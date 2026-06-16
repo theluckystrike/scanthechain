@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SC FiRM Campaign 5 Autonomous SC Audit Pipeline</title>
+<meta name="description" content="A close review of Inverse Finance FiRM in campaign 5 of an autonomous smart contract audit pipeline.">
+<meta name="keywords" content="smart contract audit pipeline, automated bug bounty, DeFi security research, smart contract security">
+<meta name="author" content="Scan the Chain">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://scanthechain.com/SC-FIRM-AUDIT-CAMPAIGN5.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Scan the Chain">
+<meta property="og:title" content="SC FiRM Campaign 5 Autonomous SC Audit Pipeline">
+<meta property="og:description" content="A close review of Inverse Finance FiRM in campaign 5 of an autonomous smart contract audit pipeline.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SC FiRM Campaign 5 Autonomous SC Audit Pipeline">
+<meta name="twitter:description" content="A close review of Inverse Finance FiRM in campaign 5 of an autonomous smart contract audit pipeline.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SC AUDIT PIPELINE  ·  shared design kit
+   Canonical, copied from DASHBOARD.html so every report renders native
+   inside the command-center iframe. Standalone-report build (no tab-bar).
+
+   PALETTE GUIDE (map bespoke classes onto these, never raw hex):
+     amber  (--amber)  = primary signal, the one accent, live/submitted
+     bone   (--bone)   = headline text, neutral emphasis
+     moss   (--good)   = good / escalated / pass / positive delta
+     rust   (--kill)   = dead / rejected / zero / negative
+     burnt  (--warn)   = pending / in-progress / caution
+     slate  (--info)   = neutral data / informational
+   Sharp corners only (radius 0, or 2px on chips). No neon, no gradients
+   except the quiet vignette and progress fills already defined here.
+   ========================================================================== */
+:root {
+  --ink-0:#0a0a0c; --ink-1:#0e0e11; --ink-2:#131318; --ink-3:#1a1a20;
+  --rule:#23232b; --rule-2:#2d2d36;
+  --bone:#e8e3d6; --bone-d:#d6d1c2; --mute:#8b8676; --mute-2:#6a6659; --dim:#4a4740;
+  --amber:#d4a24b; --amber-d:#a37a30; --amber-bg:rgba(212,162,75,0.08);
+  --alive:#b9a36a;
+  --good:#8aa672; --good-bg:rgba(138,166,114,0.07);
+  --kill:#b15247; --kill-bg:rgba(177,82,71,0.07);
+  --warn:#c9874a; --warn-bg:rgba(201,135,74,0.06);
+  --info:#7a8499; --info-bg:rgba(122,132,153,0.06);
+  --ff-sans:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+  --ff-serif:'IBM Plex Serif',ui-serif,Georgia,serif;
+  --ff-mono:'IBM Plex Mono',ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;
+  /* legacy aliases so old inline token names keep working */
+  --bg:var(--ink-0); --card:var(--ink-1); --card2:var(--ink-2); --border:var(--rule);
+  --text:var(--bone); --muted:var(--mute); --accent:var(--amber); --accent2:var(--bone-d);
+  --green:var(--good); --red:var(--kill); --orange:var(--warn); --cyan:var(--info);
+  --gold:var(--amber); --blue:var(--info); --purple:var(--mute); --danger:var(--kill);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*::selection{background:var(--amber);color:var(--ink-0)}
+html,body{font-feature-settings:"ss01","ss02","cv11","tnum"}
+body{
+  font-family:var(--ff-sans); background:var(--ink-0); color:var(--bone);
+  line-height:1.55; font-size:14px; min-height:100vh;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding:0;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:1; mix-blend-mode:screen;
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(212,162,75,0.04),transparent 60%),
+    repeating-linear-gradient(180deg,rgba(255,255,255,0.012) 0 1px,transparent 1px 3px);
+}
+body>*{position:relative;z-index:2}
+
+/* ── report shell ─────────────────────────────────────────── */
+.report-head{
+  display:flex; align-items:center; gap:0.7rem;
+  padding:0 1.6rem; height:48px;
+  background:linear-gradient(180deg,#0c0c0f 0%,#0a0a0c 100%);
+  border-bottom:1px solid var(--rule);
+  position:sticky; top:0; z-index:1000;
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+}
+.report-head .rh-mark{ width:8px; height:8px; background:var(--amber); box-shadow:0 0 10px rgba(212,162,75,0.6); animation:pulse 2.4s ease-in-out infinite; }
+.report-head .rh-name{ color:var(--bone); font-weight:600; }
+.report-head .rh-sep{ color:var(--dim); }
+.report-head .rh-tag{ color:var(--mute); }
+.report-head .rh-back{ margin-left:auto; color:var(--mute); text-decoration:none; border:1px solid var(--rule); padding:0.3rem 0.7rem; transition:color .15s,border-color .15s; }
+.report-head .rh-back:hover{ color:var(--amber); border-color:var(--amber-d); }
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 10px rgba(212,162,75,0.6)}50%{opacity:.5;box-shadow:0 0 4px rgba(212,162,75,0.3)}}
+
+.wrap{ max-width:1320px; margin:0 auto; padding:2.4rem 2rem 4rem; }
+
+/* ── headings ─────────────────────────────────────────────── */
+h1{ font-family:var(--ff-serif); font-size:2.2rem; font-weight:500; letter-spacing:-0.012em; line-height:1.06; color:var(--bone); margin:0.2rem 0 0.4rem; }
+h1 em{ font-style:italic; font-weight:400; color:var(--bone-d); }
+h2{ font-family:var(--ff-mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.22em; color:var(--bone); margin:2.6rem 0 1.1rem; padding-bottom:0.7rem; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:0.8rem; }
+h3{ font-family:var(--ff-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin:1.6rem 0 0.7rem; }
+.subtitle,.subhead-deck{ color:var(--mute); font-size:13px; margin-bottom:1.6rem; font-family:var(--ff-sans); }
+p{ color:var(--bone-d); line-height:1.62; margin:0.6rem 0; max-width:78ch; }
+a{ color:var(--amber); }
+
+/* ── tables ───────────────────────────────────────────────── */
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:13px; font-variant-numeric:tabular-nums; }
+thead{ background:var(--ink-1); }
+th{ text-align:left; padding:0.65rem 0.9rem; font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.14em; color:var(--mute); border-bottom:1px solid var(--rule-2); border-top:1px solid var(--rule); }
+td{ padding:0.65rem 0.9rem; border-bottom:1px solid var(--rule); font-size:13px; color:var(--bone-d); vertical-align:top; }
+td strong,td b{ color:var(--bone); font-weight:500; }
+tr:hover td{ background:rgba(212,162,75,0.025); }
+td code,td .num{ font-family:var(--ff-mono); font-size:12px; color:var(--bone); }
+tr.row-live td{ background:rgba(212,162,75,0.07)!important; box-shadow:inset 2px 0 0 var(--amber); }
+tr.row-good td{ background:var(--good-bg)!important; }
+tr.row-warn td{ background:var(--warn-bg)!important; }
+tr.row-dead td{ background:var(--kill-bg)!important; }
+tr.row-killed td{ opacity:.45; }
+tr.row-total td{ font-weight:500; border-top:1px solid var(--amber); background:var(--ink-1)!important; }
+
+/* ── KPI grid ─────────────────────────────────────────────── */
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.kpi{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); border-radius:0; padding:1.4rem 1.2rem 1.2rem; text-align:left; position:relative; transition:background .2s; }
+.kpi:hover{ background:rgba(212,162,75,0.025); }
+.kpi::before{ content:""; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--amber); }
+.kpi .value{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; letter-spacing:-0.02em; color:var(--bone); line-height:1.05; font-variant-numeric:tabular-nums; }
+.kpi .label{ font-family:var(--ff-mono); color:var(--mute-2); font-size:10px; text-transform:uppercase; letter-spacing:0.16em; margin-top:0.6rem; display:block; }
+.kpi.green .value,.kpi.good .value{ color:var(--good); } .kpi.green::before,.kpi.good::before{ background:var(--good); }
+.kpi.orange .value,.kpi.warn .value{ color:var(--amber); } .kpi.orange::before,.kpi.warn::before{ background:var(--amber); }
+.kpi.cyan .value,.kpi.info .value{ color:var(--info); } .kpi.cyan::before,.kpi.info::before{ background:var(--info); }
+.kpi.red .value,.kpi.danger .value{ color:var(--kill); } .kpi.red::before,.kpi.danger::before{ background:var(--kill); }
+.kpi.blue .value{ color:var(--bone); } .kpi.blue::before{ background:var(--bone-d); }
+.kpi.purple .value{ color:var(--bone); } .kpi.purple::before{ background:var(--mute); }
+
+/* ── badges / tags / pills ────────────────────────────────── */
+.badge,.tag,.pill,.flag,.flow-tag,.layer-badge,.card-badge{
+  display:inline-block; padding:0.15rem 0.55rem 0.2rem; border-radius:2px;
+  font-family:var(--ff-mono); font-size:10px; font-weight:500; letter-spacing:0.08em;
+  text-transform:uppercase; border:1px solid;
+}
+.badge-escalated,.badge-green,.badge-pass,.badge-verified,.badge-ready,.tag-pass,.pill-green,.badge-g{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge-submitted,.badge-automated,.badge-y,.tag-submitted{ background:var(--amber-bg); color:var(--amber); border-color:rgba(212,162,75,0.35); }
+.badge-dead,.badge-red,.badge-critical,.tag-critical,.badge-o{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge-pending,.badge-queued,.badge-semi,.badge-manual,.badge-orange,.badge-high,.tag-high,.tag-medium{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge-blue,.badge-purple,.badge-gray,.tag-skip,.badge-b{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge-duplicate{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); text-decoration:line-through; }
+
+/* ── sections / cards / alerts ────────────────────────────── */
+.section{ margin:2.4rem 0; }
+.card,.handoff-card,.finding-card,.col-card,.force-card,.pnl-card,.counter,.bottleneck{
+  background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1.1rem 1.2rem; margin:0.7rem 0;
+}
+.alert{ padding:0.9rem 1.1rem; border-radius:0; margin:0.5rem 0; font-size:13px; line-height:1.6; border:1px solid var(--rule); border-left-width:2px; background:var(--ink-1); color:var(--bone-d); }
+.alert strong{ color:var(--bone); font-weight:500; }
+.alert-green{ border-left-color:var(--good); background:var(--good-bg); }
+.alert-red{ border-left-color:var(--kill); background:var(--kill-bg); }
+.alert-orange{ border-left-color:var(--warn); background:var(--warn-bg); }
+.alert-blue{ border-left-color:var(--info); background:var(--info-bg); }
+
+/* ── checklist / timeline ─────────────────────────────────── */
+.checklist{ list-style:none; padding:0; }
+.checklist li{ padding:0.45rem 0 0.45rem 1.8rem; position:relative; font-size:13px; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+.checklist li::before{ content:'[ ]'; position:absolute; left:0; color:var(--mute-2); font-family:var(--ff-mono); font-size:11px; top:0.55rem; }
+.checklist li.done{ color:var(--mute); } .checklist li.done::before{ content:'[\2713]'; color:var(--good); }
+.timeline{ border-left:1px solid var(--rule-2); margin-left:0.5rem; padding-left:1.8rem; }
+.timeline-item{ margin-bottom:1.4rem; position:relative; }
+.timeline-item::before{ content:''; position:absolute; left:-2.1rem; top:0.4rem; width:9px; height:9px; background:var(--mute); border:2px solid var(--ink-0); outline:1px solid var(--rule-2); transform:rotate(45deg); }
+.timeline-item.green::before{ background:var(--good); outline-color:var(--good); }
+.timeline-item.red::before{ background:var(--kill); outline-color:var(--kill); }
+.timeline-item.orange::before{ background:var(--amber); outline-color:var(--amber); }
+.timeline-item .time{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin-bottom:0.3rem; display:block; }
+
+/* ── bars / progress ──────────────────────────────────────── */
+.bar,.budget-bar{ height:8px; background:var(--ink-3); border:1px solid var(--rule); overflow:hidden; display:inline-block; width:80px; vertical-align:middle; border-radius:0; }
+.budget-bar{ width:100%; height:20px; }
+.bar-fill,.budget-fill,.fill,.filled{ height:100%; background:var(--amber); box-shadow:0 0 8px rgba(212,162,75,0.4); border-radius:0; }
+.bar-h{ background:var(--kill); } .bar-cost{ background:var(--info); }
+
+/* ── layout helpers ───────────────────────────────────────── */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.auto-grid,.pay-cards,.layers{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+@media(max-width:768px){ .two-col,.auto-grid{ grid-template-columns:1fr; } }
+
+/* ── inline helpers / utility colors ──────────────────────── */
+code{ font-family:var(--ff-mono); font-size:0.92em; color:var(--amber); background:rgba(212,162,75,0.06); padding:1px 4px; border-radius:2px; }
+.mono{ font-family:var(--ff-mono); } .tnum{ font-variant-numeric:tabular-nums; }
+.amber,.gold,.accent{ color:var(--amber)!important; }
+.green,.good{ color:var(--good)!important; } .red,.danger,.kill,.hot{ color:var(--kill)!important; }
+.orange,.warn{ color:var(--warn)!important; } .cyan,.blue,.info,.cool{ color:var(--info)!important; }
+.muted,.dim{ color:var(--mute)!important; }
+.subhead{ font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin-bottom:0.6rem; display:block; }
+
+/* ── footer ───────────────────────────────────────────────── */
+.report-foot{ max-width:1320px; margin:3rem auto 0; padding:1.4rem 2rem 2.4rem; border-top:1px solid var(--rule); font-family:var(--ff-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute-2); display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+
+/* ── scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--ink-0); }
+::-webkit-scrollbar-thumb{ background:var(--rule-2); border:2px solid var(--ink-0); }
+::-webkit-scrollbar-thumb:hover{ background:var(--amber-d); }
+
+/* ==========================================================================
+   PAGE OVERRIDES  ·  Campaign 5 bespoke classes remapped to the kit palette
+   ========================================================================== */
+.report-banner{ border:1px solid var(--rule); border-radius:0; background:var(--ink-1); padding:2.2rem 2rem; margin-bottom:1.6rem; position:relative; overflow:hidden; }
+.report-banner::before{ content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--amber); }
+.report-banner h1{ margin-bottom:0.6rem; }
+.report-banner .target-name{ font-family:var(--ff-mono); font-size:1.05rem; color:var(--amber); margin:0.9rem 0 0.4rem; letter-spacing:0.04em; }
+
+/* stat cards reuse the kit KPI look */
+.stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.stat-card{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); border-radius:0; padding:1.4rem 1.2rem 1.2rem; position:relative; }
+.stat-card::before{ content:''; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--amber); }
+.stat-card .value{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; letter-spacing:-0.02em; color:var(--bone); line-height:1.05; font-variant-numeric:tabular-nums; }
+.stat-card .label{ font-family:var(--ff-mono); color:var(--mute-2); font-size:10px; text-transform:uppercase; letter-spacing:0.16em; margin-top:0.6rem; display:block; }
+.stat-card.high .value{ color:var(--kill); } .stat-card.high::before{ background:var(--kill); }
+.stat-card.medium .value{ color:var(--warn); } .stat-card.medium::before{ background:var(--warn); }
+.stat-card.green .value{ color:var(--good); } .stat-card.green::before{ background:var(--good); }
+
+/* sections become flat panels */
+.section{ background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1.5rem; margin:1.5rem 0; }
+.section h2{ margin-top:0; }
+.section h3{ color:var(--amber); margin:1.6rem 0 0.7rem; }
+
+/* severity chips remapped off neon onto warm ramp */
+.sev{ display:inline-block; padding:2px 8px; border-radius:2px; font-family:var(--ff-mono); font-weight:500; font-size:0.72rem; letter-spacing:0.06em; white-space:nowrap; text-transform:uppercase; border:1px solid; }
+.sev-critical{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.5); }
+.sev-high{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.sev-medium{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.sev-low{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.sev-info{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+
+/* rating pips remapped to warm ramp */
+.rating-bar{ display:inline-flex; align-items:center; gap:2px; }
+.rating-pip{ width:8px; height:16px; border-radius:0; background:var(--ink-3); border:1px solid var(--rule); }
+.rating-pip.filled{ background:var(--amber); border-color:var(--amber-d); }
+.rating-pip.filled.hot{ background:var(--kill); border-color:var(--kill); }
+.rating-pip.filled.warm{ background:var(--warn); border-color:var(--warn); }
+.rating-pip.filled.cool{ background:var(--info); border-color:var(--info); }
+.rating-num{ margin-left:6px; color:var(--mute); font-family:var(--ff-mono); font-size:0.75rem; }
+
+/* finding cards */
+.finding{ border:1px solid var(--rule); border-radius:0; margin-bottom:1rem; overflow:hidden; background:var(--ink-1); }
+.finding-header{ display:flex; justify-content:space-between; align-items:center; gap:0.8rem; padding:0.8rem 1rem; background:var(--ink-2); }
+.finding-header:hover{ background:rgba(212,162,75,0.04); }
+.finding-id{ font-family:var(--ff-mono); font-weight:600; margin-right:0.8rem; }
+.finding-title{ flex:1; font-family:var(--ff-sans); color:var(--bone); }
+.finding-title code{ font-size:0.85em; }
+.finding-body{ padding:1rem; border-top:1px solid var(--rule); font-size:0.86rem; line-height:1.7; color:var(--bone-d); }
+.finding-body code{ background:rgba(212,162,75,0.06); color:var(--amber); padding:1px 5px; border-radius:2px; font-size:0.8rem; }
+.finding-body pre{ background:var(--ink-2); border:1px solid var(--rule); border-radius:0; padding:1rem; overflow-x:auto; margin:0.8rem 0; font-family:var(--ff-mono); font-size:0.8rem; line-height:1.5; color:var(--bone-d); }
+.finding-body .subhead{ margin-top:0.9rem; }
+.finding-meta{ display:flex; flex-wrap:wrap; gap:1.5rem; margin-top:0.8rem; font-family:var(--ff-mono); font-size:0.72rem; color:var(--mute); }
+.finding-meta span::before{ content:'>'; color:var(--amber); margin-right:4px; }
+
+/* pipeline rows */
+.pipeline-row{ display:grid; grid-template-columns:50px 1fr 120px 80px 80px; gap:0.5rem; padding:0.6rem 0.8rem; border-bottom:1px solid var(--rule); align-items:center; font-size:0.82rem; font-variant-numeric:tabular-nums; }
+.pipeline-row.head{ font-family:var(--ff-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:var(--mute); border-bottom:1px solid var(--rule-2); }
+.pipeline-row.active{ background:rgba(212,162,75,0.07); box-shadow:inset 2px 0 0 var(--amber); }
+.pipeline-row.total{ font-weight:500; border-top:1px solid var(--amber); background:var(--ink-1); }
+.status-badge{ font-family:var(--ff-mono); font-size:0.7rem; padding:2px 6px; border-radius:2px; text-transform:uppercase; letter-spacing:0.06em; border:1px solid; }
+.status-ready{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.status-waiting{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.status-complete{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.status-killed{ background:var(--ink-3); color:var(--mute-2); border-color:var(--rule-2); }
+
+/* agent cards */
+.agent-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; }
+.agent-card{ background:var(--ink-2); border:1px solid var(--rule); border-radius:0; padding:1rem; position:relative; }
+.agent-card::before{ content:''; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--good); }
+.agent-name{ font-family:var(--ff-mono); font-weight:600; color:var(--amber); margin-bottom:0.5rem; font-size:0.85rem; }
+.agent-stat{ font-size:0.78rem; color:var(--mute); }
+.agent-stat span{ color:var(--bone); }
+
+/* submission tier labels */
+.tier-label{ display:inline-block; padding:3px 10px; border-radius:2px; font-family:var(--ff-mono); font-size:0.72rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:0.6rem; border:1px solid; }
+.tier-1{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.tier-2{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.tier-no{ background:var(--ink-3); color:var(--mute); border-color:var(--rule-2); }
+
+/* expected value box */
+.ev-box{ background:var(--ink-2); border:1px solid var(--good); border-left-width:2px; border-radius:0; padding:1.5rem; text-align:center; margin:1.5rem 0; }
+.ev-box .ev-value{ font-family:var(--ff-mono); font-size:2.4rem; font-weight:500; color:var(--good); letter-spacing:-0.02em; }
+.ev-box .ev-label{ font-family:var(--ff-mono); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--mute); }
+
+.kill-note{ margin-top:1rem; padding:0.9rem 1.1rem; border:1px solid var(--rule); border-left:2px solid var(--good); background:var(--good-bg); border-radius:0; }
+.note-line{ font-size:0.85rem; color:var(--bone-d); display:block; margin-top:0.4rem; }
+
+@media (max-width:768px){
+  .stats-grid{ grid-template-columns:repeat(2,1fr); }
+  .agent-grid{ grid-template-columns:1fr; }
+  .pipeline-row{ grid-template-columns:1fr; gap:0.2rem; }
+}
+
+/* ── RESPONSIVE (shared, kit-based report pages) ───────────── */
+@media (max-width: 900px){
+  .auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px){
+  html,body{ overflow-x:hidden; max-width:100%; }
+  .report-head .rh-sep, .report-head .rh-tag{ display:none; }
+  body{ font-size: 13.5px; }
+  .report-head{ height: 44px; padding: 0 1rem; font-size: 10px; letter-spacing: 0.1em; }
+  .report-head .rh-tag{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw; }
+  .report-head .rh-back{ padding: 0.25rem 0.55rem; }
+  .wrap{ padding: 1.4rem 1rem 2.4rem; }
+  h1{ font-size: 1.6rem; }
+  h2{ margin: 2rem 0 0.9rem; }
+  .two-col,.auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr; }
+  .kpi{ border-right: none; }
+  table{ white-space: nowrap; }
+  .report-foot{ padding: 1.2rem 1rem 2rem; flex-direction: column; gap: 0.4rem; }
+}
+@media (max-width: 460px){
+  .kpi-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+.tbl-scroll > table{ margin:0; }
+</style>
+</head>
+<body>
+<header class="report-head"><span class="rh-mark"></span><span class="rh-name">SC Audit</span><span class="rh-sep">//</span><span class="rh-tag">AUDIT · Campaign 5 FiRM Audit</span><a class="rh-back" href="index.html">Command center</a></header>
+
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="report-banner">
+  <h1>Autonomous SC audit pipeline</h1>
+  <div class="subtitle">Campaign 5 report · 2026-05-14</div>
+  <div class="target-name">Inverse Finance FiRM Protocol</div>
+  <div class="subtitle">Sherlock bug bounty · max bounty 100,000 DOLA</div>
+</div>
+
+<!-- TOP STATS -->
+<div class="stats-grid">
+  <div class="stat-card high">
+    <div class="value">3</div>
+    <div class="label">High severity</div>
+  </div>
+  <div class="stat-card medium">
+    <div class="value">10</div>
+    <div class="label">Medium severity</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">12</div>
+    <div class="label">Low severity</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">10</div>
+    <div class="label">Informational</div>
+  </div>
+  <div class="stat-card green">
+    <div class="value">~$9K</div>
+    <div class="label">Expected value</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">8</div>
+    <div class="label">Agents deployed</div>
+  </div>
+</div>
+
+<!-- API USAGE -->
+<div class="section">
+  <h2>API usage and resource consumption</h2>
+
+  <div class="agent-grid">
+    <div class="agent-card">
+      <div class="agent-name">Agent 3 · ALE accounting</div>
+      <div class="agent-stat">Tool uses <span>38</span></div>
+      <div class="agent-stat">Tokens <span>61,106</span></div>
+      <div class="agent-stat">Duration <span>4m 28s</span></div>
+      <div class="agent-stat">Findings <span>10 (1M, 9 Low/Info)</span></div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-name">Agent 6 · Staking derivative feeds</div>
+      <div class="agent-stat">Tool uses <span>39</span></div>
+      <div class="agent-stat">Tokens <span>45,424</span></div>
+      <div class="agent-stat">Duration <span>4m 10s</span></div>
+      <div class="agent-stat">Findings <span>10 (3M, 4L, 3I)</span></div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-name">Agent 7 · DOLA price feeds</div>
+      <div class="agent-stat">Tool uses <span>38</span></div>
+      <div class="agent-stat">Tokens <span>73,325</span></div>
+      <div class="agent-stat">Duration <span>3m 59s</span></div>
+      <div class="agent-stat">Findings <span>9 (2M, 4L, 3I)</span></div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-name">Agent 8 · Base feed infrastructure</div>
+      <div class="agent-stat">Tool uses <span>25</span></div>
+      <div class="agent-stat">Tokens <span>54,364</span></div>
+      <div class="agent-stat">Duration <span>3m 20s</span></div>
+      <div class="agent-stat">Findings <span>10 (1H, 4M, 5L)</span></div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-name">Agent 9 · Market.sol post-C4</div>
+      <div class="agent-stat">Tool uses <span>30</span></div>
+      <div class="agent-stat">Tokens <span>73,535</span></div>
+      <div class="agent-stat">Duration <span>3m 59s</span></div>
+      <div class="agent-stat">Findings <span>12 (1M, 4L, 7I)</span></div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-name">Agent 10 · DBR token mechanics</div>
+      <div class="agent-stat">Tool uses <span>8</span></div>
+      <div class="agent-stat">Tokens <span>33,281</span></div>
+      <div class="agent-stat">Duration <span>3m 18s</span></div>
+      <div class="agent-stat">Findings <span>10 (2H, 1M, 4L, 3I)</span></div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-name">Explore · prior audit search</div>
+      <div class="agent-stat">Tool uses <span>38</span></div>
+      <div class="agent-stat">Tokens <span>52,203</span></div>
+      <div class="agent-stat">Duration <span>1m 4s</span></div>
+      <div class="agent-stat">Purpose <span>Deduplication</span></div>
+    </div>
+    <div class="agent-card">
+      <div class="agent-name">Research · bounty scope</div>
+      <div class="agent-stat">Tool uses <span>40</span></div>
+      <div class="agent-stat">Tokens <span>41,723</span></div>
+      <div class="agent-stat">Duration <span>5m 18s</span></div>
+      <div class="agent-stat">Purpose <span>Sherlock/Immunefi intel</span></div>
+    </div>
+  </div>
+
+  <div class="tbl-scroll"><table style="margin-top: 1.5rem;">
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+    <tr><td>Total agents</td><td>8 (6 audit + 2 research)</td></tr>
+    <tr><td>Total tool uses (across agents)</td><td>256</td></tr>
+    <tr><td>Total tokens (agents only)</td><td>434,961</td></tr>
+    <tr><td>Main thread (orchestration)</td><td>~115,000 est.</td></tr>
+    <tr><td>Total session tokens</td><td>~550,000</td></tr>
+    <tr><td>Contracts analyzed</td><td>19</td></tr>
+    <tr><td>Lines of code</td><td>~4,100 LoC</td></tr>
+    <tr><td>Tokens per LoC</td><td>~134</td></tr>
+    <tr><td>Estimated API cost</td><td>~$5-8</td></tr>
+    <tr><td>Wall clock time</td><td>~30 minutes (parallel)</td></tr>
+  </table></div>
+</div>
+
+<!-- ALL FINDINGS WITH RATINGS -->
+<div class="section">
+  <h2>All findings with ratings (1 to 10)</h2>
+  <p style="font-size:0.8rem; color:var(--mute); margin-bottom:1rem;">
+    Rating equals novelty times exploitability times impact times submittability.
+  </p>
+
+  <!-- HIGH -->
+  <h3>High severity</h3>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-high">HIGH</span> H-01</span></span>
+      <span class="finding-title">DBR <code>accrueDueTokens()</code> pre-initialization griefing</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip filled hot"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">9/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>src/DBR.sol:285-295</code> · agent DBR token mechanics
+
+      <span class="subhead">The bug</span>
+      <code>accrueDueTokens()</code> is public and permissionless. When called for a user with no debt, it sets <code>lastUpdated[user] = block.timestamp</code>. But the conditional <code>if(accrued > 0 || lastUpdated[user] == 0)</code> means if <code>lastUpdated</code> was already set and <code>debt == 0</code>, the timestamp never gets refreshed.
+
+      <span class="subhead">Attack</span>
+      <pre>1. Attacker calls accrueDueTokens(victim) at T1     -> lastUpdated[victim] = T1
+2. One year passes. Victim borrows 1000 DOLA at T2
+3. onBorrow() -> accrueDueTokens(): debt=0, lastUpdated!=0
+   -> accrued=0, condition FALSE, lastUpdated stays T1!
+4. debts[victim] += 1000e18
+5. balanceOf(victim) now computes: (T2+1 - T1) * 1000e18 / 365 days
+   = ~1000 DBR consumed INSTANTLY (should be ~0.00003 DBR)
+6. Victim immediately in deficit -> force replenished at penalty</pre>
+
+      <span class="subhead">Impact</span>
+      An attacker can grief any future borrower. The attack costs only gas. The attacker can also profit as the force replenisher, since that role earns a DOLA reward from the Market contract.
+
+      <span class="subhead">Fix</span>
+      Always update <code>lastUpdated</code> no matter the accrual amount.
+
+      <div class="finding-meta">
+        <span>Novel vs C4 YES (C4 found a different DBR issue)</span>
+        <span>Exploitable YES (permissionless)</span>
+        <span>Direct fund loss YES</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-high">HIGH</span> H-02</span></span>
+      <span class="finding-title">Convex feeds bypass all ChainlinkBasePriceFeed protections</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">7/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>src/feeds/ConvexCurvePriceFeed.sol:36-50</code>, <code>ConvexFraxSharePriceFeed.sol:33-47</code> · agent base feed infrastructure
+
+      <p>Legacy feeds call raw Chainlink feeds directly, with no heartbeat check, no <code>isPriceOutOfBounds</code>, no fallback, and no staleness signal. During a circuit breaker event, say a CRV crash past <code>minAnswer</code>, collateral can be overvalued 10x.</p>
+      <div class="finding-meta">
+        <span>Novel UNCERTAIN (Nomoi may have reviewed)</span>
+        <span>Exploitable YES (circuit breaker scenario)</span>
+        <span>Precedent LUNA crash, CRV depeg</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-high">HIGH</span> H-03</span></span>
+      <span class="finding-title">DbrDistributor modifier runs the body before checks</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">4/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>src/DbrDistributor.sol:66-73</code> · agent DBR token mechanics
+
+      <p>The <code>onlyINVEscrow</code> modifier places <code>_</code> before validation. It's safe right now, since a revert rolls back, but the pattern is fragile. Code comments call this an intentional CEI violation for reentrancy protection. Likely out of scope, an acknowledged design choice.</p>
+      <div class="finding-meta">
+        <span>Novel NO (acknowledged in code)</span>
+        <span>Currently exploitable NO</span>
+        <span>Submission do not submit</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIUM -->
+  <h3>Medium severity</h3>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-05</span></span>
+      <span class="finding-title">WbtcPriceFeed division by zero before bounds check</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">8/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>src/feeds/WbtcPriceFeed.sol:70-71</code>
+
+      <p>Division by <code>wbtcBtcPrice</code> happens before the bounds check. A feed returning 0 triggers a division-by-zero panic, the fallback becomes unreachable, and the entire wBTC market freezes. Post-audit contract, and novel.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-06</span></span>
+      <span class="finding-title">WbtcPriceFeed BTC/USD missing bounds check</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">7/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>src/feeds/WbtcPriceFeed.sol:70-73</code>
+
+      <p>The BTC/USD Chainlink feed never gets checked for circuit breaker bounds. Only wBTC/BTC is checked. If BTC/USD hits its circuit breaker cap, the capped price passes through and never triggers the fallback. Post-audit, and novel.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-07</span></span>
+      <span class="finding-title">WbtcPriceFeed fallback has zero validation</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">7/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>src/feeds/WbtcPriceFeed.sol:123-131</code>
+
+      <p>The fallback uses Curve tricrypto plus Chainlink USDT/ETH plus ETH/USD with zero staleness, bounds, or negative checks. It returns <code>updatedAt</code> from the primary path, not the fallback. Post-audit, and novel.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-01</span></span>
+      <span class="finding-title">Fallback feed not validated for staleness or bounds</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">6/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>src/feeds/ChainlinkBasePriceFeed.sol:77-93</code>
+
+      <p>When the primary feed is stale or out of bounds, the fallback price gets accepted with no staleness or bounds validation. Both feeds failing at once means an undetected bad price.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-03</span></span>
+      <span class="finding-title">Convex ratio floor creates an artificial price floor</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip filled warm"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">6/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>ConvexCurvePriceFeed.sol:42-46</code>
+
+      <p>A hardcoded 50% floor sits on the CvxCRV/CRV ratio. If CvxCRV depegs to 20%, the feed still reports 50%, overvaluing by 2.5x. Comments call it temporary, but it stays in production.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-04</span></span>
+      <span class="finding-title">Fallback returns negative or zero price unvalidated</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">5/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>ChainlinkBasePriceFeed.sol:78-86</code>
+
+      <p>The fallback price never gets checked for positive or zero. Oracle.sol mitigates it with <code>require(price > 0)</code>, but direct feed consumers like PessimisticFeed and CurveLPPessimisticFeed bypass that check.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-08</span></span>
+      <span class="finding-title">DolaPriceFeed both feeds stale scenario</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">5/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>DolaPriceFeed.sol:103-131</code>
+
+      <p>When pyUSD/USD and FRAX/USD go stale at the same time, a stale price gets returned with <code>updatedAt = 0</code>. Liquidations then proceed on stale data.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-02</span></span>
+      <span class="finding-title">Stale price returned instead of a revert</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">4/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>ChainlinkBasePriceFeed.sol:87-90</code>, <code>Oracle.sol:158-162</code>
+
+      <span class="subhead red">C4 duplicate risk</span>
+      <p>Staleness is not checked in Oracle.sol. BorrowController only protects borrows. C4 flagged the same systemic issue in October 2022.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-10</span></span>
+      <span class="finding-title">Missing staleness in liquidation, withdrawal, force replenish</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">4/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>Market.sol:658, 630, 469</code>
+
+      <span class="subhead red">C4 duplicate risk</span>
+      <p>Same systemic staleness gap. Not submittable as novel.</p>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="finding-header">
+      <span><span class="finding-id"><span class="sev sev-medium">MED</span> M-09</span></span>
+      <span class="finding-title">DolaFixedPriceFeed holds $1 during a DOLA depeg</span>
+      <span>
+        <span class="rating-bar">
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip filled cool"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+          <span class="rating-pip"></span>
+        </span>
+        <span class="rating-num">3/10</span>
+      </span>
+    </div>
+    <div class="finding-body">
+      <span class="subhead">File</span>
+      <code>DolaFixedPriceFeed.sol:13</code>
+
+      <p>An acknowledged design choice. The contract carries a "don't use for external integrations" comment. A DOLA depeg is a protocol-level systemic risk.</p>
+    </div>
+  </div>
+
+  <!-- LOW (summary table) -->
+  <h3>Low severity</h3>
+
+  <div class="tbl-scroll"><table>
+    <tr>
+      <th>ID</th>
+      <th>Finding</th>
+      <th>File</th>
+      <th>Rating</th>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-01</span></td>
+      <td>Double-pessimistic dampening (feed plus oracle)</td>
+      <td><code>PessimisticFeed.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">3</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-02</span></td>
+      <td>Bounds check uses primary aggregator after fallback</td>
+      <td><code>ChainlinkBasePriceFeed.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">4</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-03</span></td>
+      <td>BorrowController staleness only protects borrows</td>
+      <td><code>BorrowController.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">3</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-04</span></td>
+      <td>Mutable storage for critical addresses (ConvexCurve)</td>
+      <td><code>ConvexCurvePriceFeed.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">2</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-05</span></td>
+      <td>StYEthPriceFeed missing heartbeat staleness check</td>
+      <td><code>StYEthPriceFeed.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">4</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-06</span></td>
+      <td>StYEthPriceFeed fallback returns zero, market freeze</td>
+      <td><code>StYEthPriceFeed.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">3</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-07</span></td>
+      <td>InvPriceFeed sole Curve EMA (historically exploited)</td>
+      <td><code>InvPriceFeed.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">4</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-08</span></td>
+      <td>WbtcPriceFeed no heartbeat enforcement anywhere</td>
+      <td><code>WbtcPriceFeed.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">5</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-09</span></td>
+      <td>DBR transfer totalSupply desynchronization</td>
+      <td><code>DBR.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">4</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-10</span></td>
+      <td>Market rounding mismatch (dust bad debt)</td>
+      <td><code>Market.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">2</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-11</span></td>
+      <td>ALE dust token accumulation via balanceOf pattern</td>
+      <td><code>ALE.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">2</span>
+      </td>
+    </tr>
+    <tr>
+      <td><span class="sev sev-low">L-12</span></td>
+      <td>DolaPriceFeed stale pyUSD used when lower</td>
+      <td><code>DolaPriceFeed.sol</code></td>
+      <td>
+        <span class="rating-bar"><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip filled cool"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span><span class="rating-pip"></span></span>
+        <span class="rating-num">3</span>
+      </td>
+    </tr>
+  </table></div>
+</div>
+
+<!-- SUBMISSION STRATEGY -->
+<div class="section">
+  <h2>Submission strategy</h2>
+
+  <div style="margin-bottom: 1.5rem;">
+    <span class="tier-label tier-1">Tier 1 · submit immediately</span>
+    <div class="tbl-scroll"><table>
+      <tr><th>Finding</th><th>Target</th><th>Reward</th><th>Confidence</th></tr>
+      <tr>
+        <td><span class="sev sev-high">H-01</span> DBR accrueDueTokens griefing</td>
+        <td>Critical / High</td>
+        <td>$5K - $15K</td>
+        <td>70%</td>
+      </tr>
+      <tr>
+        <td><span class="sev sev-medium">M-05+06+07</span> WbtcPriceFeed bundle</td>
+        <td>Medium</td>
+        <td>$2K</td>
+        <td>60%</td>
+      </tr>
+    </table></div>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <span class="tier-label tier-2">Tier 2 · submit if tier 1 accepted</span>
+    <div class="tbl-scroll"><table>
+      <tr><th>Finding</th><th>Target</th><th>Reward</th><th>Confidence</th></tr>
+      <tr>
+        <td><span class="sev sev-high">H-02</span> Convex feeds bypass protections</td>
+        <td>High / Medium</td>
+        <td>$2K - $5K</td>
+        <td>30%</td>
+      </tr>
+      <tr>
+        <td><span class="sev sev-medium">M-01</span> Fallback not validated</td>
+        <td>Medium</td>
+        <td>$2K</td>
+        <td>40%</td>
+      </tr>
+      <tr>
+        <td><span class="sev sev-medium">M-03</span> Convex ratio floor</td>
+        <td>Medium</td>
+        <td>$2K</td>
+        <td>30%</td>
+      </tr>
+    </table></div>
+  </div>
+
+  <div>
+    <span class="tier-label tier-no">Do not submit</span>
+    <div class="tbl-scroll"><table>
+      <tr><th>Finding</th><th>Reason</th></tr>
+      <tr><td>M-02, M-10 (staleness gaps)</td><td>C4 duplicate, same systemic issue flagged Oct 2022</td></tr>
+      <tr><td>H-03 (modifier pattern)</td><td>Acknowledged design choice in code comments</td></tr>
+      <tr><td>M-09 (DolaFixed $1)</td><td>Design choice, acknowledged</td></tr>
+      <tr><td>All low findings</td><td>Below bounty threshold, not novel enough</td></tr>
+    </table></div>
+  </div>
+
+  <div class="ev-box">
+    <div class="ev-value">~$9,000</div>
+    <div class="ev-label">Total expected value</div>
+    <div class="ev-label" style="margin-top:0.5rem;">API cost ~$5-8 · ROI ~1,125x to 1,800x</div>
+  </div>
+</div>
+
+<!-- PRIOR AUDITS -->
+<div class="section">
+  <h2>Prior audit coverage and kill criteria</h2>
+  <div class="tbl-scroll"><table>
+    <tr><th>Audit</th><th>Date</th><th>Scope</th><th>Overlap</th></tr>
+    <tr>
+      <td>Code4rena</td><td>Oct 2022</td>
+      <td>FiRM core (8 contracts, 901 LOC)</td>
+      <td><span class="sev sev-medium">M-02, M-10, L-09</span></td>
+    </tr>
+    <tr>
+      <td>Nomoi</td><td>May 2023</td>
+      <td>cvxCRV market launch</td>
+      <td><span class="sev sev-high">H-02</span> <span class="sev sev-medium">M-03</span> maybe</td>
+    </tr>
+    <tr>
+      <td>yAudit</td><td>Jan 2024</td>
+      <td>sDOLA</td>
+      <td>None (different scope)</td>
+    </tr>
+    <tr>
+      <td>Sherlock Contest</td><td>Nov 2025</td>
+      <td>Junior Tranches</td>
+      <td>None (different scope)</td>
+    </tr>
+    <tr>
+      <td>Sherlock Audit</td><td>Oct 2025</td>
+      <td>Junior Tranches</td>
+      <td>None (different scope)</td>
+    </tr>
+  </table></div>
+
+  <div class="kill-note">
+    <span class="subhead green">Kill criteria do not kill</span>
+    <span class="note-line">Five prior audits exist, but they cover different scopes and times. The post-audit additions, price feeds, ALE, and ChainlinkBasePriceFeed, were never audited. Key novel findings are confirmed.</span>
+  </div>
+</div>
+
+<!-- PIPELINE HISTORY -->
+<div class="section">
+  <h2>Pipeline performance (cumulative)</h2>
+
+  <div class="pipeline-row head">
+    <span>#</span><span>Target</span><span>Result</span><span>EV</span><span>Status</span>
+  </div>
+  <div class="pipeline-row">
+    <span>1</span><span>K2 Lending (C4 $135K)</span><span>1 Medium</span><span>$586</span>
+    <span><span class="status-badge status-waiting">Awaiting</span></span>
+  </div>
+  <div class="pipeline-row">
+    <span>2</span><span>Renegade ZK Dark Pool (C4)</span><span>1 High</span><span>$20,000</span>
+    <span><span class="status-badge status-waiting">Awaiting</span></span>
+  </div>
+  <div class="pipeline-row">
+    <span>3</span><span>GMTrade</span><span>0 (correct kill)</span><span>$0</span>
+    <span><span class="status-badge status-complete">Done</span></span>
+  </div>
+  <div class="pipeline-row">
+    <span>4</span><span>CapyFi (Immunefi)</span><span>0 (prior audit kill)</span><span>$0</span>
+    <span><span class="status-badge status-killed">Killed</span></span>
+  </div>
+  <div class="pipeline-row active">
+    <span>5</span><span>Inverse FiRM (Sherlock)</span><span>2-5 submittable</span><span>$9,000</span>
+    <span><span class="status-badge status-ready">Ready</span></span>
+  </div>
+  <div class="pipeline-row total">
+    <span></span><span>Total pipeline EV</span><span></span><span class="green">$29,586</span><span></span>
+  </div>
+</div>
+
+<!-- SCOPE COVERAGE -->
+<div class="section">
+  <h2>Scope coverage (19 contracts, ~4,100 LoC)</h2>
+  <div class="tbl-scroll"><table>
+    <tr><th>Contract</th><th>LoC</th><th>Agent</th><th>Coverage</th></tr>
+    <tr><td>Oracle.sol</td><td>167</td><td>Multiple</td><td>Full</td></tr>
+    <tr><td>Market.sol</td><td>688</td><td>Agent 9</td><td>Full</td></tr>
+    <tr><td>DBR.sol</td><td>393</td><td>Agent 10</td><td>Full</td></tr>
+    <tr><td>DbrDistributor.sol</td><td>128</td><td>Agent 10</td><td>Full</td></tr>
+    <tr><td>ALE.sol</td><td>~750</td><td>Agent 3</td><td>Full</td></tr>
+    <tr><td>BorrowController.sol</td><td>172</td><td>Multiple</td><td>Partial</td></tr>
+    <tr><td>ChainlinkBasePriceFeed.sol</td><td>162</td><td>Agent 8</td><td>Full</td></tr>
+    <tr><td>PessimisticFeed.sol</td><td>88</td><td>Agent 8</td><td>Full</td></tr>
+    <tr><td>ConvexCurvePriceFeed.sol</td><td>84</td><td>Agent 8</td><td>Full</td></tr>
+    <tr><td>ConvexFraxSharePriceFeed.sol</td><td>81</td><td>Agent 8</td><td>Full</td></tr>
+    <tr><td>CurveLPPessimisticFeed.sol</td><td>109</td><td>Multiple</td><td>Full</td></tr>
+    <tr><td>DolaFixedPriceFeed.sol</td><td>56</td><td>Agent 7</td><td>Full</td></tr>
+    <tr><td>DolaPriceFeed.sol</td><td>193</td><td>Agent 7</td><td>Full</td></tr>
+    <tr><td>USDeBeforeMaturityFeed.sol</td><td>74</td><td>Agent 7</td><td>Full</td></tr>
+    <tr><td>FeedSwitch.sol</td><td>131</td><td>Agent 7</td><td>Full</td></tr>
+    <tr><td>StYEthPriceFeed.sol</td><td>214</td><td>Agent 6</td><td>Full</td></tr>
+    <tr><td>WstETHPriceFeed.sol</td><td>200</td><td>Agent 6</td><td>Full</td></tr>
+    <tr><td>WbtcPriceFeed.sol</td><td>132</td><td>Agent 6</td><td>Full</td></tr>
+    <tr><td>InvPriceFeed.sol</td><td>186</td><td>Agent 6</td><td>Full</td></tr>
+  </table></div>
+</div>
+
+</div>
+
+<footer class="report-foot"><span>SC Audit Pipeline · Campaign 5 FiRM Audit</span><span>Generated from pipeline data</span></footer>
+
+</body>
+</html>

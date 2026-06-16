@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SC Audit Pipeline · C19 Session Report</title>
+<meta name="description" content="Campaign 19 of an autonomous smart contract audit pipeline. 31 targets scanned, findings, and the DeepSeek cost breakdown.">
+<meta name="keywords" content="smart contract audit pipeline, automated bug bounty, DeFi security research, smart contract security">
+<meta name="author" content="Scan the Chain">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://scanthechain.com/SC-SESSION-UPDATE-C19.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Scan the Chain">
+<meta property="og:title" content="SC Audit Pipeline · C19 Session Report">
+<meta property="og:description" content="Campaign 19 of an autonomous smart contract audit pipeline. 31 targets scanned, findings, and the DeepSeek cost breakdown.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SC Audit Pipeline · C19 Session Report">
+<meta name="twitter:description" content="Campaign 19 of an autonomous smart contract audit pipeline. 31 targets scanned, findings, and the DeepSeek cost breakdown.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SC AUDIT PIPELINE  ·  shared design kit
+   Canonical, copied from DASHBOARD.html so every report renders native
+   inside the command-center iframe. Standalone-report build (no tab-bar).
+
+   PALETTE GUIDE (map bespoke classes onto these, never raw hex):
+     amber  (--amber)  = primary signal, the one accent, live/submitted
+     bone   (--bone)   = headline text, neutral emphasis
+     moss   (--good)   = good / escalated / pass / positive delta
+     rust   (--kill)   = dead / rejected / zero / negative
+     burnt  (--warn)   = pending / in-progress / caution
+     slate  (--info)   = neutral data / informational
+   Sharp corners only (radius 0, or 2px on chips). No neon, no gradients
+   except the quiet vignette and progress fills already defined here.
+   ========================================================================== */
+:root {
+  --ink-0:#0a0a0c; --ink-1:#0e0e11; --ink-2:#131318; --ink-3:#1a1a20;
+  --rule:#23232b; --rule-2:#2d2d36;
+  --bone:#e8e3d6; --bone-d:#d6d1c2; --mute:#8b8676; --mute-2:#6a6659; --dim:#4a4740;
+  --amber:#d4a24b; --amber-d:#a37a30; --amber-bg:rgba(212,162,75,0.08);
+  --alive:#b9a36a;
+  --good:#8aa672; --good-bg:rgba(138,166,114,0.07);
+  --kill:#b15247; --kill-bg:rgba(177,82,71,0.07);
+  --warn:#c9874a; --warn-bg:rgba(201,135,74,0.06);
+  --info:#7a8499; --info-bg:rgba(122,132,153,0.06);
+  --ff-sans:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+  --ff-serif:'IBM Plex Serif',ui-serif,Georgia,serif;
+  --ff-mono:'IBM Plex Mono',ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;
+  /* legacy aliases so old inline token names keep working */
+  --bg:var(--ink-0); --card:var(--ink-1); --card2:var(--ink-2); --border:var(--rule);
+  --text:var(--bone); --muted:var(--mute); --accent:var(--amber); --accent2:var(--bone-d);
+  --green:var(--good); --red:var(--kill); --orange:var(--warn); --cyan:var(--info);
+  --gold:var(--amber); --blue:var(--info); --purple:var(--mute); --danger:var(--kill);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*::selection{background:var(--amber);color:var(--ink-0)}
+html,body{font-feature-settings:"ss01","ss02","cv11","tnum"}
+body{
+  font-family:var(--ff-sans); background:var(--ink-0); color:var(--bone);
+  line-height:1.55; font-size:14px; min-height:100vh;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding:0;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:1; mix-blend-mode:screen;
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(212,162,75,0.04),transparent 60%),
+    repeating-linear-gradient(180deg,rgba(255,255,255,0.012) 0 1px,transparent 1px 3px);
+}
+body>*{position:relative;z-index:2}
+
+/* ── report shell ─────────────────────────────────────────── */
+.report-head{
+  display:flex; align-items:center; gap:0.7rem;
+  padding:0 1.6rem; height:48px;
+  background:linear-gradient(180deg,#0c0c0f 0%,#0a0a0c 100%);
+  border-bottom:1px solid var(--rule);
+  position:sticky; top:0; z-index:1000;
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+}
+.report-head .rh-mark{ width:8px; height:8px; background:var(--amber); box-shadow:0 0 10px rgba(212,162,75,0.6); animation:pulse 2.4s ease-in-out infinite; }
+.report-head .rh-name{ color:var(--bone); font-weight:600; }
+.report-head .rh-sep{ color:var(--dim); }
+.report-head .rh-tag{ color:var(--mute); }
+.report-head .rh-back{ margin-left:auto; color:var(--mute); text-decoration:none; border:1px solid var(--rule); padding:0.3rem 0.7rem; transition:color .15s,border-color .15s; }
+.report-head .rh-back:hover{ color:var(--amber); border-color:var(--amber-d); }
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 10px rgba(212,162,75,0.6)}50%{opacity:.5;box-shadow:0 0 4px rgba(212,162,75,0.3)}}
+
+.wrap{ max-width:1320px; margin:0 auto; padding:2.4rem 2rem 4rem; }
+
+/* ── headings ─────────────────────────────────────────────── */
+h1{ font-family:var(--ff-serif); font-size:2.2rem; font-weight:500; letter-spacing:-0.012em; line-height:1.06; color:var(--bone); margin:0.2rem 0 0.4rem; }
+h1 em{ font-style:italic; font-weight:400; color:var(--bone-d); }
+h2{ font-family:var(--ff-mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.22em; color:var(--bone); margin:2.6rem 0 1.1rem; padding-bottom:0.7rem; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:0.8rem; }
+h3{ font-family:var(--ff-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin:1.6rem 0 0.7rem; }
+.subtitle,.subhead-deck{ color:var(--mute); font-size:13px; margin-bottom:1.6rem; font-family:var(--ff-sans); }
+p{ color:var(--bone-d); line-height:1.62; margin:0.6rem 0; max-width:78ch; }
+a{ color:var(--amber); }
+
+/* ── tables ───────────────────────────────────────────────── */
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:13px; font-variant-numeric:tabular-nums; }
+thead{ background:var(--ink-1); }
+th{ text-align:left; padding:0.65rem 0.9rem; font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.14em; color:var(--mute); border-bottom:1px solid var(--rule-2); border-top:1px solid var(--rule); }
+td{ padding:0.65rem 0.9rem; border-bottom:1px solid var(--rule); font-size:13px; color:var(--bone-d); vertical-align:top; }
+td strong,td b{ color:var(--bone); font-weight:500; }
+tr:hover td{ background:rgba(212,162,75,0.025); }
+td code,td .num{ font-family:var(--ff-mono); font-size:12px; color:var(--bone); }
+tr.row-live td{ background:rgba(212,162,75,0.07)!important; box-shadow:inset 2px 0 0 var(--amber); }
+tr.row-good td{ background:var(--good-bg)!important; }
+tr.row-warn td{ background:var(--warn-bg)!important; }
+tr.row-dead td{ background:var(--kill-bg)!important; }
+tr.row-killed td{ opacity:.45; }
+tr.row-total td{ font-weight:500; border-top:1px solid var(--amber); background:var(--ink-1)!important; }
+
+/* ── KPI grid ─────────────────────────────────────────────── */
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.kpi{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); border-radius:0; padding:1.4rem 1.2rem 1.2rem; text-align:left; position:relative; transition:background .2s; }
+.kpi:hover{ background:rgba(212,162,75,0.025); }
+.kpi::before{ content:""; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--amber); }
+.kpi .value{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; letter-spacing:-0.02em; color:var(--bone); line-height:1.05; font-variant-numeric:tabular-nums; }
+.kpi .label{ font-family:var(--ff-mono); color:var(--mute-2); font-size:10px; text-transform:uppercase; letter-spacing:0.16em; margin-top:0.6rem; display:block; }
+.kpi.green .value,.kpi.good .value{ color:var(--good); } .kpi.green::before,.kpi.good::before{ background:var(--good); }
+.kpi.orange .value,.kpi.warn .value{ color:var(--amber); } .kpi.orange::before,.kpi.warn::before{ background:var(--amber); }
+.kpi.cyan .value,.kpi.info .value{ color:var(--info); } .kpi.cyan::before,.kpi.info::before{ background:var(--info); }
+.kpi.red .value,.kpi.danger .value{ color:var(--kill); } .kpi.red::before,.kpi.danger::before{ background:var(--kill); }
+.kpi.blue .value{ color:var(--bone); } .kpi.blue::before{ background:var(--bone-d); }
+.kpi.purple .value{ color:var(--bone); } .kpi.purple::before{ background:var(--mute); }
+
+/* ── badges / tags / pills ────────────────────────────────── */
+.badge,.tag,.pill,.flag,.flow-tag,.layer-badge,.card-badge{
+  display:inline-block; padding:0.15rem 0.55rem 0.2rem; border-radius:2px;
+  font-family:var(--ff-mono); font-size:10px; font-weight:500; letter-spacing:0.08em;
+  text-transform:uppercase; border:1px solid;
+}
+.badge-escalated,.badge-green,.badge-pass,.badge-verified,.badge-ready,.tag-pass,.pill-green,.badge-g{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge-submitted,.badge-automated,.badge-y,.tag-submitted{ background:var(--amber-bg); color:var(--amber); border-color:rgba(212,162,75,0.35); }
+.badge-dead,.badge-red,.badge-critical,.tag-critical,.badge-o{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge-pending,.badge-queued,.badge-semi,.badge-manual,.badge-orange,.badge-high,.tag-high,.tag-medium{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge-blue,.badge-purple,.badge-gray,.tag-skip,.badge-b{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge-duplicate{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); text-decoration:line-through; }
+
+/* ── sections / cards / alerts ────────────────────────────── */
+.section{ margin:2.4rem 0; }
+.card,.handoff-card,.finding-card,.col-card,.force-card,.pnl-card,.counter,.bottleneck{
+  background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1.1rem 1.2rem; margin:0.7rem 0;
+}
+.alert{ padding:0.9rem 1.1rem; border-radius:0; margin:0.5rem 0; font-size:13px; line-height:1.6; border:1px solid var(--rule); border-left-width:2px; background:var(--ink-1); color:var(--bone-d); }
+.alert strong{ color:var(--bone); font-weight:500; }
+.alert-green{ border-left-color:var(--good); background:var(--good-bg); }
+.alert-red{ border-left-color:var(--kill); background:var(--kill-bg); }
+.alert-orange{ border-left-color:var(--warn); background:var(--warn-bg); }
+.alert-blue{ border-left-color:var(--info); background:var(--info-bg); }
+
+/* ── checklist / timeline ─────────────────────────────────── */
+.checklist{ list-style:none; padding:0; }
+.checklist li{ padding:0.45rem 0 0.45rem 1.8rem; position:relative; font-size:13px; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+.checklist li::before{ content:'[ ]'; position:absolute; left:0; color:var(--mute-2); font-family:var(--ff-mono); font-size:11px; top:0.55rem; }
+.checklist li.done{ color:var(--mute); } .checklist li.done::before{ content:'[\2713]'; color:var(--good); }
+.timeline{ border-left:1px solid var(--rule-2); margin-left:0.5rem; padding-left:1.8rem; }
+.timeline-item{ margin-bottom:1.4rem; position:relative; }
+.timeline-item::before{ content:''; position:absolute; left:-2.1rem; top:0.4rem; width:9px; height:9px; background:var(--mute); border:2px solid var(--ink-0); outline:1px solid var(--rule-2); transform:rotate(45deg); }
+.timeline-item.green::before{ background:var(--good); outline-color:var(--good); }
+.timeline-item.red::before{ background:var(--kill); outline-color:var(--kill); }
+.timeline-item.orange::before{ background:var(--amber); outline-color:var(--amber); }
+.timeline-item .time{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin-bottom:0.3rem; display:block; }
+
+/* ── bars / progress ──────────────────────────────────────── */
+.bar,.budget-bar{ height:8px; background:var(--ink-3); border:1px solid var(--rule); overflow:hidden; display:inline-block; width:80px; vertical-align:middle; border-radius:0; }
+.budget-bar{ width:100%; height:20px; }
+.bar-fill,.budget-fill,.fill,.filled{ height:100%; background:var(--amber); box-shadow:0 0 8px rgba(212,162,75,0.4); border-radius:0; }
+.bar-h{ background:var(--kill); } .bar-cost{ background:var(--info); }
+
+/* ── layout helpers ───────────────────────────────────────── */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.auto-grid,.pay-cards,.layers{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+@media(max-width:768px){ .two-col,.auto-grid{ grid-template-columns:1fr; } }
+
+/* ── inline helpers / utility colors ──────────────────────── */
+code{ font-family:var(--ff-mono); font-size:0.92em; color:var(--amber); background:rgba(212,162,75,0.06); padding:1px 4px; border-radius:2px; }
+.mono{ font-family:var(--ff-mono); } .tnum{ font-variant-numeric:tabular-nums; }
+.amber,.gold,.accent{ color:var(--amber)!important; }
+.green,.good{ color:var(--good)!important; } .red,.danger,.kill,.hot{ color:var(--kill)!important; }
+.orange,.warn{ color:var(--warn)!important; } .cyan,.blue,.info,.cool{ color:var(--info)!important; }
+.muted,.dim{ color:var(--mute)!important; }
+.subhead{ font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin-bottom:0.6rem; display:block; }
+
+/* ── footer ───────────────────────────────────────────────── */
+.report-foot{ max-width:1320px; margin:3rem auto 0; padding:1.4rem 2rem 2.4rem; border-top:1px solid var(--rule); font-family:var(--ff-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute-2); display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+
+/* ── scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--ink-0); }
+::-webkit-scrollbar-thumb{ background:var(--rule-2); border:2px solid var(--ink-0); }
+::-webkit-scrollbar-thumb:hover{ background:var(--amber-d); }
+
+/* ========================================================================
+   PAGE OVERRIDES · C19 session bespoke classes remapped to kit variables
+   ======================================================================== */
+.scan-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(30px,1fr)); gap:2px; margin:1.2rem 0 2rem; }
+.scan-block{ height:30px; display:flex; align-items:center; justify-content:center; font-family:var(--ff-mono); font-size:8px; font-weight:500; color:var(--ink-0); border-radius:0; cursor:default; }
+/* heatmap ramp · hot to cool remapped to warm palette (rust → burnt → slate/mute) */
+.hm-1{ background:#b15247; } .hm-2{ background:#b35a4b; } .hm-3{ background:#b66250; }
+.hm-4{ background:#b96b53; } .hm-5{ background:#bd7549; } .hm-6{ background:#c17e48; }
+.hm-7{ background:#c58448; } .hm-8{ background:#c9874a; } .hm-9{ background:#bf8650; }
+.hm-10{ background:#b48459; } .hm-11{ background:#a3855f; color:var(--bone); }
+.hm-12{ background:#94836a; color:var(--bone); } .hm-13{ background:#8b8676; color:var(--bone); }
+.hm-14{ background:#84807a; color:var(--bone); } .hm-15{ background:#7c7f83; color:var(--bone); }
+.hm-16{ background:#7a8499; color:var(--bone); }
+.handoff-card .title{ font-family:var(--ff-mono); font-size:12px; font-weight:600; color:var(--amber); letter-spacing:0.04em; display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+.handoff-card .bounty{ font-family:var(--ff-mono); font-size:13px; font-weight:500; color:var(--good); margin-top:0.4rem; }
+.handoff-card .detail{ color:var(--mute); font-size:12px; margin-top:0.4rem; font-family:var(--ff-sans); }
+.budget-fill{ display:flex; align-items:center; justify-content:flex-end; padding-right:0.7rem; font-family:var(--ff-mono); font-size:10px; color:var(--ink-0); font-weight:600; }
+.plain-list{ list-style:none; padding:0; margin:0.4rem 0; }
+.plain-list li{ padding:0.4rem 0 0.4rem 1.4rem; position:relative; font-size:13px; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+.mark-good::before{ content:'+'; position:absolute; left:0; color:var(--good); font-family:var(--ff-mono); }
+.mark-bad::before{ content:'\2212'; position:absolute; left:0; color:var(--kill); font-family:var(--ff-mono); }
+.note{ color:var(--mute); font-size:12px; margin-top:0.7rem; font-family:var(--ff-mono); }
+
+/* ── RESPONSIVE (shared, kit-based report pages) ───────────── */
+@media (max-width: 900px){
+  .auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px){
+  html,body{ overflow-x:hidden; max-width:100%; }
+  .report-head .rh-sep, .report-head .rh-tag{ display:none; }
+  body{ font-size: 13.5px; }
+  .report-head{ height: 44px; padding: 0 1rem; font-size: 10px; letter-spacing: 0.1em; }
+  .report-head .rh-tag{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw; }
+  .report-head .rh-back{ padding: 0.25rem 0.55rem; }
+  .wrap{ padding: 1.4rem 1rem 2.4rem; }
+  h1{ font-size: 1.6rem; }
+  h2{ margin: 2rem 0 0.9rem; }
+  .two-col,.auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr; }
+  .kpi{ border-right: none; }
+  table{ white-space: nowrap; }
+  .report-foot{ padding: 1.2rem 1rem 2rem; flex-direction: column; gap: 0.4rem; }
+}
+@media (max-width: 460px){
+  .kpi-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+.tbl-scroll > table{ margin:0; }
+</style>
+</head>
+<body>
+
+<header class="report-head"><span class="rh-mark"></span><span class="rh-name">SC Audit</span><span class="rh-sep">//</span><span class="rh-tag">SESSION · Campaign 19 Session</span><a class="rh-back" href="index.html">Command center</a></header>
+
+<div class="wrap">
+
+<h1>SC audit pipeline · campaign 19</h1>
+<div class="subtitle">Triple workload session · 2026-05-15 · Session 4</div>
+
+<div class="kpi-grid">
+  <div class="kpi info"><div class="value">31</div><div class="label">Targets scanned</div></div>
+  <div class="kpi"><div class="value">14,192</div><div class="label">Total findings</div></div>
+  <div class="kpi danger"><div class="value">2,899</div><div class="label">H-severity</div></div>
+  <div class="kpi warn"><div class="value">$8.03</div><div class="label">DeepSeek cost</div></div>
+  <div class="kpi"><div class="value">10</div><div class="label">PM1 candidates</div></div>
+  <div class="kpi info"><div class="value">$25.6M</div><div class="label">Bounty pool</div></div>
+  <div class="kpi"><div class="value">$26.16</div><div class="label">Balance left</div></div>
+  <div class="kpi warn"><div class="value">$0.26</div><div class="label">Avg per scan</div></div>
+</div>
+
+<h2>Scan heatmap · 31 targets by findings count</h2>
+<div class="scan-grid">
+  <div class="scan-block hm-1" title="reserve-protocol: 891">891</div>
+  <div class="scan-block hm-1" title="termmax-v2: 849">849</div>
+  <div class="scan-block hm-2" title="lista-dao: 816">816</div>
+  <div class="scan-block hm-2" title="pendle: 770">770</div>
+  <div class="scan-block hm-3" title="stakewise-v3: 739">739</div>
+  <div class="scan-block hm-3" title="origin-dollar: 719">719</div>
+  <div class="scan-block hm-4" title="beanstalk: 681">681</div>
+  <div class="scan-block hm-4" title="across-protocol: 652">652</div>
+  <div class="scan-block hm-5" title="radiant-v2: 619">619</div>
+  <div class="scan-block hm-5" title="open-dollar: 610">610</div>
+  <div class="scan-block hm-6" title="etherfi: 510">510</div>
+  <div class="scan-block hm-7" title="lombard: 499">499</div>
+  <div class="scan-block hm-7" title="ribbon: 494">494</div>
+  <div class="scan-block hm-8" title="alchemix-v3: 462">462</div>
+  <div class="scan-block hm-8" title="euler-vault: 460">460</div>
+  <div class="scan-block hm-9" title="flare-fassets: 451">451</div>
+  <div class="scan-block hm-9" title="nucleus: 423">423</div>
+  <div class="scan-block hm-10" title="velodrome: 379">379</div>
+  <div class="scan-block hm-10" title="ajna: 371">371</div>
+  <div class="scan-block hm-11" title="gearbox-v3: 368">368</div>
+  <div class="scan-block hm-11" title="thirdweb: 362">362</div>
+  <div class="scan-block hm-12" title="chainlink-ccip: 306">306</div>
+  <div class="scan-block hm-12" title="liquity: 304">304</div>
+  <div class="scan-block hm-13" title="aave-v3: 282">282</div>
+  <div class="scan-block hm-13" title="pancakeswap-per: 272">272</div>
+  <div class="scan-block hm-14" title="pancakeswap-inf: 267">267</div>
+  <div class="scan-block hm-14" title="paraswap: 220">220</div>
+  <div class="scan-block hm-15" title="ethena: 159">159</div>
+  <div class="scan-block hm-15" title="gamma: 103">103</div>
+  <div class="scan-block hm-16" title="morpho-blue: 88">88</div>
+  <div class="scan-block hm-16" title="monetrix: 66">66</div>
+</div>
+
+<h2>Top 10 PM1 handoff candidates</h2>
+
+<div class="handoff-card">
+  <div class="title">V-01 Ethena · mintWETH() missing MINTER_ROLE <span class="tag tag-critical">0.98</span></div>
+  <div class="bounty">$3,000,000 bounty (Immunefi)</div>
+  <div class="detail">access_control agent · EthenaMinting.sol · if real, unauthorized minting of WETH-backed USDe</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-02 Morpho Blue · MorphoInternalAccess missing AC <span class="tag tag-critical">1.00</span></div>
+  <div class="bounty">$2,500,000 bounty (Cantina)</div>
+  <div class="detail">access_control agent · update() and increaseInterest() · if real, direct market state manipulation</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-03 Pendle · unsafe int256 to uint256 cast <span class="tag tag-high">0.98</span></div>
+  <div class="bounty">$2,000,000 bounty (Cantina)</div>
+  <div class="detail">oracle_price agent · _applyFeedMultiplier · negative Chainlink price wraps to huge uint</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-04 Reserve Protocol · ExchangeRateOracle staleness <span class="tag tag-high">0.95</span></div>
+  <div class="bounty">$10,000,000 bounty (Cantina)</div>
+  <div class="detail">oracle_price agent · exchangeRate() · missing freshness check on exchange rate</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-07 Lombard · decimal mismatch in BTCB/CBBTC PMM <span class="tag tag-high">0.95</span></div>
+  <div class="bounty">$250,000 bounty (Immunefi)</div>
+  <div class="detail">oracle_price agent · PMM contracts · incorrect price scaling between BTC wrapped assets</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-09 Alchemix V3 · Frax oracle missing freshness <span class="tag tag-high">0.95</span></div>
+  <div class="bounty">$300,000 bounty (Immunefi)</div>
+  <div class="detail">oracle_price agent · FraxDualOracleAdapter · latestRoundData() without timestamp check</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-10 Lista DAO · CDPLiquidator flash loan reentrancy <span class="tag tag-high">0.95</span></div>
+  <div class="bounty">$1,000,000 bounty (Immunefi)</div>
+  <div class="detail">reentrancy agent · onFlashLoan · external calls before state updates in callback</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-06 PancakeSwap · uninitialized vault implementation <span class="tag tag-high">0.95</span></div>
+  <div class="bounty">$1,000,000 bounty (Cantina)</div>
+  <div class="detail">upgrade_proxy agent · Vault contract · same pattern as TermMax S-01</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-08 Nucleus · underflow in CellarMigrator <span class="tag tag-medium">0.95</span></div>
+  <div class="bounty">$500,000 bounty (Immunefi)</div>
+  <div class="detail">oracle_price agent · completeMigration() · unchecked arithmetic in migration</div>
+</div>
+
+<div class="handoff-card">
+  <div class="title">V-05 Chainlink CCIP · executeSingleMessage no guard <span class="tag tag-medium">0.95</span></div>
+  <div class="bounty">$3,000,000 bounty (Immunefi)</div>
+  <div class="detail">reentrancy agent · OffRamp · missing reentrancy guard on message execution</div>
+</div>
+
+<h2>All scans · full results table</h2>
+<div class="tbl-scroll"><table>
+<thead>
+<tr><th>#</th><th>Target</th><th>Bounty</th><th>Findings</th><th>H</th><th>Specific H</th><th>Cost</th><th>.sol</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>reserve-protocol</td><td>$10M</td><td>891</td><td>204</td><td>106</td><td>$0.45</td><td>313</td></tr>
+<tr><td>2</td><td>termmax-v2</td><td>$50K</td><td>849</td><td>213</td><td>109</td><td>$0.36</td><td>239</td></tr>
+<tr><td>3</td><td>lista-dao</td><td>$1M</td><td>816</td><td>162</td><td>85</td><td>$0.36</td><td>190</td></tr>
+<tr><td>4</td><td>pendle</td><td>$2M</td><td>770</td><td>167</td><td>78</td><td>$0.36</td><td>205</td></tr>
+<tr><td>5</td><td>stakewise-v3</td><td>·</td><td>739</td><td>162</td><td>76</td><td>$0.31</td><td>176</td></tr>
+<tr><td>6</td><td>origin-dollar</td><td>·</td><td>719</td><td>125</td><td>58</td><td>$0.41</td><td>253</td></tr>
+<tr><td>7</td><td>beanstalk</td><td>·</td><td>681</td><td>180</td><td>107</td><td>$0.43</td><td>226</td></tr>
+<tr><td>8</td><td>across-protocol</td><td>·</td><td>652</td><td>167</td><td>84</td><td>$0.41</td><td>292</td></tr>
+<tr><td>9</td><td>radiant-v2</td><td>·</td><td>619</td><td>156</td><td>84</td><td>$0.33</td><td>147</td></tr>
+<tr><td>10</td><td>open-dollar</td><td>·</td><td>610</td><td>115</td><td>68</td><td>$0.32</td><td>208</td></tr>
+<tr><td>11</td><td>etherfi</td><td>$300K</td><td>510</td><td>89</td><td>45</td><td>$0.34</td><td>206</td></tr>
+<tr><td>12</td><td>lombard</td><td>$250K</td><td>499</td><td>93</td><td>52</td><td>$0.24</td><td>95</td></tr>
+<tr><td>13</td><td>ribbon</td><td>·</td><td>494</td><td>95</td><td>47</td><td>$0.24</td><td>88</td></tr>
+<tr><td>14</td><td>alchemix-v3</td><td>$300K</td><td>462</td><td>104</td><td>67</td><td>$0.22</td><td>88</td></tr>
+<tr><td>15</td><td>euler-vault</td><td>·</td><td>460</td><td>118</td><td>47</td><td>$0.17</td><td>84</td></tr>
+<tr><td>16</td><td>flare-fassets</td><td>$250K</td><td>451</td><td>73</td><td>36</td><td>$0.32</td><td>165</td></tr>
+<tr><td>17</td><td>nucleus</td><td>$500K</td><td>423</td><td>73</td><td>41</td><td>$0.30</td><td>232</td></tr>
+<tr><td>18</td><td>velodrome</td><td>·</td><td>379</td><td>76</td><td>48</td><td>$0.23</td><td>80</td></tr>
+<tr><td>19</td><td>ajna</td><td>·</td><td>371</td><td>53</td><td>32</td><td>$0.38</td><td>195</td></tr>
+<tr><td>20</td><td>gearbox-v3</td><td>$200K</td><td>368</td><td>58</td><td>28</td><td>$0.14</td><td>69</td></tr>
+<tr><td>21</td><td>thirdweb</td><td>·</td><td>362</td><td>53</td><td>28</td><td>$0.36</td><td>331</td></tr>
+<tr><td>22</td><td>chainlink-ccip</td><td>$3M</td><td>306</td><td>52</td><td>28</td><td>$0.28</td><td>82</td></tr>
+<tr><td>23</td><td>liquity</td><td>·</td><td>304</td><td>60</td><td>39</td><td>$0.18</td><td>82</td></tr>
+<tr><td>24</td><td>aave-v3</td><td>$1M</td><td>282</td><td>52</td><td>24</td><td>$0.28</td><td>110</td></tr>
+<tr><td>25</td><td>pancakeswap-per</td><td>$1M</td><td>272</td><td>39</td><td>22</td><td>$0.16</td><td>91</td></tr>
+<tr><td>26</td><td>pancakeswap-inf</td><td>$1M</td><td>267</td><td>29</td><td>21</td><td>$0.18</td><td>87</td></tr>
+<tr><td>27</td><td>paraswap</td><td>·</td><td>220</td><td>41</td><td>22</td><td>$0.11</td><td>63</td></tr>
+<tr><td>28</td><td>ethena</td><td>$3M</td><td>159</td><td>28</td><td>16</td><td>$0.06</td><td>51</td></tr>
+<tr><td>29</td><td>gamma</td><td>·</td><td>103</td><td>19</td><td>14</td><td>$0.03</td><td>20</td></tr>
+<tr><td>30</td><td>morpho-blue</td><td>$2.5M</td><td>88</td><td>31</td><td>25</td><td>$0.03</td><td>29</td></tr>
+<tr><td>31</td><td>monetrix</td><td>$22K</td><td>66</td><td>12</td><td>7</td><td>$0.03</td><td>20</td></tr>
+</tbody>
+</table></div>
+
+<h2>Budget progress</h2>
+<div class="section">
+  <p>Starting balance was $34.19, after a $20 top-up.</p>
+  <p>C19 spend came to $8.03.</p>
+  <p>Ending balance sits at $26.16.</p>
+  <div class="budget-bar">
+    <div class="budget-fill" style="width:76.5%">$26.16 remaining (76.5%)</div>
+  </div>
+  <p class="note">Cumulative spend C7-C19 is roughly $17.26, or about 57 more scans at the current rate.</p>
+</div>
+
+<h2>API usage summary</h2>
+<div class="two-col">
+  <div class="section">
+    <h3>DeepSeek API</h3>
+    <p>Calls ran to about 4,800 estimated.</p>
+    <p>Cost landed at $8.03.</p>
+    <p>Model was deepseek-chat.</p>
+    <p>Scans covered 31 targets.</p>
+  </div>
+  <div class="section">
+    <h3>Other APIs</h3>
+    <p>Immunefi API took 1 call, with cached bounties.</p>
+    <p>GitHub handled 32 git clones.</p>
+    <p>WebSearch ran about 5 queries.</p>
+    <p>WebFetch pulled about 3 pages.</p>
+  </div>
+</div>
+
+<h2>Campaign comparison · C7 to C19</h2>
+<div class="tbl-scroll"><table>
+<thead>
+<tr><th>Campaign</th><th>Targets</th><th>Findings</th><th>Cost</th><th>New</th></tr>
+</thead>
+<tbody>
+<tr><td>C7</td><td>13</td><td>5,384</td><td>$2.46</td><td>13</td></tr>
+<tr><td>C8</td><td>4</td><td>1,709</td><td>$0.95</td><td>4</td></tr>
+<tr><td>C9</td><td>6</td><td>2,363</td><td>$0.95</td><td>6</td></tr>
+<tr><td>C10-C15</td><td>various</td><td>various</td><td>$0.60</td><td>various</td></tr>
+<tr><td>C16</td><td>4</td><td>65</td><td>$0.00</td><td>4</td></tr>
+<tr><td>C17</td><td>285 scans</td><td>0 new</td><td>$0.00</td><td>0</td></tr>
+<tr><td>C18</td><td>53</td><td>11,055</td><td>$6.28</td><td>0 (re-scan)</td></tr>
+<tr class="row-total"><td>C19</td><td>31</td><td>14,192</td><td>$8.03</td><td>31</td></tr>
+</tbody>
+</table></div>
+
+<h2>What landed and what stalled</h2>
+<div class="two-col">
+  <div class="section">
+    <h3 class="good">What worked</h3>
+    <ul class="plain-list">
+      <li class="mark-good">31 new targets in a single session</li>
+      <li class="mark-good">$8.03 DeepSeek spend, past the $8 minimum</li>
+      <li class="mark-good">$25.6M in bounty pool coverage</li>
+      <li class="mark-good">10 PM1 candidates across 17 bounty targets</li>
+      <li class="mark-good">Parallel scan run, roughly 30 min for all 31</li>
+      <li class="mark-good">Target discovery off Immunefi cached data</li>
+    </ul>
+  </div>
+  <div class="section">
+    <h3 class="red">What didn't</h3>
+    <ul class="plain-list">
+      <li class="mark-bad">HackenProof still 403 blocked</li>
+      <li class="mark-bad">Olas C4 repo scan failed on a structure issue</li>
+      <li class="mark-bad">USDT0 repo came back as an empty clone</li>
+      <li class="mark-bad">Code4rena shutting down on May 13, 2026</li>
+      <li class="mark-bad">Most H findings are generic reentrancy false positives</li>
+      <li class="mark-bad">Well-audited protocols yield about 0% actionable</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<footer class="report-foot"><span>SC Audit Pipeline · Campaign 19 Session</span><span>Generated from pipeline data</span></footer>
+
+</body>
+</html>

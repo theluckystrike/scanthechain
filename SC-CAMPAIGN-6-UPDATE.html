@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SC Campaign 6 Final Update Dashboard</title>
+<meta name="description" content="Follow-up on campaign 6 of an autonomous smart contract audit pipeline, with updated findings.">
+<meta name="keywords" content="smart contract audit pipeline, automated bug bounty, DeFi security research, smart contract security">
+<meta name="author" content="Scan the Chain">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://scanthechain.com/SC-CAMPAIGN-6-UPDATE.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Scan the Chain">
+<meta property="og:title" content="SC Campaign 6 Final Update Dashboard">
+<meta property="og:description" content="Follow-up on campaign 6 of an autonomous smart contract audit pipeline, with updated findings.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SC Campaign 6 Final Update Dashboard">
+<meta name="twitter:description" content="Follow-up on campaign 6 of an autonomous smart contract audit pipeline, with updated findings.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SC AUDIT PIPELINE  ·  shared design kit
+   Canonical, copied from DASHBOARD.html so every report renders native
+   inside the command-center iframe. Standalone-report build (no tab-bar).
+
+   PALETTE GUIDE (map bespoke classes onto these, never raw hex):
+     amber  (--amber)  = primary signal, the one accent, live/submitted
+     bone   (--bone)   = headline text, neutral emphasis
+     moss   (--good)   = good / escalated / pass / positive delta
+     rust   (--kill)   = dead / rejected / zero / negative
+     burnt  (--warn)   = pending / in-progress / caution
+     slate  (--info)   = neutral data / informational
+   Sharp corners only (radius 0, or 2px on chips). No neon, no gradients
+   except the quiet vignette and progress fills already defined here.
+   ========================================================================== */
+:root {
+  --ink-0:#0a0a0c; --ink-1:#0e0e11; --ink-2:#131318; --ink-3:#1a1a20;
+  --rule:#23232b; --rule-2:#2d2d36;
+  --bone:#e8e3d6; --bone-d:#d6d1c2; --mute:#8b8676; --mute-2:#6a6659; --dim:#4a4740;
+  --amber:#d4a24b; --amber-d:#a37a30; --amber-bg:rgba(212,162,75,0.08);
+  --alive:#b9a36a;
+  --good:#8aa672; --good-bg:rgba(138,166,114,0.07);
+  --kill:#b15247; --kill-bg:rgba(177,82,71,0.07);
+  --warn:#c9874a; --warn-bg:rgba(201,135,74,0.06);
+  --info:#7a8499; --info-bg:rgba(122,132,153,0.06);
+  --ff-sans:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+  --ff-serif:'IBM Plex Serif',ui-serif,Georgia,serif;
+  --ff-mono:'IBM Plex Mono',ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;
+  /* legacy aliases so old inline token names keep working */
+  --bg:var(--ink-0); --card:var(--ink-1); --card2:var(--ink-2); --border:var(--rule);
+  --text:var(--bone); --muted:var(--mute); --accent:var(--amber); --accent2:var(--bone-d);
+  --green:var(--good); --red:var(--kill); --orange:var(--warn); --cyan:var(--info);
+  --gold:var(--amber); --blue:var(--info); --purple:var(--mute); --danger:var(--kill);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*::selection{background:var(--amber);color:var(--ink-0)}
+html,body{font-feature-settings:"ss01","ss02","cv11","tnum"}
+body{
+  font-family:var(--ff-sans); background:var(--ink-0); color:var(--bone);
+  line-height:1.55; font-size:14px; min-height:100vh;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding:0;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:1; mix-blend-mode:screen;
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(212,162,75,0.04),transparent 60%),
+    repeating-linear-gradient(180deg,rgba(255,255,255,0.012) 0 1px,transparent 1px 3px);
+}
+body>*{position:relative;z-index:2}
+
+/* ── report shell ─────────────────────────────────────────── */
+.report-head{
+  display:flex; align-items:center; gap:0.7rem;
+  padding:0 1.6rem; height:48px;
+  background:linear-gradient(180deg,#0c0c0f 0%,#0a0a0c 100%);
+  border-bottom:1px solid var(--rule);
+  position:sticky; top:0; z-index:1000;
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+}
+.report-head .rh-mark{ width:8px; height:8px; background:var(--amber); box-shadow:0 0 10px rgba(212,162,75,0.6); animation:pulse 2.4s ease-in-out infinite; }
+.report-head .rh-name{ color:var(--bone); font-weight:600; }
+.report-head .rh-sep{ color:var(--dim); }
+.report-head .rh-tag{ color:var(--mute); }
+.report-head .rh-back{ margin-left:auto; color:var(--mute); text-decoration:none; border:1px solid var(--rule); padding:0.3rem 0.7rem; transition:color .15s,border-color .15s; }
+.report-head .rh-back:hover{ color:var(--amber); border-color:var(--amber-d); }
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 10px rgba(212,162,75,0.6)}50%{opacity:.5;box-shadow:0 0 4px rgba(212,162,75,0.3)}}
+
+.wrap{ max-width:1320px; margin:0 auto; padding:2.4rem 2rem 4rem; }
+
+/* ── headings ─────────────────────────────────────────────── */
+h1{ font-family:var(--ff-serif); font-size:2.2rem; font-weight:500; letter-spacing:-0.012em; line-height:1.06; color:var(--bone); margin:0.2rem 0 0.4rem; }
+h1 em{ font-style:italic; font-weight:400; color:var(--bone-d); }
+h2{ font-family:var(--ff-mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.22em; color:var(--bone); margin:2.6rem 0 1.1rem; padding-bottom:0.7rem; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:0.8rem; }
+h3{ font-family:var(--ff-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin:1.6rem 0 0.7rem; }
+.subtitle,.subhead-deck{ color:var(--mute); font-size:13px; margin-bottom:1.6rem; font-family:var(--ff-sans); }
+p{ color:var(--bone-d); line-height:1.62; margin:0.6rem 0; max-width:78ch; }
+a{ color:var(--amber); }
+
+/* ── tables ───────────────────────────────────────────────── */
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:13px; font-variant-numeric:tabular-nums; }
+thead{ background:var(--ink-1); }
+th{ text-align:left; padding:0.65rem 0.9rem; font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.14em; color:var(--mute); border-bottom:1px solid var(--rule-2); border-top:1px solid var(--rule); }
+td{ padding:0.65rem 0.9rem; border-bottom:1px solid var(--rule); font-size:13px; color:var(--bone-d); vertical-align:top; }
+td strong,td b{ color:var(--bone); font-weight:500; }
+tr:hover td{ background:rgba(212,162,75,0.025); }
+td code,td .num{ font-family:var(--ff-mono); font-size:12px; color:var(--bone); }
+tr.row-live td{ background:rgba(212,162,75,0.07)!important; box-shadow:inset 2px 0 0 var(--amber); }
+tr.row-good td{ background:var(--good-bg)!important; }
+tr.row-warn td{ background:var(--warn-bg)!important; }
+tr.row-dead td{ background:var(--kill-bg)!important; }
+tr.row-killed td{ opacity:.45; }
+tr.row-total td{ font-weight:500; border-top:1px solid var(--amber); background:var(--ink-1)!important; }
+
+/* ── KPI grid ─────────────────────────────────────────────── */
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.kpi{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); border-radius:0; padding:1.4rem 1.2rem 1.2rem; text-align:left; position:relative; transition:background .2s; }
+.kpi:hover{ background:rgba(212,162,75,0.025); }
+.kpi::before{ content:""; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--amber); }
+.kpi .value{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; letter-spacing:-0.02em; color:var(--bone); line-height:1.05; font-variant-numeric:tabular-nums; }
+.kpi .label{ font-family:var(--ff-mono); color:var(--mute-2); font-size:10px; text-transform:uppercase; letter-spacing:0.16em; margin-top:0.6rem; display:block; }
+.kpi.green .value,.kpi.good .value{ color:var(--good); } .kpi.green::before,.kpi.good::before{ background:var(--good); }
+.kpi.orange .value,.kpi.warn .value{ color:var(--amber); } .kpi.orange::before,.kpi.warn::before{ background:var(--amber); }
+.kpi.cyan .value,.kpi.info .value{ color:var(--info); } .kpi.cyan::before,.kpi.info::before{ background:var(--info); }
+.kpi.red .value,.kpi.danger .value{ color:var(--kill); } .kpi.red::before,.kpi.danger::before{ background:var(--kill); }
+.kpi.blue .value{ color:var(--bone); } .kpi.blue::before{ background:var(--bone-d); }
+.kpi.purple .value{ color:var(--bone); } .kpi.purple::before{ background:var(--mute); }
+
+/* ── badges / tags / pills ────────────────────────────────── */
+.badge,.tag,.pill,.flag,.flow-tag,.layer-badge,.card-badge{
+  display:inline-block; padding:0.15rem 0.55rem 0.2rem; border-radius:2px;
+  font-family:var(--ff-mono); font-size:10px; font-weight:500; letter-spacing:0.08em;
+  text-transform:uppercase; border:1px solid;
+}
+.badge-escalated,.badge-green,.badge-pass,.badge-verified,.badge-ready,.tag-pass,.pill-green,.badge-g{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge-submitted,.badge-automated,.badge-y,.tag-submitted{ background:var(--amber-bg); color:var(--amber); border-color:rgba(212,162,75,0.35); }
+.badge-dead,.badge-red,.badge-critical,.tag-critical,.badge-o{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge-pending,.badge-queued,.badge-semi,.badge-manual,.badge-orange,.badge-high,.tag-high,.tag-medium{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge-blue,.badge-purple,.badge-gray,.tag-skip,.badge-b{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge-duplicate{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); text-decoration:line-through; }
+
+/* ── sections / cards / alerts ────────────────────────────── */
+.section{ margin:2.4rem 0; }
+.card,.handoff-card,.finding-card,.col-card,.force-card,.pnl-card,.counter,.bottleneck{
+  background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1.1rem 1.2rem; margin:0.7rem 0;
+}
+.alert{ padding:0.9rem 1.1rem; border-radius:0; margin:0.5rem 0; font-size:13px; line-height:1.6; border:1px solid var(--rule); border-left-width:2px; background:var(--ink-1); color:var(--bone-d); }
+.alert strong{ color:var(--bone); font-weight:500; }
+.alert-green{ border-left-color:var(--good); background:var(--good-bg); }
+.alert-red{ border-left-color:var(--kill); background:var(--kill-bg); }
+.alert-orange{ border-left-color:var(--warn); background:var(--warn-bg); }
+.alert-blue{ border-left-color:var(--info); background:var(--info-bg); }
+
+/* ── checklist / timeline ─────────────────────────────────── */
+.checklist{ list-style:none; padding:0; }
+.checklist li{ padding:0.45rem 0 0.45rem 1.8rem; position:relative; font-size:13px; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+.checklist li::before{ content:'[ ]'; position:absolute; left:0; color:var(--mute-2); font-family:var(--ff-mono); font-size:11px; top:0.55rem; }
+.checklist li.done{ color:var(--mute); } .checklist li.done::before{ content:'[\2713]'; color:var(--good); }
+.timeline{ border-left:1px solid var(--rule-2); margin-left:0.5rem; padding-left:1.8rem; }
+.timeline-item{ margin-bottom:1.4rem; position:relative; }
+.timeline-item::before{ content:''; position:absolute; left:-2.1rem; top:0.4rem; width:9px; height:9px; background:var(--mute); border:2px solid var(--ink-0); outline:1px solid var(--rule-2); transform:rotate(45deg); }
+.timeline-item.green::before{ background:var(--good); outline-color:var(--good); }
+.timeline-item.red::before{ background:var(--kill); outline-color:var(--kill); }
+.timeline-item.orange::before{ background:var(--amber); outline-color:var(--amber); }
+.timeline-item .time{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin-bottom:0.3rem; display:block; }
+
+/* ── bars / progress ──────────────────────────────────────── */
+.bar,.budget-bar{ height:8px; background:var(--ink-3); border:1px solid var(--rule); overflow:hidden; display:inline-block; width:80px; vertical-align:middle; border-radius:0; }
+.budget-bar{ width:100%; height:20px; }
+.bar-fill,.budget-fill,.fill,.filled{ height:100%; background:var(--amber); box-shadow:0 0 8px rgba(212,162,75,0.4); border-radius:0; }
+.bar-h{ background:var(--kill); } .bar-cost{ background:var(--info); }
+
+/* ── layout helpers ───────────────────────────────────────── */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.auto-grid,.pay-cards,.layers{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+@media(max-width:768px){ .two-col,.auto-grid{ grid-template-columns:1fr; } }
+
+/* ── inline helpers / utility colors ──────────────────────── */
+code{ font-family:var(--ff-mono); font-size:0.92em; color:var(--amber); background:rgba(212,162,75,0.06); padding:1px 4px; border-radius:2px; }
+.mono{ font-family:var(--ff-mono); } .tnum{ font-variant-numeric:tabular-nums; }
+.amber,.gold,.accent{ color:var(--amber)!important; }
+.green,.good{ color:var(--good)!important; } .red,.danger,.kill,.hot{ color:var(--kill)!important; }
+.orange,.warn{ color:var(--warn)!important; } .cyan,.blue,.info,.cool{ color:var(--info)!important; }
+.muted,.dim{ color:var(--mute)!important; }
+.subhead{ font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin-bottom:0.6rem; display:block; }
+
+/* ── footer ───────────────────────────────────────────────── */
+.report-foot{ max-width:1320px; margin:3rem auto 0; padding:1.4rem 2rem 2.4rem; border-top:1px solid var(--rule); font-family:var(--ff-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute-2); display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+
+/* ── scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--ink-0); }
+::-webkit-scrollbar-thumb{ background:var(--rule-2); border:2px solid var(--ink-0); }
+::-webkit-scrollbar-thumb:hover{ background:var(--amber-d); }
+
+/* ========================================================================
+   PAGE OVERRIDES  ·  bespoke classes remapped onto the kit palette
+   ======================================================================== */
+.page-banner{ margin:1.6rem 0 0; }
+.page-banner .deck{ color:var(--mute); font-size:13px; font-family:var(--ff-sans); margin-top:0.4rem; }
+
+.grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.card.kpi-cell{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); padding:1.4rem 1.2rem 1.2rem; position:relative; }
+.card.kpi-cell::before{ content:""; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--amber); }
+.card.kpi-cell.critical::before,.card.kpi-cell.dead::before{ background:var(--kill); }
+.card.kpi-cell.high::before{ background:var(--warn); }
+.card.kpi-cell.info::before{ background:var(--info); }
+.card.kpi-cell.success::before{ background:var(--good); }
+.card.kpi-cell h3{ margin-bottom:0.6rem; }
+.card.kpi-cell .value{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; color:var(--bone); line-height:1.05; }
+.card.kpi-cell .value.red{ color:var(--kill); }
+.card.kpi-cell .value.orange{ color:var(--warn); }
+.card.kpi-cell .value.yellow{ color:var(--amber); }
+.card.kpi-cell .value.blue{ color:var(--info); }
+.card.kpi-cell .detail{ font-family:var(--ff-mono); font-size:11px; color:var(--mute); margin-top:0.5rem; }
+
+.badge.critical{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge.high{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge.medium{ background:var(--amber-bg); color:var(--amber); border-color:rgba(212,162,75,0.35); }
+.badge.held{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge.dead{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge.active{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge.pending{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+
+.rating-bar{ height:8px; background:var(--ink-3); border:1px solid var(--rule); margin-top:6px; position:relative; overflow:hidden; }
+.rating-bar .fill{ height:100%; }
+/* data-driven ramp remapped to the warm palette: hot/critical -> kill, mid -> warn, low -> info */
+.rating-bar .fill.r10{ width:100%; background:var(--kill); }
+.rating-bar .fill.r9{ width:90%; background:var(--warn); }
+.rating-bar .fill.r8{ width:80%; background:var(--amber); }
+.rating-bar .fill.r7{ width:70%; background:var(--info); }
+.rating-bar .fill.r6{ width:60%; background:var(--mute); }
+
+.api-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media(max-width:768px){ .api-grid{ grid-template-columns:1fr; } }
+.api-box{ background:var(--ink-2); border:1px solid var(--rule); border-radius:0; padding:1rem 1.1rem; }
+.api-box h4{ font-family:var(--ff-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.16em; color:var(--amber); margin-bottom:0.7rem; }
+.api-box .stat{ display:flex; justify-content:space-between; padding:0.3rem 0; font-size:12px; border-bottom:1px dashed var(--rule); }
+.api-box .stat .label{ color:var(--mute); }
+.api-box .stat .val{ color:var(--bone); font-weight:500; font-family:var(--ff-mono); }
+.api-box .stat .val.good{ color:var(--good); }
+
+.ev-bar{ display:flex; align-items:center; margin:0.6rem 0; }
+.ev-bar .label{ width:60px; font-family:var(--ff-mono); font-size:11px; color:var(--mute); }
+.ev-bar .bar{ flex:1; height:20px; background:var(--ink-3); border:1px solid var(--rule); overflow:hidden; position:relative; display:inline-block; width:auto; }
+.ev-bar .bar .fill{ height:100%; display:flex; align-items:center; padding-left:8px; font-family:var(--ff-mono); font-size:10px; font-weight:500; white-space:nowrap; box-shadow:none; }
+.ev-bar .bar .fill.lvl-crit{ background:var(--kill-bg); color:var(--bone); border-right:2px solid var(--kill); }
+.ev-bar .bar .fill.lvl-high{ background:var(--warn-bg); color:var(--bone); border-right:2px solid var(--warn); }
+.ev-bar .bar .fill.lvl-med{ background:var(--amber-bg); color:var(--bone); border-right:2px solid var(--amber); }
+
+.ev-summary{ margin-top:1rem; padding:0.9rem 1.1rem; background:var(--ink-2); border:1px solid var(--rule); }
+.ev-summary .row{ display:flex; justify-content:space-between; font-size:13px; padding:0.2rem 0; }
+.ev-summary .row.fine{ font-size:11px; color:var(--mute); }
+.ev-summary .row .k{ color:var(--mute); }
+.ev-summary .row .v{ font-weight:500; font-family:var(--ff-mono); }
+.ev-summary .row .v.good{ color:var(--good); }
+.ev-summary .row .v.amber{ color:var(--amber); }
+.ev-summary .row .v.warn{ color:var(--warn); }
+
+.outreach-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0.8rem; }
+.outreach-card{ background:var(--ink-2); border:1px solid var(--rule); border-radius:0; padding:1rem; text-align:center; }
+.outreach-card.ok{ border-left:2px solid var(--good); }
+.outreach-card.fail{ border-left:2px solid var(--kill); }
+.outreach-card.wait{ border-left:2px solid var(--warn); }
+.outreach-card .channel{ font-family:var(--ff-mono); font-size:12px; color:var(--bone); font-weight:600; text-transform:uppercase; letter-spacing:0.08em; }
+.outreach-card .target{ font-family:var(--ff-mono); font-size:11px; color:var(--mute); margin-top:0.4rem; word-break:break-all; }
+.outreach-card .status{ font-size:11px; margin-top:0.7rem; }
+
+.score-row-bad td{ background:var(--kill-bg); }
+.big{ font-size:16px; font-weight:600; font-family:var(--ff-mono); }
+.bigger{ font-size:22px; font-weight:600; font-family:var(--ff-mono); }
+
+/* ── RESPONSIVE (shared, kit-based report pages) ───────────── */
+@media (max-width: 900px){
+  .auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px){
+  html,body{ overflow-x:hidden; max-width:100%; }
+  .report-head .rh-sep, .report-head .rh-tag{ display:none; }
+  body{ font-size: 13.5px; }
+  .report-head{ height: 44px; padding: 0 1rem; font-size: 10px; letter-spacing: 0.1em; }
+  .report-head .rh-tag{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw; }
+  .report-head .rh-back{ padding: 0.25rem 0.55rem; }
+  .wrap{ padding: 1.4rem 1rem 2.4rem; }
+  h1{ font-size: 1.6rem; }
+  h2{ margin: 2rem 0 0.9rem; }
+  .two-col,.auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr; }
+  .kpi{ border-right: none; }
+  table{ white-space: nowrap; }
+  .report-foot{ padding: 1.2rem 1rem 2rem; flex-direction: column; gap: 0.4rem; }
+}
+@media (max-width: 460px){
+  .kpi-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+.tbl-scroll > table{ margin:0; }
+</style>
+</head>
+<body>
+
+<header class="report-head"><span class="rh-mark"></span><span class="rh-name">SC Audit</span><span class="rh-sep">//</span><span class="rh-tag">UPDATE · Campaign 6 Update</span><a class="rh-back" href="index.html">Command center</a></header>
+
+<div class="wrap">
+
+<div class="page-banner">
+  <h1>SC Campaign 6 final update</h1>
+  <div class="deck">Sentiment V2 leveraged lending protocol · autonomous SC audit pipeline</div>
+  <div class="alert alert-red" style="margin-top:1rem"><strong>Sherlock bounty #37 removed.</strong> Pivoting to direct disclosure.</div>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid">
+  <div class="card kpi-cell dead">
+    <h3>Bounty status</h3>
+    <div class="value red">REMOVED</div>
+    <div class="detail">Sherlock #37, all fields null. 310 IDs scanned, 0 matches.</div>
+  </div>
+  <div class="card kpi-cell critical">
+    <h3>Verified findings</h3>
+    <div class="value">3</div>
+    <div class="detail">1 Critical (10/10), 1 High (9/10), 1 Medium (8/10)</div>
+  </div>
+  <div class="card kpi-cell info">
+    <h3>Total API cost</h3>
+    <div class="value blue">~$35</div>
+    <div class="detail">1.67M tokens · 890 tool calls · 28 agents</div>
+  </div>
+  <div class="card kpi-cell success">
+    <h3>Disclosure status</h3>
+    <div class="value" style="font-size:24px">IN PROGRESS</div>
+    <div class="detail">5 emails, Discord ticket, Twitter DM, 8 messages sent.</div>
+  </div>
+</div>
+
+<!-- Findings Table -->
+<div class="section">
+  <h2>Findings rated 1 to 10</h2>
+  <div class="tbl-scroll"><table>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Severity</th>
+      <th>Rating</th>
+      <th>Confidence</th>
+      <th>Verification</th>
+      <th>Status</th>
+    </tr>
+    <tr>
+      <td class="kill" style="font-weight:bold">S-02</td>
+      <td>HyperliquidUsdcOracle ETH_INDEX=4 is DYDX, not ETH</td>
+      <td><span class="badge critical">CRITICAL</span></td>
+      <td>
+        <span class="kill" style="font-weight:bold">10/10</span>
+        <div class="rating-bar"><div class="fill r10"></div></div>
+      </td>
+      <td>99%</td>
+      <td>Mainnet API, precompile, docs</td>
+      <td><span class="badge active">DISCLOSING</span></td>
+    </tr>
+    <tr>
+      <td class="warn" style="font-weight:bold">S-04</td>
+      <td>RedstoneOracle ms/s staleness check bypass</td>
+      <td><span class="badge high">HIGH</span></td>
+      <td>
+        <span class="warn" style="font-weight:bold">9/10</span>
+        <div class="rating-bar"><div class="fill r9"></div></div>
+      </td>
+      <td>95%</td>
+      <td>Redstone source code confirmed</td>
+      <td><span class="badge active">DISCLOSING</span></td>
+    </tr>
+    <tr>
+      <td class="amber" style="font-weight:bold">S-01</td>
+      <td>AggV3Oracle missing non-positive price check</td>
+      <td><span class="badge medium">MEDIUM</span></td>
+      <td>
+        <span class="amber" style="font-weight:bold">8/10</span>
+        <div class="rating-bar"><div class="fill r8"></div></div>
+      </td>
+      <td>99%</td>
+      <td>Forge PoC 6/6 PASS</td>
+      <td><span class="badge active">DISCLOSING</span></td>
+    </tr>
+    <tr class="row-killed">
+      <td>S-03</td>
+      <td>Hyperliquid oracles zero price DoS</td>
+      <td><span class="badge medium">MEDIUM</span></td>
+      <td>
+        <span class="info">7/10</span>
+        <div class="rating-bar"><div class="fill r7"></div></div>
+      </td>
+      <td>90%</td>
+      <td>Code review</td>
+      <td><span class="badge held">HELD</span></td>
+    </tr>
+    <tr class="row-killed">
+      <td>S-05</td>
+      <td>SuperPool paused pool removal</td>
+      <td><span class="badge medium">MEDIUM</span></td>
+      <td>
+        <span class="info">6/10</span>
+        <div class="rating-bar"><div class="fill r6"></div></div>
+      </td>
+      <td>80%</td>
+      <td>Code review</td>
+      <td><span class="badge held">HELD</span></td>
+    </tr>
+  </table></div>
+</div>
+
+<!-- API Usage Breakdown -->
+<div class="section">
+  <h2>API usage, full Campaign 6</h2>
+  <div class="api-grid">
+    <div class="api-box">
+      <h4>Session 1, main audit pipeline</h4>
+      <div class="stat"><span class="label">Agents</span><span class="val">23 (20 audit + 3 verification)</span></div>
+      <div class="stat"><span class="label">Tokens</span><span class="val">~1,550,000</span></div>
+      <div class="stat"><span class="label">Tool Calls</span><span class="val">~805</span></div>
+      <div class="stat"><span class="label">Model</span><span class="val">Claude Opus 4.6</span></div>
+      <div class="stat"><span class="label">Cost</span><span class="val">$25-35</span></div>
+    </div>
+    <div class="api-box">
+      <h4>Session 2, submission and disclosure</h4>
+      <div class="stat"><span class="label">Agents</span><span class="val">5 (research + scan)</span></div>
+      <div class="stat"><span class="label">Tokens</span><span class="val">~120,000</span></div>
+      <div class="stat"><span class="label">Tool Calls</span><span class="val">~85</span></div>
+      <div class="stat"><span class="label">Web Searches</span><span class="val">8</span></div>
+      <div class="stat"><span class="label">Sherlock IDs Scanned</span><span class="val">310</span></div>
+      <div class="stat"><span class="label">Cost</span><span class="val">$3-5</span></div>
+    </div>
+    <div class="api-box">
+      <h4>Campaign 6 totals</h4>
+      <div class="stat"><span class="label">Total Agents</span><span class="val good">28</span></div>
+      <div class="stat"><span class="label">Total Tokens</span><span class="val good">~1,670,000</span></div>
+      <div class="stat"><span class="label">Total Tool Calls</span><span class="val good">~890</span></div>
+      <div class="stat"><span class="label">Total Cost</span><span class="val good">~$35</span></div>
+      <div class="stat"><span class="label">Cost per Finding</span><span class="val good">$11.67</span></div>
+    </div>
+    <div class="api-box">
+      <h4>Pipeline lifetime, 6 campaigns</h4>
+      <div class="stat"><span class="label">Total Campaigns</span><span class="val">6</span></div>
+      <div class="stat"><span class="label">Findings Submitted</span><span class="val">4 (C1+C2)</span></div>
+      <div class="stat"><span class="label">Targets Killed</span><span class="val">2 (C3+C4)</span></div>
+      <div class="stat"><span class="label">Ready/Blocked</span><span class="val">2 (C5+C6)</span></div>
+      <div class="stat"><span class="label">Kill Rate</span><span class="val">97-98%</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Expected Value -->
+<div class="section">
+  <h2>Expected value if the bounty were active</h2>
+  <div class="ev-bar">
+    <div class="label">S-02</div>
+    <div class="bar"><div class="fill lvl-crit" style="width:85%">$15K to $50K (Critical)</div></div>
+  </div>
+  <div class="ev-bar">
+    <div class="label">S-04</div>
+    <div class="bar"><div class="fill lvl-high" style="width:45%">$5K to $15K (High)</div></div>
+  </div>
+  <div class="ev-bar">
+    <div class="label">S-01</div>
+    <div class="bar"><div class="fill lvl-med" style="width:20%">$1K to $5K (Medium)</div></div>
+  </div>
+  <div class="ev-summary">
+    <div class="row"><span class="k">Total EV (0.3x discount)</span><span class="v good">$5,600 to $18,700</span></div>
+    <div class="row"><span class="k">Stake saved, bounty dead</span><span class="v amber">$750 USDC not risked</span></div>
+    <div class="row"><span class="k">Direct disclosure EV (realistic)</span><span class="v warn">$1,500 to $4,000</span></div>
+    <div class="row fine"><span>Team pays a voluntary bounty around 15-20% of the time.</span><span>40-50% fix silently with no reward.</span></div>
+  </div>
+</div>
+
+<!-- Outreach Channels -->
+<div class="section">
+  <h2>Disclosure outreach across all channels</h2>
+  <div class="outreach-grid">
+    <div class="outreach-card ok">
+      <div class="channel">Gmail SMTP</div>
+      <div class="target">0xhitgo@sentiment.xyz</div>
+      <div class="status"><span class="badge active">SENT</span></div>
+    </div>
+    <div class="outreach-card ok">
+      <div class="channel">Gmail SMTP</div>
+      <div class="target">ruvaag@gmail.com</div>
+      <div class="status"><span class="badge active">SENT</span></div>
+    </div>
+    <div class="outreach-card ok">
+      <div class="channel">Gmail SMTP</div>
+      <div class="target">coldroohafza@gmail.com</div>
+      <div class="status"><span class="badge active">SENT</span></div>
+    </div>
+    <div class="outreach-card ok">
+      <div class="channel">Gmail SMTP</div>
+      <div class="target">sriyantra717@gmail.com</div>
+      <div class="status"><span class="badge active">SENT</span></div>
+    </div>
+    <div class="outreach-card ok">
+      <div class="channel">Gmail SMTP</div>
+      <div class="target">0xhitgo@protonmail.com</div>
+      <div class="status"><span class="badge active">SENT</span></div>
+    </div>
+    <div class="outreach-card fail">
+      <div class="channel">GitHub Advisory</div>
+      <div class="target">sentimentxyz/protocol-v2</div>
+      <div class="status"><span class="badge dead">404, NO ACCESS</span></div>
+    </div>
+    <div class="outreach-card ok">
+      <div class="channel">Discord</div>
+      <div class="target">ONYX server, ticket #0600</div>
+      <div class="status"><span class="badge active">SENT</span></div>
+    </div>
+    <div class="outreach-card wait">
+      <div class="channel">Telegram</div>
+      <div class="target">@ruvaag (core dev)</div>
+      <div class="status"><span class="badge pending">PENDING, MANUAL</span></div>
+    </div>
+    <div class="outreach-card ok">
+      <div class="channel">Twitter/X DM</div>
+      <div class="target">@sentimentxyz</div>
+      <div class="status"><span class="badge active">SENT</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="section">
+  <h2>Campaign 6 timeline</h2>
+  <div class="timeline">
+    <div class="timeline-item green">
+      <h3>Session 1, full pipeline deployment</h3>
+      <p>20 agents audited 22 contracts (~5,135 LoC). 250+ raw findings narrowed to 5 submittable. 3 verification agents upgraded S-02 to Critical and S-04 to High.</p>
+    </div>
+    <div class="timeline-item green">
+      <h3>Forge PoC, S-01 validated</h3>
+      <p>6 of 6 tests pass. Zero price silent acceptance and negative price panic both confirmed. The AggV3Oracle pattern gap against sister contracts is proven.</p>
+    </div>
+    <div class="timeline-item green">
+      <h3>Mainnet verification, S-02 confirmed critical</h3>
+      <p>Hyperliquid mainnet API shows index 4 = DYDX ($0.15), index 1 = ETH ($2,269). That's a 15,127x overvaluation. Rating moved from 7/10 to 10/10.</p>
+    </div>
+    <div class="timeline-item green">
+      <h3>Submissions prepared</h3>
+      <p>4 SC-prefixed submission files created, with AppleScript automation for Chrome. The call was to submit 3 and hold 2.</p>
+    </div>
+    <div class="timeline-item red">
+      <h3>Session 2, bounty removed</h3>
+      <p>Sherlock #37 returns null on every field. We scanned 310 IDs and found zero Sentiment matches. The bounty was removed sometime between March and May 2026.</p>
+    </div>
+    <div class="timeline-item orange">
+      <h3>Pivot to direct responsible disclosure</h3>
+      <p>Five-channel outreach to the Sentiment team. Email, GitHub Advisory, Discord, Telegram, and Twitter. No details shared yet. We're asking for a secure channel first.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Lessons -->
+<div class="section">
+  <h2>Campaign 6 lessons learned</h2>
+  <div class="card">
+    <div class="tbl-scroll"><table>
+      <tr><td class="kill" style="width:30px">1.</td><td>Verify the bounty is live before doing verification work. We spent $3-5 on verification agents for a bounty that was already dead. Check API status first.</td></tr>
+      <tr><td class="warn">2.</td><td>Verification agents still earn their keep. S-02 went from 7/10 to 10/10 Critical. S-04 went from 50% to 95% confidence. Cost was $3-4. Always deploy for findings rated 6 or higher.</td></tr>
+      <tr><td class="amber">3.</td><td>Post-audit oracle contracts stay prime targets. 4 of 5 findings came from 6 contracts (~558 LoC) added after all audits.</td></tr>
+      <tr><td class="good">4.</td><td>Always keep a disclosure fallback. Bounty platforms can pull programs at any time. Direct team contact preserves the finding value.</td></tr>
+      <tr><td class="info">5.</td><td>Fix DeepSeek routing before Campaign 7. 1.67M tokens on Opus ran ~$35 against ~$2 on DeepSeek Flash. That's 17.5x cost overhead.</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- Honest Scorecard -->
+<div class="section">
+  <h2>Campaign 6 honest scorecard (user feedback)</h2>
+  <div class="card">
+    <div class="tbl-scroll"><table>
+      <tr><th>Dimension</th><th>Score</th><th>Notes</th></tr>
+      <tr><td><strong>Finding quality</strong></td><td class="good big">9.5/10</td><td>Best of all 6 campaigns. S-02 is the single best finding so far.</td></tr>
+      <tr><td><strong>Verification rigor</strong></td><td class="good big">9/10</td><td>Mainnet API, forge PoC, source code analysis</td></tr>
+      <tr><td>Target selection</td><td class="warn" style="font-weight:bold">7/10</td><td>Right protocol, wrong timing</td></tr>
+      <tr class="score-row-bad"><td>Bounty verification</td><td class="kill big">1/10</td><td>Didn't check before spending. One API call costs $0 and 30 seconds.</td></tr>
+      <tr class="score-row-bad"><td>Cost efficiency</td><td class="kill" style="font-weight:bold">3/10</td><td>$35 on Opus, should be $2 on DeepSeek Flash</td></tr>
+      <tr class="score-row-bad"><td>Monetization outcome</td><td class="kill" style="font-weight:bold">3/10</td><td>$0 confirmed, $1.5K-$4K hoped</td></tr>
+      <tr><td>Disclosure execution</td><td class="info" style="font-weight:bold">7/10</td><td>8 messages across 4 channels, all automated</td></tr>
+      <tr><td>Pipeline learning</td><td class="good" style="font-weight:bold">8/10</td><td>CHECK 0, verification protocol, DeepSeek routing fix</td></tr>
+      <tr class="row-total"><td class="bigger">OVERALL</td><td class="warn bigger">6/10</td><td><strong>Elite findings, broken process</strong></td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- Cumulative Status -->
+<div class="section">
+  <h2>Cumulative pipeline status, brutally honest</h2>
+  <div class="card">
+    <div class="tbl-scroll"><table>
+      <tr><td><strong>Confirmed earnings to date</strong></td><td class="kill bigger">$0</td></tr>
+      <tr><td>Submissions awaiting judgment</td><td class="warn" style="font-weight:bold">2 (K2 + Renegade)</td></tr>
+      <tr><td>Findings in disclosure limbo</td><td class="warn" style="font-weight:bold">3 (Sentiment)</td></tr>
+      <tr><td>Targets correctly killed</td><td class="good" style="font-weight:bold">2 (GMTrade + CapyFi)</td></tr>
+      <tr><td>Total compute spent</td><td>~$95 (should be ~$15 with DS routing)</td></tr>
+      <tr><td>Total deposits at risk</td><td>$25 (Renegade USDC)</td></tr>
+      <tr><td>DeepSeek budget wasted</td><td class="kill">$29.95 of $34.97</td></tr>
+      <tr><td>Best realistic outcome</td><td class="good" style="font-weight:bold">$15K-$25K</td></tr>
+      <tr><td>Expected outcome (0.3x)</td><td class="warn" style="font-weight:bold">$4K-$8K</td></tr>
+      <tr><td>Worst realistic outcome</td><td class="kill" style="font-weight:bold">-$120</td></tr>
+    </table></div>
+    <p style="margin-top:1rem;font-size:12px;color:var(--mute)">Where it stands. The pipeline produces genuine security findings, and that part is proven. Whether those findings turn into money is still unproven. Everything rides on the Renegade and Sentiment responses over the next 2 to 4 weeks.</p>
+  </div>
+</div>
+
+</div>
+
+<footer class="report-foot"><span>SC Audit Pipeline · Campaign 6 Update</span><span>Generated from pipeline data</span></footer>
+
+</body>
+</html>

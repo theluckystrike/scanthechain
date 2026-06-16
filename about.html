@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About the researcher behind the smart contract audit pipeline</title>
+<meta name="description" content="The independent security researcher behind an autonomous smart contract audit pipeline that scanned 50+ DeFi protocols across 58 campaigns. Read the story, and get the full research data for $99.">
+<meta name="keywords" content="independent smart contract security researcher, bug bounty methodology, smart contract audit data, DeFi security research, automated audit pipeline">
+<meta name="author" content="Scan the Chain">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="canonical" href="https://scanthechain.com/about.html">
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="Scan the Chain">
+<meta property="og:title" content="About the researcher behind the smart contract audit pipeline">
+<meta property="og:description" content="An independent security researcher who built an autonomous pipeline that scanned 50+ DeFi protocols across 58 campaigns. The story, and the research data for $99.">
+<meta property="og:url" content="https://scanthechain.com/about.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="About the researcher behind the smart contract audit pipeline">
+<meta name="twitter:description" content="An independent security researcher who scanned 50+ DeFi protocols across 58 campaigns. The story, and the data for $99.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_design-kit.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "mainEntity": {
+    "@type": "Person",
+    "name": "Independent security researcher",
+    "jobTitle": "Smart contract security researcher",
+    "description": "Builds automation for smart contract bug hunting and DeFi security research.",
+    "knowsAbout": ["smart contract security", "bug bounty automation", "DeFi auditing", "vulnerability research"]
+  },
+  "makesOffer": {
+    "@type": "Offer",
+    "name": "Smart contract research data pack",
+    "description": "Full finding tables, the scan dataset, prompts, and per-protocol notes from the audit pipeline.",
+    "price": "99",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
+<style>
+/* page-specific bits for the about layout */
+.lede{ font-family:var(--ff-serif); font-size:1.25rem; line-height:1.5; color:var(--bone-d); max-width:62ch; margin:0.8rem 0 0; }
+.lede em{ color:var(--amber); font-style:italic; }
+.fact-row{ display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--rule); background:var(--ink-1); margin:1.8rem 0 0.6rem; }
+.fact{ padding:1.1rem 1.1rem 1rem; border-right:1px solid var(--rule); }
+.fact:last-child{ border-right:none; }
+.fact .n{ font-family:var(--ff-mono); font-size:1.5rem; color:var(--amber); font-variant-numeric:tabular-nums; }
+.fact .k{ font-family:var(--ff-mono); font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--mute-2); margin-top:0.4rem; }
+.offer{ border:1px solid var(--amber-d); background:linear-gradient(180deg,rgba(212,162,75,0.06),rgba(212,162,75,0.02)); padding:1.6rem 1.6rem 1.7rem; margin:1.4rem 0; }
+.offer .price{ font-family:var(--ff-serif); font-size:2.4rem; color:var(--bone); line-height:1; }
+.offer .price span{ font-family:var(--ff-mono); font-size:12px; color:var(--mute); letter-spacing:0.1em; }
+.offer ul{ list-style:none; padding:0; margin:1rem 0; }
+.offer li{ padding:0.4rem 0 0.4rem 1.5rem; position:relative; color:var(--bone-d); font-size:13.5px; border-bottom:1px dashed var(--rule); }
+.offer li::before{ content:'+'; position:absolute; left:0; color:var(--amber); font-family:var(--ff-mono); }
+.cta{ display:inline-block; margin-top:0.8rem; font-family:var(--ff-mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-0); background:var(--amber); padding:0.7rem 1.2rem; text-decoration:none; border:1px solid var(--amber); transition:background .15s; }
+.cta:hover{ background:var(--bone); border-color:var(--bone); }
+.cta.ghost{ background:transparent; color:var(--amber); }
+.cta.ghost:hover{ background:var(--amber-bg); color:var(--bone); }
+.links-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0; border:1px solid var(--rule); }
+.link-card{ display:block; padding:1.1rem 1.2rem; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); text-decoration:none; transition:background .15s; }
+.link-card:hover{ background:rgba(212,162,75,0.04); }
+.link-card .lc-t{ font-family:var(--ff-sans); font-size:13.5px; color:var(--bone); font-weight:500; }
+.link-card .lc-m{ font-family:var(--ff-mono); font-size:10px; color:var(--mute-2); letter-spacing:0.06em; margin-top:0.25rem; }
+.editable{ /* contact fields, swap the address before launch */ }
+@media (max-width:760px){ .fact-row{ grid-template-columns:1fr 1fr; } .fact:nth-child(2n){ border-right:none; } .offer .price{ font-size:2rem; } }
+.tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+.tbl-scroll > table{ margin:0; }
+</style>
+</head>
+<body>
+
+<header class="report-head">
+  <span class="rh-mark"></span>
+  <span class="rh-name">SC Audit</span>
+  <span class="rh-sep">//</span>
+  <span class="rh-tag">About &middot; the researcher</span>
+  <a class="rh-back" href="index.html">Command center</a>
+</header>
+
+<div class="wrap">
+
+  <h1>The person behind the pipeline</h1>
+  <p class="lede">I'm an independent security researcher. I build automation that hunts for smart contract bugs, then I run it against live DeFi protocols and write down what actually happened. This site is the open version of that work, <em>numbers, costs, dead ends, and all</em>.</p>
+
+  <div class="fact-row">
+    <div class="fact"><div class="n">58</div><div class="k">Campaigns run</div></div>
+    <div class="fact"><div class="n">50+</div><div class="k">DeFi protocols scanned</div></div>
+    <div class="fact"><div class="n">10</div><div class="k">Reports published</div></div>
+    <div class="fact"><div class="n">Open</div><div class="k">Methodology and data</div></div>
+  </div>
+
+  <h2>What I built</h2>
+  <p>The pipeline takes a target protocol, pulls its contracts, runs a layered review across many model passes, then filters thousands of raw signals down to a short list worth a human's time. The dashboard on this site walks the whole funnel, from raw findings to the few that clear a submission gate. None of it is theory. Every campaign on the board ran against a real, in-scope program.</p>
+  <p>Plenty of it didn't work. Stable, heavily audited features kept producing duplicates of bugs that paid researchers had already reported. The win came from pointing the same method at beta features with no CVE history, where being early actually matters. That kind of lesson is the reason I keep the failures in the reports instead of polishing them out.</p>
+
+  <h2>What you can use here</h2>
+  <p>Everything below is free to read. Start with the command center for the live picture, then drop into any campaign for the raw tables.</p>
+  <div class="links-grid">
+    <a class="link-card" href="index.html"><div class="lc-t">Command center</div><div class="lc-m">Live funnel, KPIs, lessons</div></a>
+    <a class="link-card" href="SC-PIPELINE-FULL-AUTOMATION-REPORT-2026-05-15.html"><div class="lc-t">C7 to C22 full report</div><div class="lc-m">16 campaigns end to end</div></a>
+    <a class="link-card" href="autonomous-pipeline.html"><div class="lc-t">A to Z blueprint</div><div class="lc-m">How the pipeline is wired</div></a>
+    <a class="link-card" href="immunefi-bounty-scan-2026-05-15.html"><div class="lc-t">Immunefi target scan</div><div class="lc-m">Full target list and scope</div></a>
+  </div>
+
+  <h2 id="get-the-full-research-data">Get the full research data</h2>
+  <p>The site shows the shape of the work. The deeper material takes time to assemble, so I sell it as a pack. If you hunt bounties or audit for a living, it saves you the weeks I already spent building and tuning this.</p>
+
+  <div class="offer">
+    <div class="price">$99 <span>per research pack</span></div>
+    <p>One payment, current dataset, no subscription. Here's what lands in your inbox.</p>
+    <ul>
+      <li>The full finding tables behind every campaign, not just the summaries shown here</li>
+      <li>The raw scan dataset across all 50+ protocols, ready to filter and sort</li>
+      <li>The prompt chain and review steps the pipeline actually uses</li>
+      <li>Per-protocol notes on what tripped the gate and why most leads died</li>
+      <li>The target and scope shortlist I'd hunt next</li>
+    </ul>
+    <p>Good fit if you want quality research data to save time rather than rebuild the rig yourself. Tell me what you're hunting and I'll point you at the slice that helps.</p>
+    <a class="cta editable" href="mailto:research@scanthechain.com?subject=Research%20data%20pack%20(%2499)">Request the pack</a>
+    <a class="cta ghost" href="index.html">See the free reports first</a>
+  </div>
+
+  <h2>Reach me</h2>
+  <p>Email is best. Send a line about what you're working on and I'll reply with specifics. The address below is a placeholder until the domain is live.</p>
+  <p class="editable" style="font-family:var(--ff-mono);font-size:13px;color:var(--bone)">research@scanthechain.com</p>
+
+</div>
+
+<footer class="report-foot">
+  <span>SC Audit Pipeline &middot; about the researcher</span>
+  <span>Free reports, paid data pack</span>
+</footer>
+
+</body>
+</html>

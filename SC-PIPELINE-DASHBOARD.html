@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign 39 snapshot · Scan the Chain</title>
+<meta name="description" content="A point in time snapshot of the audit pipeline at campaign 39. Part of the Scan the Chain case study.">
+<meta name="keywords" content="smart contract audit pipeline, automated bug bounty, DeFi security research, smart contract security">
+<meta name="author" content="Scan the Chain">
+<meta name="robots" content="noindex, follow">
+<!-- legacy snapshot, canonical points home -->
+<link rel="canonical" href="https://scanthechain.com/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Scan the Chain">
+<meta property="og:title" content="Campaign 39 snapshot">
+<meta property="og:description" content="A point in time snapshot of the audit pipeline at campaign 39.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Campaign 39 snapshot">
+<meta name="twitter:description" content="A point in time snapshot of the audit pipeline at campaign 39.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SC AUDIT PIPELINE  ·  shared design kit
+   Canonical, copied from DASHBOARD.html so every report renders native
+   inside the command-center iframe. Standalone-report build (no tab-bar).
+
+   PALETTE GUIDE (map bespoke classes onto these, never raw hex):
+     amber  (--amber)  = primary signal, the one accent, live/submitted
+     bone   (--bone)   = headline text, neutral emphasis
+     moss   (--good)   = good / escalated / pass / positive delta
+     rust   (--kill)   = dead / rejected / zero / negative
+     burnt  (--warn)   = pending / in-progress / caution
+     slate  (--info)   = neutral data / informational
+   Sharp corners only (radius 0, or 2px on chips). No neon, no gradients
+   except the quiet vignette and progress fills already defined here.
+   ========================================================================== */
+:root {
+  --ink-0:#0a0a0c; --ink-1:#0e0e11; --ink-2:#131318; --ink-3:#1a1a20;
+  --rule:#23232b; --rule-2:#2d2d36;
+  --bone:#e8e3d6; --bone-d:#d6d1c2; --mute:#8b8676; --mute-2:#6a6659; --dim:#4a4740;
+  --amber:#d4a24b; --amber-d:#a37a30; --amber-bg:rgba(212,162,75,0.08);
+  --alive:#b9a36a;
+  --good:#8aa672; --good-bg:rgba(138,166,114,0.07);
+  --kill:#b15247; --kill-bg:rgba(177,82,71,0.07);
+  --warn:#c9874a; --warn-bg:rgba(201,135,74,0.06);
+  --info:#7a8499; --info-bg:rgba(122,132,153,0.06);
+  --ff-sans:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+  --ff-serif:'IBM Plex Serif',ui-serif,Georgia,serif;
+  --ff-mono:'IBM Plex Mono',ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;
+  /* legacy aliases so old inline token names keep working */
+  --bg:var(--ink-0); --card:var(--ink-1); --card2:var(--ink-2); --border:var(--rule);
+  --text:var(--bone); --muted:var(--mute); --accent:var(--amber); --accent2:var(--bone-d);
+  --green:var(--good); --red:var(--kill); --orange:var(--warn); --cyan:var(--info);
+  --gold:var(--amber); --blue:var(--info); --purple:var(--mute); --danger:var(--kill);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*::selection{background:var(--amber);color:var(--ink-0)}
+html,body{font-feature-settings:"ss01","ss02","cv11","tnum"}
+body{
+  font-family:var(--ff-sans); background:var(--ink-0); color:var(--bone);
+  line-height:1.55; font-size:14px; min-height:100vh;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding:0;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:1; mix-blend-mode:screen;
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(212,162,75,0.04),transparent 60%),
+    repeating-linear-gradient(180deg,rgba(255,255,255,0.012) 0 1px,transparent 1px 3px);
+}
+body>*{position:relative;z-index:2}
+
+/* ── report shell ─────────────────────────────────────────── */
+.report-head{
+  display:flex; align-items:center; gap:0.7rem;
+  padding:0 1.6rem; height:48px;
+  background:linear-gradient(180deg,#0c0c0f 0%,#0a0a0c 100%);
+  border-bottom:1px solid var(--rule);
+  position:sticky; top:0; z-index:1000;
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+}
+.report-head .rh-mark{ width:8px; height:8px; background:var(--amber); box-shadow:0 0 10px rgba(212,162,75,0.6); animation:pulse 2.4s ease-in-out infinite; }
+.report-head .rh-name{ color:var(--bone); font-weight:600; }
+.report-head .rh-sep{ color:var(--dim); }
+.report-head .rh-tag{ color:var(--mute); }
+.report-head .rh-back{ margin-left:auto; color:var(--mute); text-decoration:none; border:1px solid var(--rule); padding:0.3rem 0.7rem; transition:color .15s,border-color .15s; }
+.report-head .rh-back:hover{ color:var(--amber); border-color:var(--amber-d); }
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 10px rgba(212,162,75,0.6)}50%{opacity:.5;box-shadow:0 0 4px rgba(212,162,75,0.3)}}
+
+.wrap{ max-width:1320px; margin:0 auto; padding:2.4rem 2rem 4rem; }
+
+/* ── headings ─────────────────────────────────────────────── */
+h1{ font-family:var(--ff-serif); font-size:2.2rem; font-weight:500; letter-spacing:-0.012em; line-height:1.06; color:var(--bone); margin:0.2rem 0 0.4rem; }
+h1 em{ font-style:italic; font-weight:400; color:var(--bone-d); }
+h2{ font-family:var(--ff-mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.22em; color:var(--bone); margin:2.6rem 0 1.1rem; padding-bottom:0.7rem; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:0.8rem; }
+h3{ font-family:var(--ff-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin:1.6rem 0 0.7rem; }
+.subtitle,.subhead-deck{ color:var(--mute); font-size:13px; margin-bottom:1.6rem; font-family:var(--ff-sans); }
+p{ color:var(--bone-d); line-height:1.62; margin:0.6rem 0; max-width:78ch; }
+a{ color:var(--amber); }
+
+/* ── tables ───────────────────────────────────────────────── */
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:13px; font-variant-numeric:tabular-nums; }
+thead{ background:var(--ink-1); }
+th{ text-align:left; padding:0.65rem 0.9rem; font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.14em; color:var(--mute); border-bottom:1px solid var(--rule-2); border-top:1px solid var(--rule); }
+td{ padding:0.65rem 0.9rem; border-bottom:1px solid var(--rule); font-size:13px; color:var(--bone-d); vertical-align:top; }
+td strong,td b{ color:var(--bone); font-weight:500; }
+tr:hover td{ background:rgba(212,162,75,0.025); }
+td code,td .num{ font-family:var(--ff-mono); font-size:12px; color:var(--bone); }
+tr.row-live td{ background:rgba(212,162,75,0.07)!important; box-shadow:inset 2px 0 0 var(--amber); }
+tr.row-good td{ background:var(--good-bg)!important; }
+tr.row-warn td{ background:var(--warn-bg)!important; }
+tr.row-dead td{ background:var(--kill-bg)!important; }
+tr.row-killed td{ opacity:.45; }
+tr.row-total td{ font-weight:500; border-top:1px solid var(--amber); background:var(--ink-1)!important; }
+
+/* ── KPI grid ─────────────────────────────────────────────── */
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.kpi{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); border-radius:0; padding:1.4rem 1.2rem 1.2rem; text-align:left; position:relative; transition:background .2s; }
+.kpi:hover{ background:rgba(212,162,75,0.025); }
+.kpi::before{ content:""; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--amber); }
+.kpi .value{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; letter-spacing:-0.02em; color:var(--bone); line-height:1.05; font-variant-numeric:tabular-nums; }
+.kpi .label{ font-family:var(--ff-mono); color:var(--mute-2); font-size:10px; text-transform:uppercase; letter-spacing:0.16em; margin-top:0.6rem; display:block; }
+.kpi.green .value,.kpi.good .value{ color:var(--good); } .kpi.green::before,.kpi.good::before{ background:var(--good); }
+.kpi.orange .value,.kpi.warn .value{ color:var(--amber); } .kpi.orange::before,.kpi.warn::before{ background:var(--amber); }
+.kpi.cyan .value,.kpi.info .value{ color:var(--info); } .kpi.cyan::before,.kpi.info::before{ background:var(--info); }
+.kpi.red .value,.kpi.danger .value{ color:var(--kill); } .kpi.red::before,.kpi.danger::before{ background:var(--kill); }
+.kpi.blue .value{ color:var(--bone); } .kpi.blue::before{ background:var(--bone-d); }
+.kpi.purple .value{ color:var(--bone); } .kpi.purple::before{ background:var(--mute); }
+
+/* ── badges / tags / pills ────────────────────────────────── */
+.badge,.tag,.pill,.flag,.flow-tag,.layer-badge,.card-badge{
+  display:inline-block; padding:0.15rem 0.55rem 0.2rem; border-radius:2px;
+  font-family:var(--ff-mono); font-size:10px; font-weight:500; letter-spacing:0.08em;
+  text-transform:uppercase; border:1px solid;
+}
+.badge-escalated,.badge-green,.badge-pass,.badge-verified,.badge-ready,.tag-pass,.pill-green,.badge-g{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge-submitted,.badge-automated,.badge-y,.tag-submitted{ background:var(--amber-bg); color:var(--amber); border-color:rgba(212,162,75,0.35); }
+.badge-dead,.badge-red,.badge-critical,.tag-critical,.badge-o{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge-pending,.badge-queued,.badge-semi,.badge-manual,.badge-orange,.badge-high,.tag-high,.tag-medium{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge-blue,.badge-purple,.badge-gray,.tag-skip,.badge-b{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge-duplicate{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); text-decoration:line-through; }
+
+/* ── sections / cards / alerts ────────────────────────────── */
+.section{ margin:2.4rem 0; }
+.card,.handoff-card,.finding-card,.col-card,.force-card,.pnl-card,.counter,.bottleneck{
+  background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1.1rem 1.2rem; margin:0.7rem 0;
+}
+.alert{ padding:0.9rem 1.1rem; border-radius:0; margin:0.5rem 0; font-size:13px; line-height:1.6; border:1px solid var(--rule); border-left-width:2px; background:var(--ink-1); color:var(--bone-d); }
+.alert strong{ color:var(--bone); font-weight:500; }
+.alert-green{ border-left-color:var(--good); background:var(--good-bg); }
+.alert-red{ border-left-color:var(--kill); background:var(--kill-bg); }
+.alert-orange{ border-left-color:var(--warn); background:var(--warn-bg); }
+.alert-blue{ border-left-color:var(--info); background:var(--info-bg); }
+
+/* ── checklist / timeline ─────────────────────────────────── */
+.checklist{ list-style:none; padding:0; }
+.checklist li{ padding:0.45rem 0 0.45rem 1.8rem; position:relative; font-size:13px; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+.checklist li::before{ content:'[ ]'; position:absolute; left:0; color:var(--mute-2); font-family:var(--ff-mono); font-size:11px; top:0.55rem; }
+.checklist li.done{ color:var(--mute); } .checklist li.done::before{ content:'[\2713]'; color:var(--good); }
+.timeline{ border-left:1px solid var(--rule-2); margin-left:0.5rem; padding-left:1.8rem; }
+.timeline-item{ margin-bottom:1.4rem; position:relative; }
+.timeline-item::before{ content:''; position:absolute; left:-2.1rem; top:0.4rem; width:9px; height:9px; background:var(--mute); border:2px solid var(--ink-0); outline:1px solid var(--rule-2); transform:rotate(45deg); }
+.timeline-item.green::before{ background:var(--good); outline-color:var(--good); }
+.timeline-item.red::before{ background:var(--kill); outline-color:var(--kill); }
+.timeline-item.orange::before{ background:var(--amber); outline-color:var(--amber); }
+.timeline-item .time{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin-bottom:0.3rem; display:block; }
+
+/* ── bars / progress ──────────────────────────────────────── */
+.bar,.budget-bar{ height:8px; background:var(--ink-3); border:1px solid var(--rule); overflow:hidden; display:inline-block; width:80px; vertical-align:middle; border-radius:0; }
+.budget-bar{ width:100%; height:20px; }
+.bar-fill,.budget-fill,.fill,.filled{ height:100%; background:var(--amber); box-shadow:0 0 8px rgba(212,162,75,0.4); border-radius:0; }
+.bar-h{ background:var(--kill); } .bar-cost{ background:var(--info); }
+
+/* ── layout helpers ───────────────────────────────────────── */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.auto-grid,.pay-cards,.layers{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+@media(max-width:768px){ .two-col,.auto-grid{ grid-template-columns:1fr; } }
+
+/* ── inline helpers / utility colors ──────────────────────── */
+code{ font-family:var(--ff-mono); font-size:0.92em; color:var(--amber); background:rgba(212,162,75,0.06); padding:1px 4px; border-radius:2px; }
+.mono{ font-family:var(--ff-mono); } .tnum{ font-variant-numeric:tabular-nums; }
+.amber,.gold,.accent{ color:var(--amber)!important; }
+.green,.good{ color:var(--good)!important; } .red,.danger,.kill,.hot{ color:var(--kill)!important; }
+.orange,.warn{ color:var(--warn)!important; } .cyan,.blue,.info,.cool{ color:var(--info)!important; }
+.muted,.dim{ color:var(--mute)!important; }
+.subhead{ font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin-bottom:0.6rem; display:block; }
+
+/* ── footer ───────────────────────────────────────────────── */
+.report-foot{ max-width:1320px; margin:3rem auto 0; padding:1.4rem 2rem 2.4rem; border-top:1px solid var(--rule); font-family:var(--ff-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute-2); display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+
+/* ── scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--ink-0); }
+::-webkit-scrollbar-thumb{ background:var(--rule-2); border:2px solid var(--ink-0); }
+::-webkit-scrollbar-thumb:hover{ background:var(--amber-d); }
+
+/* ==========================================================================
+   PAGE OVERRIDES  ·  this report's bespoke classes remapped to the kit
+   ========================================================================== */
+.hero{ text-align:left; padding:2.2rem 0 1.4rem; border-bottom:1px solid var(--rule); margin-bottom:0.4rem; background:none; }
+.hero .sub{ color:var(--mute); font-size:13px; font-family:var(--ff-mono); letter-spacing:0.1em; margin-top:0.4rem; }
+.hero .flag-bar{ display:inline-block; margin-top:1rem; padding:0.35rem 0.9rem; background:var(--kill-bg); border:1px solid rgba(177,82,71,0.3); color:var(--kill); font-size:11px; font-family:var(--ff-mono); letter-spacing:0.08em; text-transform:uppercase; }
+
+.text-green{ color:var(--good); } .text-red{ color:var(--kill); } .text-orange{ color:var(--warn); }
+.text-cyan{ color:var(--info); } .text-muted{ color:var(--mute); } .text-dim{ color:var(--dim); }
+.fw-800{ font-weight:600; }
+
+.kpi-strip{ display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.kpi-strip .kpi{ text-align:left; }
+.kpi .value{ font-size:1.6rem; }
+
+.sub-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; }
+.sub-card{ background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1.2rem; position:relative; }
+.sub-card.dead{ border-left:2px solid var(--kill); opacity:0.62; }
+.sub-card.active{ border-left:2px solid var(--good); }
+.sub-card.rejected{ border-left:2px solid var(--warn); }
+
+.tier-badge{ display:inline-block; padding:0.15rem 0.5rem; border-radius:2px; font-size:10px; font-weight:500; font-family:var(--ff-mono); letter-spacing:0.08em; text-transform:uppercase; border:1px solid; }
+.tier-1{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.tier-2{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.tier-3{ background:var(--amber-bg); color:var(--mute); border-color:var(--rule-2); }
+
+.badge{ display:inline-block; padding:0.15rem 0.55rem 0.2rem; border-radius:2px; font-family:var(--ff-mono); font-size:10px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; border:1px solid; vertical-align:middle; }
+.badge-kill{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge-warn{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge-info{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge-good{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge-mute{ background:var(--amber-bg); color:var(--mute); border-color:var(--rule-2); }
+
+.card-left-kill{ border-left:2px solid var(--kill); }
+.card-left-mute{ border-left:2px solid var(--mute-2); }
+.row-kill{ background:var(--kill-bg); }
+.row-good{ background:var(--good-bg); }
+.note{ margin-top:1rem; font-size:12px; color:var(--mute); }
+.refund-box{ margin-top:1rem; padding:0.8rem; background:var(--good-bg); border:1px solid rgba(138,166,114,0.3); }
+.inner-kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0; margin-bottom:1rem; border:1px solid var(--rule); }
+.inner-kpis .kpi{ padding:0.9rem; }
+.scroll-log{ max-height:400px; overflow-y:auto; }
+.footer-block{ text-align:center; padding:2rem 0; color:var(--dim); font-size:11px; font-family:var(--ff-mono); letter-spacing:0.08em; }
+
+/* ── RESPONSIVE (shared, kit-based report pages) ───────────── */
+@media (max-width: 900px){
+  .auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px){
+  html,body{ overflow-x:hidden; max-width:100%; }
+  .report-head .rh-sep, .report-head .rh-tag{ display:none; }
+  body{ font-size: 13.5px; }
+  .report-head{ height: 44px; padding: 0 1rem; font-size: 10px; letter-spacing: 0.1em; }
+  .report-head .rh-tag{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw; }
+  .report-head .rh-back{ padding: 0.25rem 0.55rem; }
+  .wrap{ padding: 1.4rem 1rem 2.4rem; }
+  h1{ font-size: 1.6rem; }
+  h2{ margin: 2rem 0 0.9rem; }
+  .two-col,.auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr; }
+  .kpi{ border-right: none; }
+  table{ white-space: nowrap; }
+  .report-foot{ padding: 1.2rem 1rem 2rem; flex-direction: column; gap: 0.4rem; }
+}
+@media (max-width: 460px){
+  .kpi-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+.tbl-scroll > table{ margin:0; }
+</style>
+</head>
+<body>
+
+<header class="report-head"><span class="rh-mark"></span><span class="rh-name">SC Audit</span><span class="rh-sep">//</span><span class="rh-tag">LEGACY · C39 Pipeline Snapshot</span><a class="rh-back" href="index.html">Command center</a></header>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Campaign 39 snapshot</h1>
+  <div class="sub">A point in time view of the pipeline · May 20, 2026</div>
+  <div class="flag-bar">$0 confirmed payouts · 39 campaigns · $665+ spent</div>
+</div>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi cyan"><div class="value text-cyan">39</div><div class="label">Campaigns</div></div>
+  <div class="kpi"><div class="value">170+</div><div class="label">Protocols scanned</div></div>
+  <div class="kpi red"><div class="value text-red">35+</div><div class="label">Protocols killed</div></div>
+  <div class="kpi"><div class="value">75K+</div><div class="label">Raw findings</div></div>
+  <div class="kpi red"><div class="value text-red">$0</div><div class="label">Payouts</div></div>
+  <div class="kpi orange"><div class="value text-orange">$665+</div><div class="label">Total spent</div></div>
+  <div class="kpi green"><div class="value text-green">$2-4K</div><div class="label">Honest EV</div></div>
+  <div class="kpi"><div class="value">282</div><div class="label">Immunefi programs</div></div>
+</div>
+
+<!-- MACHFI REJECTION ALERT -->
+<h2>MachFi rejection <span class="badge badge-kill">Rejected · May 20</span></h2>
+<div class="card card-left-kill">
+  <span class="subhead text-red">BandOracle staleness · rejected on 5 grounds</span>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>#</th><th>Reason</th><th>Pipeline learning</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>BandOracle not in scope.</strong> Not in the bug bounty file list or deployed contracts.</td><td class="text-red fw-800">Scope verification failed</td></tr>
+      <tr><td>2</td><td>Oracle providers are trusted to submit prices on time, so they count as "not stale" by design.</td><td>Trusted oracle counts as out of scope per BBP</td></tr>
+      <tr><td>3</td><td>Oracle providers are out of scope, and the issue relies on out-of-scope code.</td><td>FP rule #33: oracle provider bugs are out of scope</td></tr>
+      <tr><td>4</td><td><strong>Sherlock issue validity.</strong> "Stale prices and Chainlink round completeness... are invalid"</td><td class="text-red fw-800">FP rule #34: all staleness checks invalid on Sherlock</td></tr>
+      <tr><td>5</td><td>MachFi runs a Critical-only bounty, and staleness is not Critical severity.</td><td>Check payout tiers before submission</td></tr>
+    </tbody>
+  </table></div>
+  <div class="refund-box">
+    <span class="text-green fw-800">+$250 USDC refund offered.</span> Send a Polygon address to claim it. Net loss is $0 because the deposit came back.
+  </div>
+  <p class="note">The protocol shut down after submission, so even a valid finding would have paid nothing. MachFi is dead.</p>
+</div>
+
+<!-- ACTIVE SUBMISSIONS -->
+<h2>Active submissions <span class="badge badge-warn">1 alive / 6 dead</span></h2>
+<div class="sub-grid">
+  <div class="sub-card active">
+    <div class="fw-800 text-green">Renegade · C4 auth bypass</div>
+    <div class="text-muted" style="font-size:0.82rem;">API auth bypass, not SC fund theft</div>
+    <div style="margin-top:0.5rem;font-size:0.85rem;">
+      EV is $2,000 to $4,000.<br>
+      Deadline July 12, 2026.<br>
+      Odds 35% high, 15% medium, 50% reject.<br>
+      Deposit $25 USDC.
+    </div>
+  </div>
+  <div class="sub-card dead">
+    <div class="fw-800 text-red">TermMax UUPS · dead</div>
+    <div class="text-dim" style="font-size:0.8rem;">Escalated to mediation July 17. About 5% chance. Effectively $0.</div>
+  </div>
+  <div class="sub-card rejected">
+    <div class="fw-800 text-orange">MachFi BandOracle · rejected</div>
+    <div class="text-dim" style="font-size:0.8rem;">Out of scope, staleness invalid, Critical-only, protocol shut down. $250 refund available.</div>
+  </div>
+  <div class="sub-card dead">
+    <div class="fw-800 text-red">Moonwell CompositeOEV · untriggered</div>
+    <div class="text-dim" style="font-size:0.8rem;">Exploited for $1.78M in Feb 2026, then patched. Dead before we checked.</div>
+  </div>
+  <div class="sub-card dead">
+    <div class="fw-800 text-red">USX, Inverse, Sentiment · all dead</div>
+    <div class="text-dim" style="font-size:0.8rem;">USX out of scope, Inverse fixed on chain, Sentiment has no bounty.</div>
+  </div>
+</div>
+
+<!-- C39 RESULTS -->
+<h2>C39 results · May 20, 2026 <span class="badge badge-info">21 agents · $0 cost</span></h2>
+<div class="card">
+  <div class="inner-kpis">
+    <div class="kpi cyan"><div class="value text-cyan">21</div><div class="label">Agents deployed</div></div>
+    <div class="kpi red"><div class="value text-red">16</div><div class="label">Protocols killed</div></div>
+    <div class="kpi green"><div class="value text-green">7</div><div class="label">New targets found</div></div>
+    <div class="kpi"><div class="value">$0.00</div><div class="label">Cost</div></div>
+  </div>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Agent</th><th>Target</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>1. Immunefi API diff</td><td>282 programs</td><td>0 new. Polymarket removed. Snapshot saved.</td></tr>
+      <tr><td>2. Sherlock sweep</td><td>88+ bounties</td><td class="text-green fw-800">Fira UZR $7.5M, top lead</td></tr>
+      <tr><td>3. Cantina sweep</td><td>52 bounties</td><td>0 new since May 15. Fortress tier.</td></tr>
+      <tr><td>4. HackenProof sweep</td><td>200+ programs</td><td>Saturated. No new $50K+.</td></tr>
+      <tr><td>5. New Immunefi search</td><td>Web search</td><td>NUVA ($40K, 2 days old), Spark/Lightspark ($100K)</td></tr>
+      <tr><td>6. New DeFi launches</td><td>Web search</td><td>Variational, Fluid V2, Hermetica confirmed</td></tr>
+      <tr><td>7. Unscanned $50K+ sweep</td><td>165 programs</td><td>Top 20 ranked. Ondo, Nucleus, Renzo flagged.</td></tr>
+      <tr><td>8. Variational recon</td><td>$100K Immunefi</td><td class="text-orange">Conditional. Off-chain arch, audit trap.</td></tr>
+      <tr><td>9. Flying Tulip recon</td><td>$1M Sherlock</td><td class="text-red">Kill. 6+ audits, 0 contest findings.</td></tr>
+      <tr><td>10. Spark PSM3</td><td>$5M Immunefi</td><td class="text-red">Skip. 21 audits on MainnetController.</td></tr>
+      <tr><td>11. Usual Labs</td><td>$16M Sherlock</td><td class="text-red">Kill. 14 audit rounds.</td></tr>
+      <tr><td>12. Rocket Pool</td><td>$250K Immunefi</td><td class="text-red">Kill. 15+ audits, Saturn fully audited.</td></tr>
+      <tr><td>13. Kelp DAO</td><td>$250K Immunefi</td><td class="text-orange">Monitor. CCIP scope not added yet.</td></tr>
+      <tr><td>14. Morpho stack</td><td>$2.5M Immunefi</td><td class="text-red">Kill. 25-34 audits, immutable core.</td></tr>
+      <tr><td>15. Pendle, Ethena, EigenLayer</td><td>$250K-$3M</td><td class="text-red">All kill. Fortress, no new contracts.</td></tr>
+      <tr><td>16. Football.Fun AMM</td><td>Self-hosted</td><td class="text-red">7 findings, 0 permissionless exploit</td></tr>
+      <tr><td>17. Vesper SCAN items</td><td>$50K Immunefi</td><td class="text-red">All 3 killed. onlyKeeper out of scope.</td></tr>
+      <tr><td>18. Enzyme Onyx</td><td>$200K Immunefi</td><td class="text-red">Closed. No new scope since C35.</td></tr>
+      <tr><td>19. Bridge bounties</td><td>5 protocols</td><td class="text-green">Hyperlane TRON $2.5M, hot lead</td></tr>
+      <tr><td>20. Compound/Aave forks</td><td>Web search</td><td>Floe Labs ($50K), Flux Finance ($550K)</td></tr>
+      <tr><td>21. Daily report</td><td>Compilation</td><td>Written to data/daily-reports/</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- NEW TARGET QUEUE -->
+<h2>Target queue <span class="badge badge-good">7 actionable targets</span></h2>
+<div class="card">
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Tier</th><th>Target</th><th>Bounty</th><th>Platform</th><th>Signal</th><th>Next step</th></tr></thead>
+    <tbody>
+      <tr class="row-good">
+        <td><span class="tier-badge tier-1">Tier 1</span></td>
+        <td class="fw-800">Fira UZR</td>
+        <td class="text-green fw-800">$7,500,000</td>
+        <td>Sherlock</td>
+        <td>About 0-1 audits, novel fixed-rate credit module</td>
+        <td>Deep recon plus clone repo</td>
+      </tr>
+      <tr class="row-good">
+        <td><span class="tier-badge tier-1">Tier 1</span></td>
+        <td class="fw-800">Hyperlane TRON</td>
+        <td class="text-green fw-800">$2,500,000</td>
+        <td>Immunefi</td>
+        <td>Fresh April 8 chain integration, TRON ISM contracts</td>
+        <td>Clone TRON-specific contracts</td>
+      </tr>
+      <tr class="row-good">
+        <td><span class="tier-badge tier-1">Tier 1</span></td>
+        <td class="fw-800">Nucleus</td>
+        <td class="text-green fw-800">$500,000</td>
+        <td>Immunefi</td>
+        <td>Dec 2024 launch, ERC4626 plus crosschain, genuinely 0-audit?</td>
+        <td>Verify audit count</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-2">Tier 2</span></td>
+        <td>Ondo Finance</td>
+        <td>$1,000,000</td>
+        <td>Immunefi</td>
+        <td>88 SC assets, 1 API audit, RWA tokenization</td>
+        <td>Verify actual audit count</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-2">Tier 2</span></td>
+        <td>Flux Finance</td>
+        <td>$550,000</td>
+        <td>Immunefi</td>
+        <td>Compound V2 plus RWA collateral, custom permissioned assets</td>
+        <td>Scope check</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-2">Tier 2</span></td>
+        <td>Fluid V2</td>
+        <td>$200,000</td>
+        <td>Sherlock</td>
+        <td>1 audit, AMM with dynamic fees plus oracle buffers</td>
+        <td>Post-audit delta</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-3">Tier 3</span></td>
+        <td>Floe Labs</td>
+        <td>$50,000</td>
+        <td>Immunefi</td>
+        <td>Intent-based P2P lending, documented matching bug</td>
+        <td>Quick scan</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <p class="note">Fira UZR at $7.5M is the highest-value lead in the entire 39-campaign pipeline history.
+    If it's Solidity with genuinely 0-1 audits, that one target alone could justify the pipeline.</p>
+</div>
+
+<!-- CONDITIONAL / MONITOR -->
+<h2>Conditional and monitor queue</h2>
+<div class="card">
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Target</th><th>Bounty</th><th>Trigger condition</th><th>ETA</th></tr></thead>
+    <tbody>
+      <tr><td>Variational</td><td>$100K</td><td>Zellic/Spearbit reports publish plus OLP source available</td><td>June 15</td></tr>
+      <tr><td>Hyperbridge</td><td>$50K</td><td>Audit reports publish (around June 15)</td><td>July</td></tr>
+      <tr><td>Kelp DAO CCIP</td><td>$250K</td><td>CCIP contracts added to Immunefi scope</td><td>TBD</td></tr>
+      <tr><td>Moonwell</td><td>$250K</td><td>C4 to Immunefi migration</td><td>TBD</td></tr>
+      <tr><td>EigenLayer AVS</td><td>$2M</td><td>Unaudited Vertical AVSs added to scope</td><td>TBD</td></tr>
+      <tr><td>Code4rena migrants</td><td>Various</td><td>New programs on Immunefi from C4 shutdown</td><td>June</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- FULL KILL LOG -->
+<h2>Kill log <span class="badge badge-kill">35+ protocols</span></h2>
+<div class="card scroll-log">
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Protocol</th><th>Bounty</th><th>Kill reason</th><th>Campaign</th></tr></thead>
+    <tbody>
+      <tr><td>MUX Protocol</td><td>$100K</td><td>0 findings, internal AC flags</td><td>PM2 D1</td></tr>
+      <tr><td>Lombard Finance</td><td>$250K</td><td>Consortium multisig-gated, 16 audits</td><td>PM2 D2</td></tr>
+      <tr><td>Threshold</td><td>$50K</td><td>Multisig-gated</td><td>PM2 D3</td></tr>
+      <tr><td>Harvest Finance</td><td>$50K</td><td>Standard Compound fork</td><td>PM2 D3</td></tr>
+      <tr><td>WePiggy</td><td>$50K</td><td>Standard Compound fork</td><td>PM2 D3</td></tr>
+      <tr><td>Orderly Network</td><td>$50K</td><td>Off-chain matching</td><td>PM2 D3</td></tr>
+      <tr><td>Avail</td><td>$50K</td><td>DA infrastructure, non-DeFi</td><td>PM2 D3</td></tr>
+      <tr><td>ALEX (Clarity)</td><td>$100K</td><td>Non-Solidity</td><td>PM2 D3</td></tr>
+      <tr><td>Vesu (Cairo)</td><td>$100K</td><td>Non-Solidity, 7 audits</td><td>C36</td></tr>
+      <tr><td>DODO</td><td>$100K</td><td>0 fund-impact findings</td><td>PM2 D4</td></tr>
+      <tr><td>Resonate</td><td>$100K</td><td>C13 S-01 out of scope plus low BBP</td><td>PM2 D5</td></tr>
+      <tr><td>Ichi</td><td>$50K</td><td>Governance-heavy, 0 findings</td><td>PM2 D5</td></tr>
+      <tr><td>Veda BoringVault</td><td>$50K</td><td>Thin wrapper, admin-gated</td><td>PM2</td></tr>
+      <tr><td>DeFi Saver</td><td>$50K</td><td>0 survivors (API said 0 audits, actually 6)</td><td>C34</td></tr>
+      <tr><td>Enzyme CCIP/Onyx</td><td>$200K</td><td>ChainSecurity dedicated audit, 0 survivors</td><td>C27/C35</td></tr>
+      <tr><td>SYMMIO</td><td>$800K</td><td>Off-chain matching</td><td>C34</td></tr>
+      <tr><td>Cap Protocol</td><td>$50K</td><td>Admin-gated</td><td>C34</td></tr>
+      <tr><td>Perennial</td><td>$500K</td><td>Derivatives, oracle manipulation out of scope</td><td>C34</td></tr>
+      <tr><td>Hyperbridge</td><td>$50K</td><td>14 prior audit findings, gate fail</td><td>C37</td></tr>
+      <tr><td>Moonwell</td><td>$250K</td><td>CompositeOEV exploited Feb 2026, patched</td><td>C25</td></tr>
+      <tr><td>Gearbox Securitize</td><td>$50K</td><td>Adapter doesn't exist, not deployed</td><td>C37</td></tr>
+      <tr><td>ENS v2</td><td>$250K</td><td>Fortress-tier code, 1 audit plus 32 fixes, all vectors blocked</td><td>C38</td></tr>
+      <tr><td>Silo Finance v3</td><td>$100K</td><td>24 audit engagements, Certora FV</td><td>C38</td></tr>
+      <tr><td>Decentraland V4</td><td>$500K</td><td>Simple NFT marketplace, 48 audit reports</td><td>C38</td></tr>
+      <tr><td>Pinto Protocol</td><td>$50K</td><td>18 audits, C29 70 to 0 survivors</td><td>C38</td></tr>
+      <tr><td>Yearn V3</td><td>$250K</td><td>Thin wrappers, 32 to 0 survivors, Critical-only</td><td>C36</td></tr>
+      <tr><td>GammaSwap</td><td>$40K</td><td>Protocol-only, no bounty</td><td>C33</td></tr>
+      <tr><td>0x Settler</td><td>$50K</td><td>Thin wrapper, auto-kill</td><td>C36</td></tr>
+      <tr><td>ZetaChain</td><td>$50K</td><td>onlyProxy OZ v5.0.2</td><td>C35</td></tr>
+      <tr><td>Midas RWA</td><td>$50K</td><td>114 to 0 survivors</td><td>C26</td></tr>
+      <tr><td>Flying Tulip</td><td>$1M</td><td>6+ audits, Sherlock contest 0 valid findings</td><td>C39</td></tr>
+      <tr><td>Vesper Finance</td><td>$50K</td><td>3 SCAN items all onlyKeeper out of scope</td><td>C39</td></tr>
+      <tr><td>Football.Fun</td><td>Self-hosted</td><td>No permissionless exploit, no escrow</td><td>C39</td></tr>
+      <tr><td>Usual Labs</td><td>$16M</td><td>14 audit rounds by 7+ firms</td><td>C39</td></tr>
+      <tr><td>Rocket Pool</td><td>$250K</td><td>15+ audits, Saturn fully audited</td><td>C39</td></tr>
+      <tr><td>Morpho Blue</td><td>$2.5M</td><td>25-34 audits, immutable core</td><td>C39</td></tr>
+      <tr><td>Pendle Finance</td><td>$250K</td><td>4+ audits, core repo archived</td><td>C39</td></tr>
+      <tr><td>Ethena Labs</td><td>$3M</td><td>5+ audits, no new contracts</td><td>C39</td></tr>
+      <tr><td>Axelar</td><td>$500K</td><td>Saturated, low bounty vs peers</td><td>C39</td></tr>
+      <tr><td>Spark Protocol</td><td>$5M</td><td>21 audits on MainnetController, PSM3 frozen</td><td>C39</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- KEY LEARNINGS -->
+<h2>Key learnings <span class="badge badge-mute">C39 plus MachFi</span></h2>
+<div class="card card-left-mute">
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Learning</th><th>Impact</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr class="row-kill">
+        <td class="fw-800">All staleness checks are invalid on Sherlock</td>
+        <td>Auto-kill any staleness finding on Sherlock bounties</td>
+        <td>MachFi rejection reason #4</td>
+      </tr>
+      <tr class="row-kill">
+        <td class="fw-800">Oracle providers are trusted and out of scope everywhere</td>
+        <td>FP rules #33-34 added</td>
+        <td>MachFi rejection reason #2-3</td>
+      </tr>
+      <tr>
+        <td>Immunefi API "0 audits" is wildly unreliable</td>
+        <td>Always verify by hand before scanning</td>
+        <td>C39: Ether.fi, Renzo, DeFi Saver all false 0s</td>
+      </tr>
+      <tr>
+        <td>Sherlock has the highest-value new leads, not Immunefi</td>
+        <td>Fira UZR $7.5M found via Sherlock sweep</td>
+        <td>C39 agent #2</td>
+      </tr>
+      <tr>
+        <td>Code4rena shutdown opens an Immunefi migration window</td>
+        <td>Watch for migrated programs with scope gaps</td>
+        <td>C39 agent #5</td>
+      </tr>
+      <tr>
+        <td>Off-chain architecture means auto-deprioritize</td>
+        <td>Variational: 910 LoC escrow wrappers, everything off chain</td>
+        <td>C39 Variational recon</td>
+      </tr>
+      <tr>
+        <td>Flying Tulip was on Sherlock, not Cantina</td>
+        <td>Memory corrected. No $250 deposit required.</td>
+        <td>C39 agent #9</td>
+      </tr>
+      <tr>
+        <td>Spark MainnetController has 21 audit reports</td>
+        <td>Highest audit density in the pipeline. Per-version cadence.</td>
+        <td>C39 agent #10</td>
+      </tr>
+      <tr>
+        <td>The market is the bottleneck, not the scanner</td>
+        <td>8+ real bugs found, 0 paid. Near-zero addressable market.</td>
+        <td>C35-C39 cumulative</td>
+      </tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- FP RULES UPDATE -->
+<h2>FP rules update <span class="badge badge-warn">34 rules</span></h2>
+<div class="card">
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Rule</th><th>Description</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>#1-17</td><td>Original pipeline rules (DeepSeek FP patterns)</td><td>C7-C19</td></tr>
+      <tr><td>#18-22</td><td>OZ ReentrancyGuard, constant/immutable, Pyth, hallucinated crosschain, custom math</td><td>C20</td></tr>
+      <tr><td>#23-32</td><td>onlyProxy UUPS, supply cap donation, ERC3525 callback, admin frontrun, LayerZero nonce, immutable lockout, UUPS_ONLYPROXY_V5</td><td>C23-C35</td></tr>
+      <tr class="row-good"><td class="text-green fw-800">#33</td><td>Oracle provider bugs and issues are out of scope everywhere (providers are trusted)</td><td>MachFi rejection</td></tr>
+      <tr class="row-good"><td class="text-green fw-800">#34</td><td>Stale price and staleness checks are invalid per Sherlock issue validity criteria</td><td>MachFi rejection</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- CUMULATIVE FINANCIALS -->
+<h2>Cumulative financials, brutally honest</h2>
+<div class="card card-left-kill">
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Metric</th><th>Value</th><th>Assessment</th></tr></thead>
+    <tbody>
+      <tr class="row-kill"><td class="fw-800">Confirmed earnings</td><td class="text-red fw-800" style="font-size:1.5rem;">$0</td><td class="text-red">Zero money in, 39 campaigns out</td></tr>
+      <tr><td>Submissions awaiting judgment</td><td class="text-orange fw-800">1</td><td>Renegade C4 only (July 12 deadline)</td></tr>
+      <tr><td>Submissions rejected</td><td class="text-red fw-800">3+</td><td>TermMax (escalated to dead), MachFi (out of scope plus staleness), others</td></tr>
+      <tr><td>Total compute spent</td><td class="fw-800">~$175</td><td>$32 DeepSeek plus $140 Opus plus misc</td></tr>
+      <tr><td>Total deposits spent</td><td class="fw-800">$275</td><td>MachFi $250 (refund pending) plus Renegade $25</td></tr>
+      <tr><td>Other costs</td><td class="fw-800">~$215</td><td>Opus agent scanning sessions</td></tr>
+      <tr class="row-total">
+        <td>Total spent</td><td class="text-red fw-800">$665+</td><td>All-in costs across 39 campaigns</td>
+      </tr>
+      <tr class="row-good">
+        <td>Honest EV remaining</td><td class="text-green fw-800">$2,000 to $4,000</td><td>Renegade C4 only. Everything else dead.</td>
+      </tr>
+      <tr class="row-kill">
+        <td>Worst case</td><td class="text-red fw-800">-$665</td><td>Renegade rejected, all deposits lost</td>
+      </tr>
+      <tr>
+        <td>Best case (new queue)</td><td class="text-green fw-800">$10K-$50K+</td><td>If Fira UZR ($7.5M) or Hyperlane ($2.5M) produce findings</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <p class="note">Here's the read. The pipeline can find real bugs, 8+ confirmed, but it can't turn them into revenue.
+    The C39 discovery wave surfaced the best leads in pipeline history (Fira UZR $7.5M).
+    One Critical finding from the new queue flips the whole thing profitable overnight.</p>
+</div>
+
+<!-- PLATFORM STATUS -->
+<h2>Platform coverage</h2>
+<div class="card">
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Platform</th><th>Programs</th><th>Status</th><th>Best lead</th></tr></thead>
+    <tbody>
+      <tr><td class="fw-800">Immunefi</td><td>282</td><td class="text-green">Active, daily diff</td><td>Hyperlane ($2.5M), Nucleus ($500K)</td></tr>
+      <tr><td class="fw-800">Sherlock</td><td>88+ bounties</td><td class="text-green">Active, weekly sweep</td><td>Fira UZR ($7.5M), Fluid V2 ($200K)</td></tr>
+      <tr><td>Cantina</td><td>52</td><td class="text-dim">Fortress, all 52 well audited</td><td>None</td></tr>
+      <tr><td>HackenProof</td><td>200+</td><td class="text-dim">Saturated</td><td>Hyperbridge ($50K, deferred July)</td></tr>
+      <tr><td>Code4rena</td><td>0</td><td class="text-red">Shut down, migrating to Immunefi</td><td>Watch for migrants</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-block">
+  Generated May 20, 2026 · Campaign 39 · 21 agents · 35+ kills · $0 payouts<br>
+  Autonomous SC audit pipeline · v4.0 Pro
+</div>
+
+</div>
+
+<footer class="report-foot"><span>SC Audit Pipeline · C39 Pipeline Snapshot</span><span>Generated from pipeline data</span></footer>
+</body>
+</html>

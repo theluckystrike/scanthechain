@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SC Audit Pipeline Full Automation Blueprint</title>
+<meta name="description" content="Sixteen smart contract audit campaigns (C7 to C22) run end to end by an autonomous pipeline, with targets, findings, and real costs.">
+<meta name="keywords" content="smart contract audit pipeline, automated bug bounty, DeFi security research, smart contract security">
+<meta name="author" content="Scan the Chain">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://scanthechain.com/SC-PIPELINE-FULL-AUTOMATION-REPORT-2026-05-15.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Scan the Chain">
+<meta property="og:title" content="SC Audit Pipeline Full Automation Blueprint">
+<meta property="og:description" content="Sixteen smart contract audit campaigns (C7 to C22) run end to end by an autonomous pipeline, with targets, findings, and real costs.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SC Audit Pipeline Full Automation Blueprint">
+<meta name="twitter:description" content="Sixteen smart contract audit campaigns (C7 to C22) run end to end by an autonomous pipeline, with targets, findings, and real costs.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   SC AUDIT PIPELINE  ·  shared design kit
+   Canonical, copied from DASHBOARD.html so every report renders native
+   inside the command-center iframe. Standalone-report build (no tab-bar).
+
+   PALETTE GUIDE (map bespoke classes onto these, never raw hex):
+     amber  (--amber)  = primary signal, the one accent, live/submitted
+     bone   (--bone)   = headline text, neutral emphasis
+     moss   (--good)   = good / escalated / pass / positive delta
+     rust   (--kill)   = dead / rejected / zero / negative
+     burnt  (--warn)   = pending / in-progress / caution
+     slate  (--info)   = neutral data / informational
+   Sharp corners only (radius 0, or 2px on chips). No neon, no gradients
+   except the quiet vignette and progress fills already defined here.
+   ========================================================================== */
+:root {
+  --ink-0:#0a0a0c; --ink-1:#0e0e11; --ink-2:#131318; --ink-3:#1a1a20;
+  --rule:#23232b; --rule-2:#2d2d36;
+  --bone:#e8e3d6; --bone-d:#d6d1c2; --mute:#8b8676; --mute-2:#6a6659; --dim:#4a4740;
+  --amber:#d4a24b; --amber-d:#a37a30; --amber-bg:rgba(212,162,75,0.08);
+  --alive:#b9a36a;
+  --good:#8aa672; --good-bg:rgba(138,166,114,0.07);
+  --kill:#b15247; --kill-bg:rgba(177,82,71,0.07);
+  --warn:#c9874a; --warn-bg:rgba(201,135,74,0.06);
+  --info:#7a8499; --info-bg:rgba(122,132,153,0.06);
+  --ff-sans:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+  --ff-serif:'IBM Plex Serif',ui-serif,Georgia,serif;
+  --ff-mono:'IBM Plex Mono',ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;
+  /* legacy aliases so old inline token names keep working */
+  --bg:var(--ink-0); --card:var(--ink-1); --card2:var(--ink-2); --border:var(--rule);
+  --text:var(--bone); --muted:var(--mute); --accent:var(--amber); --accent2:var(--bone-d);
+  --green:var(--good); --red:var(--kill); --orange:var(--warn); --cyan:var(--info);
+  --gold:var(--amber); --blue:var(--info); --purple:var(--mute); --danger:var(--kill);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*::selection{background:var(--amber);color:var(--ink-0)}
+html,body{font-feature-settings:"ss01","ss02","cv11","tnum"}
+body{
+  font-family:var(--ff-sans); background:var(--ink-0); color:var(--bone);
+  line-height:1.55; font-size:14px; min-height:100vh;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding:0;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:1; mix-blend-mode:screen;
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(212,162,75,0.04),transparent 60%),
+    repeating-linear-gradient(180deg,rgba(255,255,255,0.012) 0 1px,transparent 1px 3px);
+}
+body>*{position:relative;z-index:2}
+
+/* ── report shell ─────────────────────────────────────────── */
+.report-head{
+  display:flex; align-items:center; gap:0.7rem;
+  padding:0 1.6rem; height:48px;
+  background:linear-gradient(180deg,#0c0c0f 0%,#0a0a0c 100%);
+  border-bottom:1px solid var(--rule);
+  position:sticky; top:0; z-index:1000;
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+}
+.report-head .rh-mark{ width:8px; height:8px; background:var(--amber); box-shadow:0 0 10px rgba(212,162,75,0.6); animation:pulse 2.4s ease-in-out infinite; }
+.report-head .rh-name{ color:var(--bone); font-weight:600; }
+.report-head .rh-sep{ color:var(--dim); }
+.report-head .rh-tag{ color:var(--mute); }
+.report-head .rh-back{ margin-left:auto; color:var(--mute); text-decoration:none; border:1px solid var(--rule); padding:0.3rem 0.7rem; transition:color .15s,border-color .15s; }
+.report-head .rh-back:hover{ color:var(--amber); border-color:var(--amber-d); }
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 10px rgba(212,162,75,0.6)}50%{opacity:.5;box-shadow:0 0 4px rgba(212,162,75,0.3)}}
+
+.wrap{ max-width:1320px; margin:0 auto; padding:2.4rem 2rem 4rem; }
+
+/* ── headings ─────────────────────────────────────────────── */
+h1{ font-family:var(--ff-serif); font-size:2.2rem; font-weight:500; letter-spacing:-0.012em; line-height:1.06; color:var(--bone); margin:0.2rem 0 0.4rem; }
+h1 em{ font-style:italic; font-weight:400; color:var(--bone-d); }
+h2{ font-family:var(--ff-mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.22em; color:var(--bone); margin:2.6rem 0 1.1rem; padding-bottom:0.7rem; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:0.8rem; }
+h3{ font-family:var(--ff-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin:1.6rem 0 0.7rem; }
+.subtitle,.subhead-deck{ color:var(--mute); font-size:13px; margin-bottom:1.6rem; font-family:var(--ff-sans); }
+p{ color:var(--bone-d); line-height:1.62; margin:0.6rem 0; max-width:78ch; }
+a{ color:var(--amber); }
+
+/* ── tables ───────────────────────────────────────────────── */
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:13px; font-variant-numeric:tabular-nums; }
+thead{ background:var(--ink-1); }
+th{ text-align:left; padding:0.65rem 0.9rem; font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.14em; color:var(--mute); border-bottom:1px solid var(--rule-2); border-top:1px solid var(--rule); }
+td{ padding:0.65rem 0.9rem; border-bottom:1px solid var(--rule); font-size:13px; color:var(--bone-d); vertical-align:top; }
+td strong,td b{ color:var(--bone); font-weight:500; }
+tr:hover td{ background:rgba(212,162,75,0.025); }
+td code,td .num{ font-family:var(--ff-mono); font-size:12px; color:var(--bone); }
+tr.row-live td{ background:rgba(212,162,75,0.07)!important; box-shadow:inset 2px 0 0 var(--amber); }
+tr.row-good td{ background:var(--good-bg)!important; }
+tr.row-warn td{ background:var(--warn-bg)!important; }
+tr.row-dead td{ background:var(--kill-bg)!important; }
+tr.row-killed td{ opacity:.45; }
+tr.row-total td{ font-weight:500; border-top:1px solid var(--amber); background:var(--ink-1)!important; }
+
+/* ── KPI grid ─────────────────────────────────────────────── */
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.kpi{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); border-radius:0; padding:1.4rem 1.2rem 1.2rem; text-align:left; position:relative; transition:background .2s; }
+.kpi:hover{ background:rgba(212,162,75,0.025); }
+.kpi::before{ content:""; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--amber); }
+.kpi .value{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; letter-spacing:-0.02em; color:var(--bone); line-height:1.05; font-variant-numeric:tabular-nums; }
+.kpi .label{ font-family:var(--ff-mono); color:var(--mute-2); font-size:10px; text-transform:uppercase; letter-spacing:0.16em; margin-top:0.6rem; display:block; }
+.kpi.green .value,.kpi.good .value{ color:var(--good); } .kpi.green::before,.kpi.good::before{ background:var(--good); }
+.kpi.orange .value,.kpi.warn .value{ color:var(--amber); } .kpi.orange::before,.kpi.warn::before{ background:var(--amber); }
+.kpi.cyan .value,.kpi.info .value{ color:var(--info); } .kpi.cyan::before,.kpi.info::before{ background:var(--info); }
+.kpi.red .value,.kpi.danger .value{ color:var(--kill); } .kpi.red::before,.kpi.danger::before{ background:var(--kill); }
+.kpi.blue .value{ color:var(--bone); } .kpi.blue::before{ background:var(--bone-d); }
+.kpi.purple .value{ color:var(--bone); } .kpi.purple::before{ background:var(--mute); }
+
+/* ── badges / tags / pills ────────────────────────────────── */
+.badge,.tag,.pill,.flag,.flow-tag,.layer-badge,.card-badge{
+  display:inline-block; padding:0.15rem 0.55rem 0.2rem; border-radius:2px;
+  font-family:var(--ff-mono); font-size:10px; font-weight:500; letter-spacing:0.08em;
+  text-transform:uppercase; border:1px solid;
+}
+.badge-escalated,.badge-green,.badge-pass,.badge-verified,.badge-ready,.tag-pass,.pill-green,.badge-g{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge-submitted,.badge-automated,.badge-y,.tag-submitted{ background:var(--amber-bg); color:var(--amber); border-color:rgba(212,162,75,0.35); }
+.badge-dead,.badge-red,.badge-critical,.tag-critical,.badge-o{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge-pending,.badge-queued,.badge-semi,.badge-manual,.badge-orange,.badge-high,.tag-high,.tag-medium{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge-blue,.badge-purple,.badge-gray,.tag-skip,.badge-b{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge-duplicate{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); text-decoration:line-through; }
+
+/* ── sections / cards / alerts ────────────────────────────── */
+.section{ margin:2.4rem 0; }
+.card,.handoff-card,.finding-card,.col-card,.force-card,.pnl-card,.counter,.bottleneck{
+  background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1.1rem 1.2rem; margin:0.7rem 0;
+}
+.alert{ padding:0.9rem 1.1rem; border-radius:0; margin:0.5rem 0; font-size:13px; line-height:1.6; border:1px solid var(--rule); border-left-width:2px; background:var(--ink-1); color:var(--bone-d); }
+.alert strong{ color:var(--bone); font-weight:500; }
+.alert-green{ border-left-color:var(--good); background:var(--good-bg); }
+.alert-red{ border-left-color:var(--kill); background:var(--kill-bg); }
+.alert-orange{ border-left-color:var(--warn); background:var(--warn-bg); }
+.alert-blue{ border-left-color:var(--info); background:var(--info-bg); }
+
+/* ── checklist / timeline ─────────────────────────────────── */
+.checklist{ list-style:none; padding:0; }
+.checklist li{ padding:0.45rem 0 0.45rem 1.8rem; position:relative; font-size:13px; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+.checklist li::before{ content:'[ ]'; position:absolute; left:0; color:var(--mute-2); font-family:var(--ff-mono); font-size:11px; top:0.55rem; }
+.checklist li.done{ color:var(--mute); } .checklist li.done::before{ content:'[\2713]'; color:var(--good); }
+.timeline{ border-left:1px solid var(--rule-2); margin-left:0.5rem; padding-left:1.8rem; }
+.timeline-item{ margin-bottom:1.4rem; position:relative; }
+.timeline-item::before{ content:''; position:absolute; left:-2.1rem; top:0.4rem; width:9px; height:9px; background:var(--mute); border:2px solid var(--ink-0); outline:1px solid var(--rule-2); transform:rotate(45deg); }
+.timeline-item.green::before{ background:var(--good); outline-color:var(--good); }
+.timeline-item.red::before{ background:var(--kill); outline-color:var(--kill); }
+.timeline-item.orange::before{ background:var(--amber); outline-color:var(--amber); }
+.timeline-item .time{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin-bottom:0.3rem; display:block; }
+
+/* ── bars / progress ──────────────────────────────────────── */
+.bar,.budget-bar{ height:8px; background:var(--ink-3); border:1px solid var(--rule); overflow:hidden; display:inline-block; width:80px; vertical-align:middle; border-radius:0; }
+.budget-bar{ width:100%; height:20px; }
+.bar-fill,.budget-fill,.fill,.filled{ height:100%; background:var(--amber); box-shadow:0 0 8px rgba(212,162,75,0.4); border-radius:0; }
+.bar-h{ background:var(--kill); } .bar-cost{ background:var(--info); }
+
+/* ── layout helpers ───────────────────────────────────────── */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.auto-grid,.pay-cards,.layers{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+@media(max-width:768px){ .two-col,.auto-grid{ grid-template-columns:1fr; } }
+
+/* ── inline helpers / utility colors ──────────────────────── */
+code{ font-family:var(--ff-mono); font-size:0.92em; color:var(--amber); background:rgba(212,162,75,0.06); padding:1px 4px; border-radius:2px; }
+.mono{ font-family:var(--ff-mono); } .tnum{ font-variant-numeric:tabular-nums; }
+.amber,.gold,.accent{ color:var(--amber)!important; }
+.green,.good{ color:var(--good)!important; } .red,.danger,.kill,.hot{ color:var(--kill)!important; }
+.orange,.warn{ color:var(--warn)!important; } .cyan,.blue,.info,.cool{ color:var(--info)!important; }
+.muted,.dim{ color:var(--mute)!important; }
+.subhead{ font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin-bottom:0.6rem; display:block; }
+
+/* ── footer ───────────────────────────────────────────────── */
+.report-foot{ max-width:1320px; margin:3rem auto 0; padding:1.4rem 2rem 2.4rem; border-top:1px solid var(--rule); font-family:var(--ff-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute-2); display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+
+/* ── scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--ink-0); }
+::-webkit-scrollbar-thumb{ background:var(--rule-2); border:2px solid var(--ink-0); }
+::-webkit-scrollbar-thumb:hover{ background:var(--amber-d); }
+
+/* ==========================================================================
+   PAGE OVERRIDES  ·  bespoke classes remapped onto the kit variables
+   (kills the old neon palette, gradients, and rounded corners)
+   ========================================================================== */
+.hero{ text-align:left; padding:2.2rem 0 1.4rem; background:transparent; border-bottom:1px solid var(--rule); position:relative; }
+.hero h1{ font-family:var(--ff-serif); font-size:2.2rem; font-weight:500; letter-spacing:-0.012em; color:var(--bone); background:none; -webkit-text-fill-color:initial; }
+.hero .subtitle{ color:var(--mute); font-size:13px; margin-top:0.5rem; font-family:var(--ff-sans); }
+.hero .date{ color:var(--amber); font-size:11px; margin-top:0.7rem; font-family:var(--ff-mono); letter-spacing:0.12em; text-transform:uppercase; }
+
+.kpi-strip{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.kpi-strip .kpi{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); border-radius:0; padding:1.4rem 1.2rem 1.2rem; text-align:left; transition:background .2s; }
+.kpi-strip .kpi:hover{ transform:none; background:rgba(212,162,75,0.025); }
+.kpi .val{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; letter-spacing:-0.02em; color:var(--bone); line-height:1.05; font-variant-numeric:tabular-nums; }
+.kpi .val.red{ color:var(--kill); }
+.kpi .val.orange{ color:var(--amber); }
+.kpi .val.green{ color:var(--good); }
+.kpi .val.blue{ color:var(--bone); }
+.kpi .val.purple{ color:var(--mute); }
+.kpi .label{ font-family:var(--ff-mono); color:var(--mute-2); font-size:10px; text-transform:uppercase; letter-spacing:0.16em; margin-top:0.6rem; }
+
+.section-title{ font-family:var(--ff-mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.22em; color:var(--bone); border-bottom:1px solid var(--rule); padding-bottom:0.7rem; margin-bottom:1.1rem; display:flex; align-items:center; gap:0.8rem; }
+.section-title .badge{ background:var(--amber-bg); color:var(--amber); border:1px solid rgba(212,162,75,0.35); font-size:10px; padding:0.15rem 0.55rem 0.2rem; border-radius:2px; letter-spacing:0.08em; }
+
+.card-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; }
+.card-title{ font-family:var(--ff-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.14em; color:var(--bone); }
+.card-badge{ display:inline-block; padding:0.15rem 0.55rem 0.2rem; border-radius:2px; font-family:var(--ff-mono); font-size:10px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; border:1px solid; }
+.badge-critical,.badge-manual{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge-high,.badge-semi{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge-automated,.badge-submitted{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge-ready{ background:var(--amber-bg); color:var(--amber); border-color:rgba(212,162,75,0.35); }
+.badge-queued{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge-killed{ background:var(--info-bg); color:var(--mute); border-color:rgba(122,132,153,0.3); }
+
+th{ background:var(--ink-1); color:var(--mute); border-bottom:1px solid var(--rule-2); border-top:1px solid var(--rule); }
+tr:hover td{ background:rgba(212,162,75,0.025); }
+
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+@media(max-width:900px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
+
+.progress-bar{ background:var(--ink-3); border:1px solid var(--rule); height:20px; overflow:hidden; margin:6px 0; position:relative; border-radius:0; }
+.progress-fill{ height:100%; border-radius:0; display:flex; align-items:center; justify-content:center; font-family:var(--ff-mono); font-size:10px; font-weight:500; color:var(--ink-0); }
+.progress-fill.green{ background:var(--good); }
+.progress-fill.blue{ background:var(--info); color:var(--bone); }
+.progress-fill.orange{ background:var(--amber); }
+.progress-fill.red{ background:var(--kill); color:var(--bone); }
+.progress-fill.purple{ background:var(--mute); color:var(--bone); }
+
+.arch-layer{ background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1rem 1.1rem; margin:0.5rem 0; display:flex; align-items:center; gap:1rem; transition:border-color 0.2s; }
+.arch-layer:hover{ border-color:var(--amber-d); }
+.arch-num{ background:var(--amber-bg); color:var(--amber); border:1px solid rgba(212,162,75,0.35); width:34px; height:34px; border-radius:0; display:flex; align-items:center; justify-content:center; font-family:var(--ff-mono); font-weight:600; font-size:13px; flex-shrink:0; }
+.arch-content{ flex:1; }
+.arch-content h4{ font-family:var(--ff-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--bone); }
+.arch-content p{ color:var(--mute); font-size:12px; margin-top:0.25rem; }
+.arch-status{ font-family:var(--ff-mono); font-size:10px; padding:0.15rem 0.55rem 0.2rem; border-radius:2px; border:1px solid; text-transform:uppercase; letter-spacing:0.08em; }
+
+.bottleneck{ background:var(--ink-1); border:1px solid var(--rule); border-left:2px solid var(--kill); border-radius:0; padding:1rem 1.1rem; margin:0.6rem 0; }
+.bottleneck.solved{ border-left-color:var(--good); }
+.bottleneck.partial{ border-left-color:var(--warn); }
+.bottleneck-header{ display:flex; justify-content:space-between; align-items:center; }
+.bottleneck h4{ font-family:var(--ff-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--bone); }
+
+.code-block{ background:var(--ink-0); border:1px solid var(--rule); border-radius:0; padding:0.9rem 1rem; margin:0.7rem 0; font-family:var(--ff-mono); font-size:12px; overflow-x:auto; white-space:pre; color:var(--mute); line-height:1.7; }
+.code-block .comment{ color:var(--mute-2); }
+.code-block .keyword{ color:var(--amber); }
+.code-block .string{ color:var(--good); }
+.code-block .number{ color:var(--info); }
+
+.timeline{ position:relative; padding-left:1.8rem; border-left:1px solid var(--rule-2); margin-left:0.5rem; }
+.timeline::before{ content:none; }
+.timeline-item{ position:relative; margin:1rem 0; }
+.timeline-item::before{ content:''; position:absolute; left:-2.3rem; top:0.5rem; width:9px; height:9px; border-radius:0; border:2px solid var(--ink-0); outline:1px solid var(--rule-2); background:var(--mute); transform:rotate(45deg); }
+.timeline-item.done::before{ background:var(--good); outline-color:var(--good); }
+.timeline-item.active::before{ background:var(--amber); outline-color:var(--amber); }
+.timeline-item.blocked::before{ background:var(--kill); outline-color:var(--kill); }
+.timeline-content{ background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:0.8rem 1rem; }
+.timeline-content h4{ font-family:var(--ff-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--bone); display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+.timeline-content p{ font-size:12px; color:var(--mute); margin-top:0.35rem; }
+
+.agent-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:0.5rem; }
+.agent-chip{ background:var(--ink-2); border:1px solid var(--rule); border-radius:0; padding:0.55rem 0.7rem; font-size:11px; text-align:left; transition:border-color .2s; }
+.agent-chip:hover{ border-color:var(--amber-d); transform:none; }
+.agent-chip .name{ font-family:var(--ff-mono); color:var(--amber); font-weight:500; }
+.agent-chip .desc{ color:var(--mute); font-size:11px; margin-top:0.2rem; }
+
+.footer{ text-align:left; padding:1.4rem 0 0; border-top:1px solid var(--rule); margin-top:2.4rem; color:var(--mute-2); font-family:var(--ff-mono); font-size:11px; letter-spacing:0.08em; }
+.footer p{ color:var(--mute-2); font-size:11px; margin:0.2rem 0; max-width:none; }
+
+.cost-highlight{ display:inline-block; background:var(--amber-bg); color:var(--amber); padding:1px 6px; border-radius:2px; font-family:var(--ff-mono); font-weight:500; }
+
+ul.check-list{ list-style:none; padding:0; }
+ul.check-list li{ padding:0.4rem 0 0.4rem 1.1rem; font-size:12px; position:relative; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+ul.check-list li::before{ content:''; position:absolute; left:0; top:0.75rem; width:6px; height:6px; border-radius:0; transform:rotate(45deg); }
+ul.check-list li.done::before{ background:var(--good); }
+ul.check-list li.todo::before{ background:var(--amber); }
+ul.check-list li.blocked::before{ background:var(--kill); }
+ul.check-list li.auto::before{ background:var(--info); }
+
+.table-wrap{ overflow-x:auto; }
+
+.stat-compare{ display:flex; gap:1.4rem; align-items:center; justify-content:flex-start; margin:1rem 0; }
+.stat-compare .arrow{ color:var(--amber); font-size:1.3em; font-family:var(--ff-mono); }
+.stat-box{ text-align:left; }
+.stat-box .val{ font-family:var(--ff-mono); font-size:1.4em; font-weight:500; }
+.stat-box .label{ font-family:var(--ff-mono); font-size:10px; color:var(--mute-2); text-transform:uppercase; letter-spacing:0.12em; }
+
+/* ── RESPONSIVE (shared, kit-based report pages) ───────────── */
+@media (max-width: 900px){
+  .auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px){
+  html,body{ overflow-x:hidden; max-width:100%; }
+  .report-head .rh-sep, .report-head .rh-tag{ display:none; }
+  body{ font-size: 13.5px; }
+  .report-head{ height: 44px; padding: 0 1rem; font-size: 10px; letter-spacing: 0.1em; }
+  .report-head .rh-tag{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw; }
+  .report-head .rh-back{ padding: 0.25rem 0.55rem; }
+  .wrap{ padding: 1.4rem 1rem 2.4rem; }
+  h1{ font-size: 1.6rem; }
+  h2{ margin: 2rem 0 0.9rem; }
+  .two-col,.auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr; }
+  .kpi{ border-right: none; }
+  table{ white-space: nowrap; }
+  .report-foot{ padding: 1.2rem 1rem 2rem; flex-direction: column; gap: 0.4rem; }
+}
+@media (max-width: 460px){
+  .kpi-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+.tbl-scroll > table{ margin:0; }
+</style>
+</head>
+<body>
+
+<header class="report-head"><span class="rh-mark"></span><span class="rh-name">SC Audit</span><span class="rh-sep">//</span><span class="rh-tag">BLUEPRINT · C7 to C22 Full Automation</span><a class="rh-back" href="index.html">Command center</a></header>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+  <h1>SC audit pipeline</h1>
+  <div class="subtitle">Full automation blueprint and analysis report</div>
+  <div class="date">Generated 2026-05-15 · 15 analysis agents · 38,178 LOC analyzed</div>
+</div>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi"><div class="val green">$400</div><div class="label">Total Investment</div></div>
+  <div class="kpi"><div class="val">$6K–$15K</div><div class="label">Pipeline EV (0.3x)</div></div>
+  <div class="kpi"><div class="val blue">15</div><div class="label">Campaigns Run</div></div>
+  <div class="kpi"><div class="val purple">200+</div><div class="label">Agents Deployed</div></div>
+  <div class="kpi"><div class="val">250K+</div><div class="label">LOC Audited</div></div>
+  <div class="kpi"><div class="val green">5,000+</div><div class="label">Findings Generated</div></div>
+  <div class="kpi"><div class="val orange">7</div><div class="label">Active Submissions</div></div>
+  <div class="kpi"><div class="val red">98%</div><div class="label">FP Kill Rate</div></div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="section">
+  <h2 class="section-title">Executive summary</h2>
+  <div class="card">
+    <p>The SC Audit Pipeline runs as a 7-layer autonomous smart contract vulnerability discovery system. It uses 20 parallel DeepSeek agents, 22 false-positive suppression rules, 3-phase semantic deduplication, and multi-platform submission automation. The codebase totals 38,178 LOC across 98 Python files (src/ + scripts/ + tests/ + config/), with 669 passing tests at 36.4% coverage.</p>
+    <br>
+    <div class="alert alert-green"><span class="subhead">Status</span>1 CRITICAL submitted to Immunefi (TermMax UUPS, $50K bounty). 2 more queued (OdosV2 + Inverse Curve Oracle). 4 additional submissions across Sherlock, C4, and direct disclosure. The 3-report Immunefi cap blocks further submissions after Day 2.</div>
+    <br>
+    <div class="alert alert-orange"><span class="subhead">Key bottleneck</span>Immunefi has no submission API. The Novice rate limit is 1 report per 24h, with a 3-report pending cap. Upgrading to 5 per 48h needs a paid report. Manual web form submission is the number 1 constraint.</div>
+  </div>
+</div>
+
+<!-- PIPELINE ARCHITECTURE -->
+<div class="section">
+  <h2 class="section-title">7-layer pipeline architecture <span class="badge">PRODUCTION</span></h2>
+
+  <div class="arch-layer">
+    <div class="arch-num">1</div>
+    <div class="arch-content">
+      <h4>Discovery and target selection</h4>
+      <p>6 platform scrapers (Immunefi, Sherlock, C4, CodeHawks, Cantina, Hats) plus audit-count filter plus exploit-history scoring. Immunefi API shows 284 active bounties.</p>
+    </div>
+    <span class="arch-status badge-automated">95% AUTO</span>
+  </div>
+
+  <div class="arch-layer">
+    <div class="arch-num">2</div>
+    <div class="arch-content">
+      <h4>Static analysis and context extraction</h4>
+      <p>Slither/Aderyn integration plus Solidity version detection plus DeFi protocol identification plus OZ pattern recognition. Context-aware prompts go to each agent.</p>
+    </div>
+    <span class="arch-status badge-automated">100% AUTO</span>
+  </div>
+
+  <div class="arch-layer">
+    <div class="arch-num">3</div>
+    <div class="arch-content">
+      <h4>AI multi-agent analysis (20 agents)</h4>
+      <p>20 specialized DeepSeek agents run in parallel via asyncio.gather(). 100 concurrent calls, 1200 RPM, 5-retry exponential backoff. Cost runs $0.07/M input, $0.28/M output.</p>
+    </div>
+    <span class="arch-status badge-automated">100% AUTO</span>
+  </div>
+
+  <div class="arch-layer">
+    <div class="arch-num">4</div>
+    <div class="arch-content">
+      <h4>Synthesis and validation</h4>
+      <p>22 FP suppression rules feed a 3-phase semantic dedup (title Jaccard, then code-location, then vuln-class). 50.5% finding reduction. 98% combined FP kill rate.</p>
+    </div>
+    <span class="arch-status badge-automated">100% AUTO</span>
+  </div>
+
+  <div class="arch-layer">
+    <div class="arch-num">5</div>
+    <div class="arch-content">
+      <h4>PM1 verification (human-guided)</h4>
+      <p>Claude-guided deep verification of PM2 handoff findings. 25% survival rate (75% kill rate). Scope verification, on-chain proof, audit cross-ref. The quality gate lives here.</p>
+    </div>
+    <span class="arch-status badge-semi">60% AUTO</span>
+  </div>
+
+  <div class="arch-layer">
+    <div class="arch-num">6</div>
+    <div class="arch-content">
+      <h4>Submission and tracking</h4>
+      <p>Immunefi (manual web form), Sherlock (AppleScript clipboard-assist plus $250 USDC stake), C4 (web form), Cantina (web form), direct email disclosure.</p>
+    </div>
+    <span class="arch-status badge-manual">40% AUTO</span>
+  </div>
+
+  <div class="arch-layer">
+    <div class="arch-num">7</div>
+    <div class="arch-content">
+      <h4>Feedback and revenue loop</h4>
+      <p>Verdict tracking, precision benchmarking, FP rule tuning, revenue dashboard. GitHub parsing for Sherlock judgments. Wallet monitoring for payouts.</p>
+    </div>
+    <span class="arch-status badge-semi">70% AUTO</span>
+  </div>
+</div>
+
+<!-- AUTOMATION LEVEL -->
+<div class="section">
+  <h2 class="section-title">Automation level by layer</h2>
+  <div class="card">
+    <div class="tbl-scroll"><table>
+      <tr><th>Layer</th><th>Current</th><th>Target</th><th>Gap</th></tr>
+      <tr>
+        <td>1. Discovery</td>
+        <td><div class="progress-bar"><div class="progress-fill green" style="width:95%">95%</div></div></td>
+        <td>99%</td>
+        <td>Auto-refresh new bounties weekly</td>
+      </tr>
+      <tr>
+        <td>2. Static Analysis</td>
+        <td><div class="progress-bar"><div class="progress-fill green" style="width:100%">100%</div></div></td>
+        <td>100%</td>
+        <td>·</td>
+      </tr>
+      <tr>
+        <td>3. AI Multi-Agent</td>
+        <td><div class="progress-bar"><div class="progress-fill green" style="width:100%">100%</div></div></td>
+        <td>100%</td>
+        <td>·</td>
+      </tr>
+      <tr>
+        <td>4. Synthesis</td>
+        <td><div class="progress-bar"><div class="progress-fill green" style="width:100%">100%</div></div></td>
+        <td>100%</td>
+        <td>·</td>
+      </tr>
+      <tr>
+        <td>5. PM1 Verification</td>
+        <td><div class="progress-bar"><div class="progress-fill orange" style="width:60%">60%</div></div></td>
+        <td>85%</td>
+        <td>Auto on-chain proof, auto audit cross-ref</td>
+      </tr>
+      <tr>
+        <td>6. Submission</td>
+        <td><div class="progress-bar"><div class="progress-fill red" style="width:40%">40%</div></div></td>
+        <td>80%</td>
+        <td>Playwright for Immunefi/Cantina, Synpress for Sherlock</td>
+      </tr>
+      <tr>
+        <td>7. Feedback Loop</td>
+        <td><div class="progress-bar"><div class="progress-fill blue" style="width:70%">70%</div></div></td>
+        <td>95%</td>
+        <td>Auto verdict scraping, wallet alerts</td>
+      </tr>
+    </table></div>
+    <br>
+    <div class="stat-compare">
+      <div class="stat-box"><div class="val orange">81%</div><div class="label">Current Overall</div></div>
+      <div class="arrow">→</div>
+      <div class="stat-box"><div class="val green">94%</div><div class="label">Target Overall</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 20 AGENTS -->
+<div class="section">
+  <h2 class="section-title">20 DeepSeek agent fleet <span class="badge">ACTIVE</span></h2>
+  <div class="agent-grid">
+    <div class="agent-chip"><div class="name">oracle_price</div><div class="desc">Price feed staleness</div></div>
+    <div class="agent-chip"><div class="name">reentrancy</div><div class="desc">Cross-function reentry</div></div>
+    <div class="agent-chip"><div class="name">access_control</div><div class="desc">Missing auth checks</div></div>
+    <div class="agent-chip"><div class="name">liquidation</div><div class="desc">Liquidation logic</div></div>
+    <div class="agent-chip"><div class="name">math_precision</div><div class="desc">Rounding errors</div></div>
+    <div class="agent-chip"><div class="name">token_accounting</div><div class="desc">Balance tracking</div></div>
+    <div class="agent-chip"><div class="name">flash_loan</div><div class="desc">Flash loan attacks</div></div>
+    <div class="agent-chip"><div class="name">upgrade_proxy</div><div class="desc">UUPS/Proxy issues</div></div>
+    <div class="agent-chip"><div class="name">economic_attack</div><div class="desc">Economic exploits</div></div>
+    <div class="agent-chip"><div class="name">input_validation</div><div class="desc">Input sanitization</div></div>
+    <div class="agent-chip"><div class="name">state_consistency</div><div class="desc">State invariants</div></div>
+    <div class="agent-chip"><div class="name">cross_contract</div><div class="desc">Cross-contract calls</div></div>
+    <div class="agent-chip"><div class="name">dos_griefing</div><div class="desc">DoS vectors</div></div>
+    <div class="agent-chip"><div class="name">lending_specific</div><div class="desc">Lending protocol</div></div>
+    <div class="agent-chip"><div class="name">governance_timelock</div><div class="desc">Governance flaws</div></div>
+    <div class="agent-chip"><div class="name">proxy_upgrade_deep</div><div class="desc">Deep proxy analysis</div></div>
+    <div class="agent-chip"><div class="name">bridge_crosschain</div><div class="desc">Bridge security</div></div>
+    <div class="agent-chip"><div class="name">vault_share_inflation</div><div class="desc">ERC4626 inflation</div></div>
+    <div class="agent-chip"><div class="name">permit_signature</div><div class="desc">Signature replay</div></div>
+    <div class="agent-chip"><div class="name">mev_sandwich</div><div class="desc">MEV/Sandwich</div></div>
+  </div>
+  <br>
+  <div class="card">
+    <h3>Pipeline parameters</h3>
+    <div class="grid-2">
+      <div>
+        <div class="tbl-scroll"><table>
+          <tr><td>Max Concurrent Calls</td><td><strong>100</strong></td></tr>
+          <tr><td>Rate Limit</td><td><strong>1,200 RPM</strong></td></tr>
+          <tr><td>Max Retries</td><td><strong>5</strong> (exp backoff 1s → 15s)</td></tr>
+          <tr><td>Request Timeout</td><td><strong>180s</strong></td></tr>
+          <tr><td>Temperature</td><td><strong>0.1</strong> (deterministic)</td></tr>
+        </table></div>
+      </div>
+      <div>
+        <div class="tbl-scroll"><table>
+          <tr><td>Max Response Tokens</td><td><strong>8,192</strong></td></tr>
+          <tr><td>Max Prompt Chars</td><td><strong>120,000</strong></td></tr>
+          <tr><td>Max Findings/Agent</td><td><strong>50</strong></td></tr>
+          <tr><td>Max Total Findings</td><td><strong>2,500</strong></td></tr>
+          <tr><td>Max Files/Batch</td><td><strong>10</strong> (200 total)</td></tr>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVE SUBMISSIONS -->
+<div class="section">
+  <h2 class="section-title">Active submissions and pipeline</h2>
+  <div class="table-wrap">
+    <div class="tbl-scroll"><table>
+      <tr>
+        <th>#</th><th>Target</th><th>Finding</th><th>Severity</th><th>Platform</th><th>Status</th><th>EV (0.3x)</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>TermMax</td>
+        <td>UUPS _disableInitializers missing (7 contracts)</td>
+        <td><span class="card-badge badge-critical">CRITICAL</span></td>
+        <td>Immunefi ($50K)</td>
+        <td><span class="card-badge badge-submitted">SUBMITTED</span></td>
+        <td class="good">$7K–$17.5K</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>TermMax</td>
+        <td>OdosV2AdapterV2 output token validation removed</td>
+        <td><span class="card-badge badge-high">HIGH</span></td>
+        <td>Immunefi ($50K)</td>
+        <td><span class="card-badge badge-queued">QUEUED DAY 1</span></td>
+        <td>$1.8K–$6K</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Inverse Finance</td>
+        <td>Curve EMA oracle staleness (6 feeds + WbtcPriceFeed)</td>
+        <td><span class="card-badge badge-high">MED-HIGH</span></td>
+        <td>Immunefi ($100K)</td>
+        <td><span class="card-badge badge-queued">QUEUED DAY 2</span></td>
+        <td>$3K–$9K</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>MachFi</td>
+        <td>BandOracle._getLatestPrice() ignores staleness</td>
+        <td><span class="card-badge badge-high">HIGH</span></td>
+        <td>Sherlock #43</td>
+        <td><span class="card-badge badge-submitted">SUBMITTED</span></td>
+        <td>$1K–$3.5K</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Renegade</td>
+        <td>AccountIfExists auth pattern bypass</td>
+        <td><span class="card-badge badge-high">HIGH</span></td>
+        <td>C4 Bounty</td>
+        <td><span class="card-badge badge-submitted">SUBMITTED</span></td>
+        <td>$4K–$7K</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>USX/Scroll</td>
+        <td>rebalanceBySwapping() missing access control</td>
+        <td><span class="card-badge badge-high">HIGH</span></td>
+        <td>Email</td>
+        <td><span class="card-badge badge-submitted">EMAILED</span></td>
+        <td>$2K–$6K</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>Sentiment V2</td>
+        <td>ETH_INDEX=DYDX 15,127x overvaluation</td>
+        <td><span class="card-badge badge-critical">CRITICAL</span></td>
+        <td>Direct Disclosure</td>
+        <td><span class="card-badge badge-semi">8 MSGS SENT</span></td>
+        <td>$750–$2K</td>
+      </tr>
+      <tr class="row-total">
+        <td colspan="5" style="text-align:right;color:var(--mute)"><strong>Total pipeline EV (0.3x discount)</strong></td>
+        <td colspan="2" class="amber" style="font-size:1.1em"><strong>$19.5K–$51K</strong></td>
+      </tr>
+    </table></div>
+  </div>
+
+  <div class="alert alert-red" style="margin-top:16px">
+    <span class="subhead">Immunefi rate limit constraint</span>Novice tier is 1 report per 24h, max 3 pending reports. After Day 2 (Inverse Curve Oracle), we hit the 3-report cap and stay blocked until one report resolves. Upgrade to 5 per 48h needs 1 paid report.
+  </div>
+</div>
+
+<!-- BACKLOG -->
+<div class="section">
+  <h2 class="section-title">Post-cap backlog</h2>
+  <div class="table-wrap">
+    <div class="tbl-scroll"><table>
+      <tr><th>Target</th><th>Finding</th><th>Bounty</th><th>EV</th><th>Blocker</th></tr>
+      <tr>
+        <td>Ostium</td>
+        <td>6 reinitializer() functions missing access control</td>
+        <td>$200K</td>
+        <td>$5K–$20K</td>
+        <td>Needs on-chain verification plus Immunefi cap</td>
+      </tr>
+      <tr>
+        <td>CapyFi</td>
+        <td>Whitelist bypass</td>
+        <td>$1M</td>
+        <td>$2K–$10K</td>
+        <td>Needs audit cross-ref plus Immunefi cap</td>
+      </tr>
+      <tr>
+        <td>Belong (3 findings)</td>
+        <td>Signature verification gaps (unsigned amount, replay, no nonce)</td>
+        <td>$30K comp</td>
+        <td>$3K–$9K</td>
+        <td>Immunefi competition format</td>
+      </tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- BOTTLENECK ANALYSIS -->
+<div class="section">
+  <h2 class="section-title">7 manual bottlenecks identified <span class="badge">CRITICAL PATH</span></h2>
+
+  <div class="bottleneck">
+    <div class="bottleneck-header">
+      <h4>B1 · Immunefi submission (manual web form)</h4>
+      <span class="card-badge badge-manual">MANUAL</span>
+    </div>
+    <p style="color:var(--mute);font-size:12px;margin-top:8px">
+      No public API. You log in, open the program, fill 7 fields, paste markdown, then submit. Rate limited 1 per 24h on Novice.
+    </p>
+    <p class="amber" style="font-size:12px;margin-top:6px">
+      Fix · Playwright browser automation. Log in with stored session cookies. Fill dropdowns, paste the markdown body, click submit. No wallet interaction at submission time. ETA 4 to 6 hours to build.
+    </p>
+  </div>
+
+  <div class="bottleneck partial">
+    <div class="bottleneck-header">
+      <h4>B2 · Sherlock submission ($250 USDC stake)</h4>
+      <span class="card-badge badge-semi">SEMI-AUTO</span>
+    </div>
+    <p style="color:var(--mute);font-size:12px;margin-top:8px">
+      AppleScript clipboard-assist is already built. The form auto-fills, but the $250 USDC wallet approval still needs manual confirmation.
+    </p>
+    <p class="amber" style="font-size:12px;margin-top:6px">
+      Fix · Playwright plus Synpress (MetaMask automation). Auto-fill form fields, auto-approve the USDC stake on Arbitrum. Keep a human gate on wallet approval for safety ($250 per submission risk).
+    </p>
+  </div>
+
+  <div class="bottleneck">
+    <div class="bottleneck-header">
+      <h4>B3 · On-chain verification (manual Etherscan)</h4>
+      <span class="card-badge badge-manual">MANUAL</span>
+    </div>
+    <p style="color:var(--mute);font-size:12px;margin-top:8px">
+      UUPS proxy verification, implementation slot reading, and initializer state checks all happen manually via Etherscan. web3.py is in requirements but no RPC verification script exists.
+    </p>
+    <p class="amber" style="font-size:12px;margin-top:6px">
+      Fix · build <code>scripts/verify_onchain.py</code>, a web3.py script to read EIP-1967 implementation slots, check the Initializable storage slot (0x0 means not initialized), and verify across all chains (Ethereum, Arbitrum, Base, BSC, Mantle, Scroll). Multi-chain RPC endpoints via the LiteLLM proxy pattern.
+    </p>
+  </div>
+
+  <div class="bottleneck">
+    <div class="bottleneck-header">
+      <h4>B4 · Audit report cross-reference (manual PDF reading)</h4>
+      <span class="card-badge badge-manual">MANUAL</span>
+    </div>
+    <p style="color:var(--mute);font-size:12px;margin-top:8px">
+      Immunefi rule says unfixed vulnerabilities mentioned in prior reports are not eligible. Right now that means reading 5+ PDFs per target by hand.
+    </p>
+    <p class="amber" style="font-size:12px;margin-top:6px">
+      Fix · build <code>scripts/audit_crossref.py</code>, which downloads audit PDFs from GitHub repos, extracts text, vector-embeds findings, and semantic-matches against ours. It flags duplicates. Cost is about $0.02 per audit report via DeepSeek embeddings.
+    </p>
+  </div>
+
+  <div class="bottleneck partial">
+    <div class="bottleneck-header">
+      <h4>B5 · PM1 verification (Claude-guided)</h4>
+      <span class="card-badge badge-semi">60% AUTO</span>
+    </div>
+    <p style="color:var(--mute);font-size:12px;margin-top:8px">
+      PM1 kills 75% of PM2 findings. Today it needs human-guided Claude sessions for deep analysis, scope verification, and exploit path reasoning.
+    </p>
+    <p class="amber" style="font-size:12px;margin-top:6px">
+      Fix · auto-scope verification via API (bounty page scraping, then asset matching), auto on-chain proof (the B3 fix), auto audit cross-ref (the B4 fix). The remaining 15% is novel exploit reasoning, which still needs Claude PM1.
+    </p>
+  </div>
+
+  <div class="bottleneck partial">
+    <div class="bottleneck-header">
+      <h4>B6 · Bounty status monitoring (manual check)</h4>
+      <span class="card-badge badge-semi">SEMI-AUTO</span>
+    </div>
+    <p style="color:var(--mute);font-size:12px;margin-top:8px">
+      Checking whether bounties are active, paused, or removed. The Sentiment bounty was dead but the pipeline didn't catch it. MachFi #43 versus #12 confusion.
+    </p>
+    <p class="amber" style="font-size:12px;margin-top:6px">
+      Fix · a cron job pinging the Immunefi API plus Sherlock GraphQL plus the C4 API every 6h. Alert on status changes. Store bounty status in SQLite.
+    </p>
+  </div>
+
+  <div class="bottleneck">
+    <div class="bottleneck-header">
+      <h4>B7 · Cantina submission (manual web form)</h4>
+      <span class="card-badge badge-manual">MANUAL</span>
+    </div>
+    <p style="color:var(--mute);font-size:12px;margin-top:8px">
+      No API, and a code-review interface with fiddly interactions. The "New Finding" button path is simpler than the code-highlighting path.
+    </p>
+    <p class="amber" style="font-size:12px;margin-top:6px">
+      Fix · Playwright automation via the "New Finding" button. Log in with stored session, fill severity, title, and description, then submit. No wallet component.
+    </p>
+  </div>
+</div>
+
+<!-- AUTOMATION SOLUTIONS -->
+<div class="section">
+  <h2 class="section-title">Submission automation strategy</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Tier 1 immediate (AppleScript)</h3>
+      <ul class="check-list">
+        <li class="done">Sherlock SC-SHERLOCK-SUBMIT-CHROME.applescript (BUILT)</li>
+        <li class="todo">Immunefi SC-IMMUNEFI-SUBMIT.applescript (1 to 2h to build)</li>
+        <li class="todo">Cantina SC-CANTINA-SUBMIT.applescript (1 to 2h to build)</li>
+      </ul>
+      <p style="color:var(--mute);font-size:12px;margin-top:10px">A human approves every action. Safest for $250 stakes. It copies title and body to the clipboard, then the user pastes.</p>
+    </div>
+    <div class="card">
+      <h3>Tier 2 near-term (Playwright)</h3>
+      <ul class="check-list">
+        <li class="auto">Immunefi Playwright (no wallet needed at submission)</li>
+        <li class="auto">Cantina Playwright (no wallet needed)</li>
+        <li class="auto">Sherlock Playwright plus Synpress (MetaMask auto)</li>
+      </ul>
+      <p style="color:var(--mute);font-size:12px;margin-top:10px">Full browser automation. 2 to 5s realistic delays. Persistent browser profiles handle session management. 1 to 2 days to build.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Platform API reality check</h3>
+    <div class="tbl-scroll"><table>
+      <tr><th>Platform</th><th>API Available?</th><th>Best Automation</th><th>On-Chain?</th><th>Risk</th></tr>
+      <tr>
+        <td>Immunefi</td>
+        <td class="kill">READ-ONLY (bounties.json)</td>
+        <td>Playwright</td>
+        <td>No</td>
+        <td class="warn">UI changes break selectors</td>
+      </tr>
+      <tr>
+        <td>Sherlock</td>
+        <td class="kill">NONE</td>
+        <td>Playwright + Synpress</td>
+        <td>Yes ($250 USDC)</td>
+        <td class="kill">$250/submission financial risk</td>
+      </tr>
+      <tr>
+        <td>Cantina</td>
+        <td class="kill">NONE</td>
+        <td>Playwright</td>
+        <td>No</td>
+        <td class="warn">Complex code-review UI</td>
+      </tr>
+      <tr>
+        <td>Code4rena</td>
+        <td class="muted">CLOSING JULY 12</td>
+        <td>N/A</td>
+        <td>No</td>
+        <td class="muted">Platform shutting down</td>
+      </tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- CODEBASE ANALYSIS -->
+<div class="section">
+  <h2 class="section-title">Codebase inventory <span class="badge">38,178 LOC</span></h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Source modules (src/)</h3>
+      <div class="tbl-scroll"><table>
+        <tr><td>analysis/</td><td>Context extraction, ensemble validation, agents, static analysis</td><td>~8,000 LOC</td></tr>
+        <tr><td>synthesis/</td><td>FP filter (841 LOC), semantic dedup, classifier, PoC generator</td><td>~4,500 LOC</td></tr>
+        <tr><td>submission/</td><td>Queue, Sherlock, C4, Immunefi, Cantina submitters</td><td>~3,000 LOC</td></tr>
+        <tr><td>discovery/</td><td>6 platform scrapers, monitor, cloner</td><td>~3,500 LOC</td></tr>
+        <tr><td>tracking/</td><td>Feedback loop, revenue dashboard, wallet monitor</td><td>~2,500 LOC</td></tr>
+        <tr><td>utils/</td><td>Secrets, database, cache, validation, logger</td><td>~2,500 LOC</td></tr>
+      </table></div>
+    </div>
+    <div class="card">
+      <h3>Scripts (scripts/)</h3>
+      <div class="tbl-scroll"><table>
+        <tr><td>SC-deepseek-v4-pro-pipeline.py</td><td>Main orchestrator</td><td>867 LOC</td></tr>
+        <tr><td>orchestrate.py</td><td>Full pipeline orchestration</td><td>1,159 LOC</td></tr>
+        <tr><td>auto_audit.py</td><td>Autonomous audit runner</td><td>993 LOC</td></tr>
+        <tr><td>submit_to_contest.py</td><td>Contest submission</td><td>621 LOC</td></tr>
+        <tr><td>benchmark_precision.py</td><td>Precision metrics</td><td>844 LOC</td></tr>
+        <tr><td>SC-target-screener.py</td><td>Target screening (3 modes)</td><td>~500 LOC</td></tr>
+        <tr><td>28 more scripts</td><td>Various utilities</td><td>~7,000 LOC</td></tr>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Testing</h3>
+    <div class="grid-3">
+      <div>
+        <div class="kpi" style="padding:12px"><div class="val green" style="font-size:1.4em">669</div><div class="label">Tests Passing</div></div>
+      </div>
+      <div>
+        <div class="kpi" style="padding:12px"><div class="val blue" style="font-size:1.4em">36.4%</div><div class="label">Coverage</div></div>
+      </div>
+      <div>
+        <div class="kpi" style="padding:12px"><div class="val" style="font-size:1.4em">3.09s</div><div class="label">Test Runtime</div></div>
+      </div>
+    </div>
+    <br>
+    <p style="color:var(--mute);font-size:12px">15 test files, 10,684 LOC of test code. Strongest coverage sits in secrets (100%), fp_filter (96%), semantic_dedup (90%), ensemble (95%). Weakest sits in the orchestrator (7%), PoC generator (0%), scrapers (0 to 54%).</p>
+  </div>
+</div>
+
+<!-- FP RULES ENGINE -->
+<div class="section">
+  <h2 class="section-title">22 false-positive suppression rules</h2>
+  <div class="card">
+    <div class="grid-2">
+      <div>
+        <span class="subhead">Pattern-based (fp_filter.py, 841 LOC)</span>
+        <div class="tbl-scroll"><table>
+          <tr><td>1</td><td>Reentrancy guard blindness (OZ, custom, EIP-1153)</td></tr>
+          <tr><td>2</td><td>Proxy architecture blindness (UUPS, Transparent, Diamond)</td></tr>
+          <tr><td>3</td><td>Intentionally public functions</td></tr>
+          <tr><td>4</td><td>View function simulation</td></tr>
+          <tr><td>5</td><td>Standard Solidity behavior (zero addr, 0.8 overflow)</td></tr>
+          <tr><td>6</td><td>Constant/immutable storage FP</td></tr>
+          <tr><td>7</td><td>SafeERC20/checked arithmetic</td></tr>
+          <tr><td>8</td><td>Access control inheritance chains</td></tr>
+        </table></div>
+      </div>
+      <div>
+        <span class="subhead">LLM-prompt-level (agent config)</span>
+        <div class="tbl-scroll"><table>
+          <tr><td>9–12</td><td>Admin trust model, owner-only, timelock</td></tr>
+          <tr><td>13–16</td><td>Pyth vs Chainlink confusion, hallucinated crosschain</td></tr>
+          <tr><td>17–18</td><td>OZ ReentrancyGuard (global not per-function)</td></tr>
+          <tr><td>19–20</td><td>Delegatecall execution context blindness</td></tr>
+          <tr><td>21</td><td>Internal function access control FP</td></tr>
+          <tr><td>22</td><td>Custom math limitation acknowledgment</td></tr>
+        </table></div>
+      </div>
+    </div>
+    <br>
+    <div class="alert alert-blue">
+      <span class="subhead">Proposed rules 23 to 30</span>L2 sequencer hallucination (ERC4626 to Chainlink confusion), dead shares immunity, MIN_SHARES pattern, signature verification gaps, commented-out security checks, Redstone ms/s timestamp mismatch, reinitializer() access control, flash loan callback reentrancy scope.
+    </div>
+  </div>
+</div>
+
+<!-- COST ANALYSIS -->
+<div class="section">
+  <h2 class="section-title">Cost analysis and unit economics</h2>
+  <div class="card">
+    <div class="grid-2">
+      <div>
+        <span class="subhead">Campaign cost breakdown</span>
+        <div class="tbl-scroll"><table>
+          <tr><th>Campaign</th><th>Targets</th><th>Findings</th><th>Cost</th><th>$/Target</th></tr>
+          <tr><td>C7</td><td>13</td><td>5,384</td><td>$2.46</td><td>$0.19</td></tr>
+          <tr><td>C8</td><td>4</td><td>1,709</td><td>$0.95</td><td>$0.24</td></tr>
+          <tr><td>C9</td><td>6</td><td>2,363</td><td>$0.95</td><td>$0.16</td></tr>
+          <tr><td>C10</td><td>7</td><td>1,528</td><td>$0.61</td><td>$0.09</td></tr>
+          <tr><td>C11</td><td>10</td><td>1,890</td><td>$0.81</td><td>$0.08</td></tr>
+          <tr><td>C12</td><td>10</td><td>3,201</td><td>$1.56</td><td>$0.16</td></tr>
+          <tr><td>C13</td><td>9</td><td>3,631</td><td>$1.55</td><td>$0.17</td></tr>
+          <tr><td>C14</td><td>9</td><td>311</td><td>$0.17</td><td>$0.02</td></tr>
+          <tr><td>C15</td><td>5</td><td>810</td><td>$0.85</td><td>$0.17</td></tr>
+        </table></div>
+      </div>
+      <div>
+        <span class="subhead">Unit economics</span>
+        <div class="kpi-strip" style="grid-template-columns:1fr 1fr;gap:0;">
+          <div class="kpi" style="padding:10px"><div class="val" style="font-size:1.2em">$0.14</div><div class="label">Avg Cost / Target</div></div>
+          <div class="kpi" style="padding:10px"><div class="val" style="font-size:1.2em">$57</div><div class="label">Cost / Submission</div></div>
+          <div class="kpi" style="padding:10px"><div class="val green" style="font-size:1.2em">37.5x</div><div class="label">Min ROI (if 1 paid)</div></div>
+          <div class="kpi" style="padding:10px"><div class="val green" style="font-size:1.2em">525x</div><div class="label">Max ROI (if all paid)</div></div>
+        </div>
+        <br>
+        <span class="subhead">DeepSeek pricing</span>
+        <div class="tbl-scroll"><table>
+          <tr><td>Flash (current)</td><td><span class="cost-highlight">$0.07/M in</span></td><td><span class="cost-highlight">$0.28/M out</span></td></tr>
+          <tr><td>Pro (alternate)</td><td>$0.27/M in</td><td>$1.10/M out</td></tr>
+          <tr><td>Budget remaining</td><td colspan="2" class="good"><strong>$20.47</strong></td></tr>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCALING PLAN -->
+<div class="section">
+  <h2 class="section-title">Scaling plan from $1K per month to 100+ campaigns</h2>
+  <div class="card">
+    <div class="tbl-scroll"><table>
+      <tr><th>Metric</th><th>Current (Manual)</th><th>Phase 1 ($100/mo)</th><th>Phase 2 ($500/mo)</th><th>Phase 3 ($1K/mo)</th></tr>
+      <tr>
+        <td>Campaigns/month</td>
+        <td>15 (manual trigger)</td>
+        <td>30 (cron daily)</td>
+        <td>60 (cron 2x/day)</td>
+        <td>100+ (continuous)</td>
+      </tr>
+      <tr>
+        <td>DeepSeek budget</td>
+        <td>$10/mo</td>
+        <td>$50/mo</td>
+        <td>$200/mo</td>
+        <td>$500/mo</td>
+      </tr>
+      <tr>
+        <td>On-chain verification</td>
+        <td>Manual Etherscan</td>
+        <td>Auto RPC (free tiers)</td>
+        <td>Alchemy Growth ($49/mo)</td>
+        <td>Multi-chain RPC ($100/mo)</td>
+      </tr>
+      <tr>
+        <td>Submission automation</td>
+        <td>Manual forms</td>
+        <td>AppleScript clipboard</td>
+        <td>Playwright semi-auto</td>
+        <td>Playwright full-auto</td>
+      </tr>
+      <tr>
+        <td>Expected submissions/mo</td>
+        <td>3–5</td>
+        <td>8–12</td>
+        <td>15–25</td>
+        <td>30–50</td>
+      </tr>
+      <tr>
+        <td>Expected revenue/mo</td>
+        <td>$0 (pre-revenue)</td>
+        <td>$2K–$5K</td>
+        <td>$5K–$15K</td>
+        <td>$10K–$30K</td>
+      </tr>
+      <tr>
+        <td>Infrastructure</td>
+        <td>Local macOS</td>
+        <td>Local + launchd</td>
+        <td>Docker (local)</td>
+        <td>Docker (VPS $50/mo)</td>
+      </tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- INFRASTRUCTURE -->
+<div class="section">
+  <h2 class="section-title">Infrastructure and deployment</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Docker stack (ready)</h3>
+      <div class="code-block"><span class="comment"># docker-compose.yml · 3-service stack</span>
+<span class="keyword">services:</span>
+  <span class="string">pipeline</span>:    <span class="comment"># Python 3.13, multi-stage build</span>
+  <span class="string">redis</span>:       <span class="comment"># Cache layer, finding dedup</span>
+  <span class="string">litellm</span>:     <span class="comment"># LLM routing proxy (70% Flash, 20% R1, 10% Claude)</span>
+
+<span class="comment"># Makefile: 41 targets</span>
+make pipeline-run     <span class="comment"># Run single campaign</span>
+make pipeline-cron    <span class="comment"># Schedule 24/7 operation</span>
+make test             <span class="comment"># 669 tests, 3.09s</span>
+make lint             <span class="comment"># ruff check + format</span>
+make typecheck        <span class="comment"># mypy strict</span></div>
+    </div>
+    <div class="card">
+      <h3>24/7 operation</h3>
+      <ul class="check-list">
+        <li class="done">Docker Compose 3-service stack defined</li>
+        <li class="done">Multi-stage build (slim Python 3.13)</li>
+        <li class="done">Redis cache for finding dedup</li>
+        <li class="done">LiteLLM proxy for model routing</li>
+        <li class="done">Makefile with 41 targets</li>
+        <li class="todo">launchd plist for macOS scheduling</li>
+        <li class="todo">Cron-based campaign triggering</li>
+        <li class="todo">Alerting (Slack/Discord webhook)</li>
+        <li class="todo">Health monitoring dashboard</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 100xagenticdev PATTERNS -->
+<div class="section">
+  <h2 class="section-title">100xagenticdev framework integration</h2>
+  <div class="card">
+    <p style="color:var(--mute);font-size:12px;margin-bottom:12px">The SC Audit Pipeline already runs several 100xagenticdev patterns. Here are the integration points for scaling to 20 parallel agents.</p>
+    <div class="grid-2">
+      <div>
+        <span class="subhead">Already implemented</span>
+        <ul class="check-list">
+          <li class="done">parallel-agents.sh pattern: asyncio.gather() with 100-concurrent semaphore</li>
+          <li class="done">Budget enforcement OUTSIDE agent code ($5 default, $50 daily cap)</li>
+          <li class="done">quality-gate.sh pattern: 22 FP rules + 3-phase dedup</li>
+          <li class="done">Frozen dataclasses (no mutable global state)</li>
+          <li class="done">NASA P10: &lt;60 line functions, bounded loops, zero warnings</li>
+          <li class="done">Token-bucket rate limiter (1200 RPM)</li>
+          <li class="done">5-retry exponential backoff (1s → 15s)</li>
+        </ul>
+      </div>
+      <div>
+        <span class="subhead">To implement</span>
+        <ul class="check-list">
+          <li class="todo">Git worktree isolation per campaign (prevent cross-contamination)</li>
+          <li class="todo">Pipeline.sh 4-stage gates (lint → test → build → deploy)</li>
+          <li class="todo">Canary deployment (run new agent configs on 1 target before fleet)</li>
+          <li class="todo">Agent performance ranking (auto-disable low-precision agents)</li>
+          <li class="todo">Feedback-driven prompt tuning (auto-update FP rules from verdicts)</li>
+          <li class="todo">Multi-model ensemble (DeepSeek + Claude + GPT-4o cross-validation)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KEY LEARNINGS -->
+<div class="section">
+  <h2 class="section-title">Key learnings from 15 campaigns</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>What works</h3>
+      <ul class="check-list">
+        <li class="done">0-audit protocols hit at 83% (5 of 6 produced real findings)</li>
+        <li class="done">UUPS _disableInitializers is the highest-confidence pattern (1.0)</li>
+        <li class="done">Cross-protocol adapter code is systematically under-audited</li>
+        <li class="done">Commented-out security checks are high-signal (Resonate harvest)</li>
+        <li class="done">PM1 verification removes 75% of FPs before submission</li>
+        <li class="done">$0.14 per target average cost makes massive scanning cheap</li>
+        <li class="done">Signature verification gaps are an underexploited pattern (Belong: 5/5)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Known DeepSeek weaknesses</h3>
+      <ul class="check-list">
+        <li class="blocked">Can't reason about delegatecall execution context (3 instances)</li>
+        <li class="blocked">Flags internal functions as missing access control (MUX: 6 kills)</li>
+        <li class="blocked">Doesn't trace inheritance chains (_disableInitializers in base)</li>
+        <li class="blocked">L2 sequencer hallucination (top FP, confuses ERC4626 with Chainlink)</li>
+        <li class="blocked">Cross-contract validation blindness (version confusion)</li>
+        <li class="blocked">Hallucinates missing modifiers while quoting code that has them</li>
+        <li class="blocked">Can't analyze novel custom math (complex curve formulas)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRMED VULNERABILITY CLASSES -->
+<div class="section">
+  <h2 class="section-title">Confirmed vulnerability classes to hunt systematically</h2>
+  <div class="card">
+    <div class="tbl-scroll"><table>
+      <tr><th>Class</th><th>Example</th><th>Confidence</th><th>Automation</th></tr>
+      <tr>
+        <td>UUPS _disableInitializers missing</td>
+        <td>TermMax (7 contracts)</td>
+        <td class="good">1.0</td>
+        <td>On-chain slot scan (EIP-1967)</td>
+      </tr>
+      <tr>
+        <td>Missing access control on rebalance/swap</td>
+        <td>USX rebalanceBySwapping()</td>
+        <td class="good">0.95</td>
+        <td>Agent: access_control</td>
+      </tr>
+      <tr>
+        <td>Oracle staleness bypass</td>
+        <td>MachFi BandOracle, Inverse Curve EMA</td>
+        <td class="good">0.90</td>
+        <td>Agent: oracle_price</td>
+      </tr>
+      <tr>
+        <td>Signature verification gaps</td>
+        <td>Belong (5 findings: unsigned fields, no nonce)</td>
+        <td class="warn">0.80</td>
+        <td>Agent: permit_signature</td>
+      </tr>
+      <tr>
+        <td>reinitializer() without access control</td>
+        <td>Ostium (6 functions, 5 contracts)</td>
+        <td class="warn">0.75</td>
+        <td>On-chain + Agent: upgrade_proxy</td>
+      </tr>
+      <tr>
+        <td>Cross-protocol adapter bugs</td>
+        <td>Sector Finance (Gearbox Curve)</td>
+        <td class="warn">0.70</td>
+        <td>Agent: cross_contract</td>
+      </tr>
+      <tr>
+        <td>Zero slippage on compound/harvest</td>
+        <td>Resonate (amountOutMin=0)</td>
+        <td class="warn">0.70</td>
+        <td>Agent: mev_sandwich</td>
+      </tr>
+      <tr>
+        <td>Redstone ms/s timestamp mismatch</td>
+        <td>Sommelier (4 instances), Sentiment V2</td>
+        <td class="info">0.65</td>
+        <td>Pattern D scan ($0 cost)</td>
+      </tr>
+      <tr>
+        <td>ERC4626 inflation (no virtual offset)</td>
+        <td>GammaSwap (MIN_SHARES ≠ virtual offset)</td>
+        <td class="info">0.60</td>
+        <td>Agent: vault_share_inflation</td>
+      </tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- SUBMISSION TIMELINE -->
+<div class="section">
+  <h2 class="section-title">Immunefi submission schedule</h2>
+  <div class="timeline">
+    <div class="timeline-item done">
+      <div class="timeline-content">
+        <h4>Day 0 · TermMax UUPS [CRITICAL] <span class="card-badge badge-submitted">DONE</span></h4>
+        <p>7 UUPS contracts missing _disableInitializers. On-chain proof shows slot = 0x0. $71.35M TVL at risk. EV $10K–$25K.</p>
+      </div>
+    </div>
+    <div class="timeline-item active">
+      <div class="timeline-content">
+        <h4>Day 1 (~23h) · TermMax OdosV2Adapter [HIGH] <span class="card-badge badge-queued">NEXT</span></h4>
+        <p>The V2 adapter removed output token validation that V1 has. Submit the second the rate limit expires. EV $3K–$10K.</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <h4>Day 2 · Inverse Finance Curve Oracle [MED-HIGH] <span class="card-badge badge-ready">READY</span></h4>
+        <p>6 composite oracle feeds validate Chainlink but not Curve EMA. WbtcPriceFeed has zero staleness on the primary path. EV $5K–$15K.</p>
+      </div>
+    </div>
+    <div class="timeline-item blocked">
+      <div class="timeline-content">
+        <h4>Blocked · 3-report Immunefi cap hit</h4>
+        <p>After the Day 2 submission, we hold 3 pending reports. Novice cap is 3. No more submissions until one resolves (3 to 7 day triage is typical).</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <h4>After cap · Ostium reinitializer() [MED-HIGH]</h4>
+        <p>6 reinitializer() functions missing AC across 5 contracts. $200K bounty. Needs on-chain verification first.</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-content">
+        <h4>After cap · CapyFi whitelist bypass [MEDIUM]</h4>
+        <p>$1M bounty. Needs an audit cross-ref to confirm it isn't already reported.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FULL AUTOMATION ROADMAP -->
+<div class="section">
+  <h2 class="section-title">Full automation roadmap</h2>
+  <div class="card">
+    <div class="tbl-scroll"><table>
+      <tr><th>Priority</th><th>Component</th><th>Effort</th><th>Impact</th><th>Status</th></tr>
+      <tr>
+        <td class="kill">P0</td>
+        <td><strong>verify_onchain.py</strong> · web3.py multi-chain UUPS slot scanner</td>
+        <td>4–6h</td>
+        <td>Eliminates B3 (on-chain manual)</td>
+        <td>NOT STARTED</td>
+      </tr>
+      <tr>
+        <td class="kill">P0</td>
+        <td><strong>Immunefi Playwright submitter</strong> · auto form fill plus submit</td>
+        <td>4–6h</td>
+        <td>Eliminates B1 (top bottleneck)</td>
+        <td>NOT STARTED</td>
+      </tr>
+      <tr>
+        <td class="warn">P1</td>
+        <td><strong>audit_crossref.py</strong> · PDF download, extract, semantic match</td>
+        <td>8–12h</td>
+        <td>Eliminates B4 (audit cross-ref)</td>
+        <td>NOT STARTED</td>
+      </tr>
+      <tr>
+        <td class="warn">P1</td>
+        <td><strong>Bounty status monitor</strong> · cron pinging 3 platform APIs</td>
+        <td>3–4h</td>
+        <td>Eliminates B6 (stale bounty detection)</td>
+        <td>NOT STARTED</td>
+      </tr>
+      <tr>
+        <td class="amber">P2</td>
+        <td><strong>FP rules 23 to 30</strong> · L2 sequencer, dead shares, signatures, Redstone</td>
+        <td>2–3h</td>
+        <td>+5% FP kill rate (98% to 99%+)</td>
+        <td>NOT STARTED</td>
+      </tr>
+      <tr>
+        <td class="amber">P2</td>
+        <td><strong>Cantina Playwright submitter</strong></td>
+        <td>4–6h</td>
+        <td>Eliminates B7</td>
+        <td>NOT STARTED</td>
+      </tr>
+      <tr>
+        <td class="info">P3</td>
+        <td><strong>Sherlock Playwright plus Synpress</strong> · MetaMask auto-approve</td>
+        <td>8–12h</td>
+        <td>Eliminates B2 (keep human gate on $250)</td>
+        <td>NOT STARTED</td>
+      </tr>
+      <tr>
+        <td class="info">P3</td>
+        <td><strong>launchd plist plus cron scheduling</strong> · 24/7 operation</td>
+        <td>2–3h</td>
+        <td>Continuous campaign execution</td>
+        <td>Docker stack ready, scheduling not</td>
+      </tr>
+      <tr>
+        <td class="muted">P4</td>
+        <td><strong>Multi-model ensemble</strong> · DeepSeek + Claude + GPT-4o cross-validation</td>
+        <td>12–16h</td>
+        <td>Higher confidence, fewer PM1 kills</td>
+        <td>Architecture defined, not implemented</td>
+      </tr>
+      <tr>
+        <td class="muted">P4</td>
+        <td><strong>Agent performance ranking</strong> · auto-disable low-precision agents</td>
+        <td>4–6h</td>
+        <td>Reduce noise, improve signal-to-noise</td>
+        <td>Benchmark script exists, no auto-tuning</td>
+      </tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- KILLED FINDINGS -->
+<div class="section">
+  <h2 class="section-title">Killed findings, do not revisit</h2>
+  <div class="card">
+    <div class="tbl-scroll"><table>
+      <tr><th>#</th><th>Target</th><th>Finding</th><th>Kill Reason</th></tr>
+      <tr><td>K-1</td><td>GammaSwap</td><td>ERC4626 inflation</td><td>Dead shares (MIN_SHARES=1e3 to address(0)) make the attack irrational</td></tr>
+      <tr><td>K-2</td><td>Twyne</td><td>handleExternalLiquidation AC</td><td>Permissionless by design (like all DeFi liquidations)</td></tr>
+      <tr><td>K-3</td><td>Twyne</td><td>onMorphoFlashLoan reentrancy</td><td>Parent holds the ReentrancyGuardTransient lock</td></tr>
+      <tr><td>K-4</td><td>Sector Finance</td><td>coinId/threeId swap</td><td>Dormant. All deployed strategies have coinId=1=threeId</td></tr>
+      <tr><td>K-5</td><td>Resonate</td><td>harvest() MEV</td><td>MasterChef adapters not in Immunefi scope</td></tr>
+      <tr><td>K-6</td><td>Sommelier</td><td>Redstone ms/s</td><td>Code uses blockTimestamp (seconds), not dataTimestamp (ms)</td></tr>
+      <tr><td>K-7</td><td>Midas</td><td>tx.origin gas dust</td><td>Gas dust only, $250 deposit not worth the risk</td></tr>
+    </table></div>
+  </div>
+</div>
+
+<!-- REVENUE PROJECTIONS -->
+<div class="section">
+  <h2 class="section-title">Revenue projections</h2>
+  <div class="card">
+    <div class="grid-3">
+      <div style="text-align:left">
+        <div class="subhead">Conservative (1 paid)</div>
+        <div style="font-family:var(--ff-mono);font-size:2em;color:var(--amber);font-weight:500">$5K</div>
+        <div style="font-size:11px;color:var(--mute)">12.5x ROI on $400</div>
+      </div>
+      <div style="text-align:left">
+        <div class="subhead">Expected (3 paid, 0.3x)</div>
+        <div style="font-family:var(--ff-mono);font-size:2em;color:var(--bone);font-weight:500">$15K</div>
+        <div style="font-size:11px;color:var(--mute)">37.5x ROI on $400</div>
+      </div>
+      <div style="text-align:left">
+        <div class="subhead">Optimistic (all paid)</div>
+        <div style="font-family:var(--ff-mono);font-size:2em;color:var(--good);font-weight:500">$51K</div>
+        <div style="font-size:11px;color:var(--mute)">127.5x ROI on $400</div>
+      </div>
+    </div>
+    <br>
+    <div class="alert alert-green">
+      <span class="subhead">Annualized at Phase 3, $1K per month investment</span>100+ campaigns per month times 30 to 50 submissions times 15% acceptance rate times $5K average payout works out to $67K–$210K per year at full automation.
+    </div>
+  </div>
+</div>
+
+<!-- NEXT ACTIONS -->
+<div class="section">
+  <h2 class="section-title">Next actions in priority order</h2>
+  <div class="card">
+    <span class="subhead">Immediate, next 24h</span>
+    <ul class="check-list">
+      <li class="todo">Submit OdosV2Adapter to Immunefi the second the rate limit expires (~23h from Day 0)</li>
+      <li class="todo">Verify MachFi Sherlock #43 is the correct active bounty (not #12)</li>
+      <li class="todo">Check Sentiment Sherlock #37. If live, prepare to re-submit S-02 Critical ($250)</li>
+    </ul>
+    <br>
+    <span class="subhead">Day 2</span>
+    <ul class="check-list">
+      <li class="todo">Submit Inverse Finance Curve Oracle to Immunefi</li>
+      <li class="todo">Monitor TermMax UUPS for a triage response</li>
+    </ul>
+    <br>
+    <span class="subhead">Build this week</span>
+    <ul class="check-list">
+      <li class="todo">Build verify_onchain.py (web3.py multi-chain UUPS scanner)</li>
+      <li class="todo">Build the Immunefi Playwright submitter</li>
+      <li class="todo">Add FP rules 23 to 30</li>
+      <li class="todo">Build the bounty status monitor (cron plus 3 APIs)</li>
+    </ul>
+    <br>
+    <span class="subhead">After the 3-report cap resolves</span>
+    <ul class="check-list">
+      <li class="todo">Verify Ostium reinitializer on-chain</li>
+      <li class="todo">Verify CapyFi whitelist bypass against audit reports</li>
+      <li class="todo">Submit survivors</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>SC Audit Pipeline · Full automation blueprint</p>
+  <p>Generated by 15 parallel analysis agents · 38,178 LOC analyzed · 2026-05-15</p>
+  <p class="amber" style="margin-top:8px">$400 invested · $6K–$15K EV (0.3x) · $67K–$210K per year at full scale</p>
+</div>
+
+</div>
+
+<footer class="report-foot"><span>SC Audit Pipeline · C7 to C22 Full Automation</span><span>Generated from pipeline data</span></footer>
+
+</body>
+</html>
