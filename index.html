@@ -48,9 +48,9 @@
   /* Type */
   --bone:    #e8e3d6;   /* warm off-white */
   --bone-d:  #d6d1c2;
-  --mute:    #8b8676;
-  --mute-2:  #6a6659;
-  --dim:     #4a4740;
+  --mute:    #aaa595;
+  --mute-2:  #8f8979;
+  --dim:     #6f6a5e;
 
   /* Signal — one amber accent, restrained */
   --amber:   #d4a24b;
@@ -122,7 +122,8 @@ body > * { position: relative; z-index: 2; }
 /* ── TAB BAR ───────────────────────────────────────────────── */
 .tab-bar {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  flex-wrap: wrap;
   background: linear-gradient(180deg, #0c0c0f 0%, #0a0a0c 100%);
   border-bottom: 1px solid var(--rule);
   padding: 0;
@@ -130,9 +131,7 @@ body > * { position: relative; z-index: 2; }
   top: 0;
   z-index: 1000;
   gap: 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  height: 52px;
+  min-height: 52px;
 }
 .tab-bar .logo {
   font-family: var(--ff-mono);
@@ -141,13 +140,14 @@ body > * { position: relative; z-index: 2; }
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--bone);
-  padding: 0 1.4rem;
+  padding: 0 1.1rem;
+  height: 51px;
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.6rem;
   white-space: nowrap;
   border-right: 1px solid var(--rule);
-  margin-right: 0.5rem;
+  margin-right: 0.3rem;
   position: relative;
 }
 .tab-bar .logo::before {
@@ -168,14 +168,15 @@ body > * { position: relative; z-index: 2; }
   margin-left: 0.6rem;
 }
 .tab-btn {
-  padding: 0 1.4rem;
+  padding: 0 0.95rem;
+  height: 51px;
   background: transparent;
   border: none;
-  color: var(--mute);
+  color: var(--bone-d);
   font-family: var(--ff-mono);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
@@ -186,12 +187,7 @@ body > * { position: relative; z-index: 2; }
   align-items: center;
   gap: 0.5rem;
 }
-.tab-btn::before {
-  content: attr(data-num);
-  font-size: 9px;
-  color: var(--dim);
-  letter-spacing: 0;
-}
+.tab-btn::before { content: none; }
 .tab-btn:hover { color: var(--bone); background: rgba(255,255,255,0.02); }
 .tab-btn.active {
   color: var(--bone);
@@ -200,21 +196,16 @@ body > * { position: relative; z-index: 2; }
 }
 .tab-btn.active::before { color: var(--amber); }
 .tab-bar a.tab-link {
-  padding: 0 1.4rem; color: var(--mute); font-family: var(--ff-mono); font-size: 11px;
-  font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+  padding: 0 0.95rem; height: 51px; color: var(--bone-d); font-family: var(--ff-mono); font-size: 11px;
+  font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
   display: inline-flex; align-items: center; gap: 0.45rem; text-decoration: none;
   border-bottom: 1px solid transparent; transition: color .15s, background .15s, border-color .15s;
 }
+.tab-bar a.tab-link.cta { margin-left: auto; }
 .tab-bar a.tab-link:hover { color: var(--bone); background: rgba(255,255,255,0.02); }
 .tab-bar a.tab-link.cta { color: var(--amber); }
 .tab-bar a.tab-link.cta:hover { color: var(--ink-0); background: var(--amber); }
-.tab-btn .tab-badge {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--good);
-}
-.tab-btn .tab-badge.red    { background: var(--kill); }
-.tab-btn .tab-badge.orange { background: var(--warn); }
+.tab-btn .tab-badge { display: none; }
 
 .tab-bar .spacer { flex: 1; }
 .tab-bar .clock {
@@ -982,10 +973,9 @@ em.note { font-style: normal; color: var(--mute); font-family: var(--ff-mono); f
   html,body{ overflow-x:hidden; max-width:100%; }
   .report-head .rh-sep, .report-head .rh-tag{ display:none; }
   body{ font-size: 13.5px; }
-  .tab-bar{ height: 48px; }
-  .tab-bar .clock{ display: none; }
-  .tab-bar .logo{ padding: 0 1rem; margin-right: 0.2rem; }
-  .tab-btn{ padding: 0 0.9rem; }
+  .tab-bar .logo{ flex: 1 0 100%; border-right: none; border-bottom: 1px solid var(--rule); padding: 0 1rem; margin-right: 0; height: 46px; }
+  .tab-btn, .tab-bar a.tab-link{ padding: 0 0.8rem; height: 44px; font-size: 10.5px; letter-spacing: 0.08em; }
+  .tab-bar a.tab-link.cta{ margin-left: 0; }
   .overview{ padding: 1.4rem 1rem 2.4rem; }
   .hero-mini h1{ font-size: 1.7rem; max-width: none; }
   .hero-mini .hero-deck{ font-size: 13px; }
@@ -998,11 +988,11 @@ em.note { font-style: normal; color: var(--mute); font-family: var(--ff-mono); f
   .funnel{ grid-template-columns: 1fr 1fr; }
   .section{ margin: 2rem 0; }
   .section h2 .h2-aside{ display: none; }
-  /* campaigns: stack the sidebar into a horizontal scroller above the report */
+  /* campaigns: stack the sidebar above the report as a no-scroll wrapping grid */
   .campaigns-layout{ flex-direction: column; height: auto; }
-  .campaign-sidebar{ width: 100%; min-width: 0; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--rule); }
-  .campaign-sidebar .sidebar-header{ display: none; }
-  .camp-btn{ min-width: 190px; border-bottom: none; border-right: 1px solid var(--rule); }
+  .campaign-sidebar{ width: 100%; min-width: 0; flex-flow: row wrap; border-right: none; border-bottom: 1px solid var(--rule); }
+  .campaign-sidebar .sidebar-header{ flex: 1 0 100%; }
+  .camp-btn{ flex: 1 1 calc(50% - 1px); min-width: 0; border-bottom: 1px solid var(--rule); }
   .campaign-main{ min-height: 80vh; }
   .campaign-main iframe{ min-height: 80vh; }
   /* wide data tables scroll on their own instead of breaking the page */
@@ -1014,26 +1004,37 @@ em.note { font-style: normal; color: var(--mute); font-family: var(--ff-mono); f
   .funnel{ grid-template-columns: 1fr; }
   .chart-stats{ grid-template-columns: 1fr; }
   .kpi{ border-right: none; }
+  .tab-btn, .tab-bar a.tab-link{ padding: 0 0.6rem; height: 42px; font-size: 10px; letter-spacing: 0.06em; }
 }
 .tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
 .tbl-scroll > table{ margin:0; }
+
+/* ── mobile anti-clipping: let grid/flex items shrink below content (min-width:0),
+   wrap long labels, and stack KPI grids so nothing is clipped by overflow-x:hidden ── */
+.card, .grid-2 > *, .grid-3 > *, .two-col > *, .auto-grid > *, .pay-cards > *, .layers > *,
+.kpi-grid > *, .kpi-strip > *, .agent-grid > * { min-width: 0; }
+@media (max-width: 760px){
+  .subhead { white-space: normal; word-break: break-word; }
+  .kpi .value, .kpi-strip .value { overflow-wrap: anywhere; }
+}
+@media (max-width: 460px){
+  .kpi-strip, .kpi-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
 <!-- TAB BAR -->
 <nav class="tab-bar">
-  <div class="logo">SCAN THE CHAIN <span class="meta">// SC AUDIT PIPELINE</span></div>
-  <button class="tab-btn active" data-tab="overview" data-num="01">Overview<span class="tab-badge"></span></button>
-  <button class="tab-btn" data-tab="campaigns" data-num="02">Campaigns<span class="tab-badge orange"></span></button>
-  <button class="tab-btn" data-tab="lessons" data-num="03">Lessons &amp; Ideas<span class="tab-badge"></span></button>
-  <button class="tab-btn" data-tab="intel" data-num="04">Strategic Intel<span class="tab-badge green"></span></button>
-  <button class="tab-btn" data-tab="sentinel" data-num="05">Commit Sentinel<span class="tab-badge orange"></span></button>
-  <button class="tab-btn" data-tab="gitlab" data-num="06">GitLab<span class="tab-badge orange"></span></button>
+  <div class="logo">SCAN THE CHAIN <span class="meta">// CASE STUDY</span></div>
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="campaigns">Campaigns</button>
+  <button class="tab-btn" data-tab="lessons">Lessons</button>
+  <button class="tab-btn" data-tab="intel">Intel</button>
+  <button class="tab-btn" data-tab="sentinel">Sentinel</button>
+  <button class="tab-btn" data-tab="gitlab">GitLab</button>
   <a class="tab-link" href="about.html">About</a>
   <a class="tab-link cta" href="about.html#get-the-full-research-data">Get the data &middot; $99</a>
-  <div class="spacer"></div>
-  <div class="clock" id="clock">00:00:00 UTC</div>
 </nav>
 
 <!-- OVERVIEW TAB (MAIN) -->

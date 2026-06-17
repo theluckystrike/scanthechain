@@ -36,7 +36,7 @@
 :root {
   --ink-0:#0a0a0c; --ink-1:#0e0e11; --ink-2:#131318; --ink-3:#1a1a20;
   --rule:#23232b; --rule-2:#2d2d36;
-  --bone:#e8e3d6; --bone-d:#d6d1c2; --mute:#8b8676; --mute-2:#6a6659; --dim:#4a4740;
+  --bone:#e8e3d6; --bone-d:#d6d1c2; --mute:#aaa595; --mute-2:#8f8979; --dim:#6f6a5e;
   --amber:#d4a24b; --amber-d:#a37a30; --amber-bg:rgba(212,162,75,0.08);
   --alive:#b9a36a;
   --good:#8aa672; --good-bg:rgba(138,166,114,0.07);
@@ -203,7 +203,7 @@ code{ font-family:var(--ff-mono); font-size:0.92em; color:var(--amber); backgrou
 .hm-4{ background:#b96b53; } .hm-5{ background:#bd7549; } .hm-6{ background:#c17e48; }
 .hm-7{ background:#c58448; } .hm-8{ background:#c9874a; } .hm-9{ background:#bf8650; }
 .hm-10{ background:#b48459; } .hm-11{ background:#a3855f; color:var(--bone); }
-.hm-12{ background:#94836a; color:var(--bone); } .hm-13{ background:#8b8676; color:var(--bone); }
+.hm-12{ background:#94836a; color:var(--bone); } .hm-13{ background:#aaa595; color:var(--bone); }
 .hm-14{ background:#84807a; color:var(--bone); } .hm-15{ background:#7c7f83; color:var(--bone); }
 .hm-16{ background:#7a8499; color:var(--bone); }
 .handoff-card .title{ font-family:var(--ff-mono); font-size:12px; font-weight:600; color:var(--amber); letter-spacing:0.04em; display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
@@ -241,6 +241,18 @@ code{ font-family:var(--ff-mono); font-size:0.92em; color:var(--amber); backgrou
 
 .tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
 .tbl-scroll > table{ margin:0; }
+
+/* ── mobile anti-clipping: let grid/flex items shrink below content (min-width:0),
+   wrap long labels, and stack KPI grids so nothing is clipped by overflow-x:hidden ── */
+.card, .grid-2 > *, .grid-3 > *, .two-col > *, .auto-grid > *, .pay-cards > *, .layers > *,
+.kpi-grid > *, .kpi-strip > *, .agent-grid > * { min-width: 0; }
+@media (max-width: 760px){
+  .subhead { white-space: normal; word-break: break-word; }
+  .kpi .value, .kpi-strip .value { overflow-wrap: anywhere; }
+}
+@media (max-width: 460px){
+  .kpi-strip, .kpi-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>

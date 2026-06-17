@@ -67,10 +67,33 @@
 .link-card:hover{ background:rgba(212,162,75,0.04); }
 .link-card .lc-t{ font-family:var(--ff-sans); font-size:13.5px; color:var(--bone); font-weight:500; }
 .link-card .lc-m{ font-family:var(--ff-mono); font-size:10px; color:var(--mute-2); letter-spacing:0.06em; margin-top:0.25rem; }
-.editable{ /* contact fields, swap the address before launch */ }
+.editable{ /* contact fields, swap before launch */ }
+.zovo{ border:1px solid var(--amber-d); background:linear-gradient(180deg,rgba(212,162,75,0.10),rgba(212,162,75,0.02)); padding:1.7rem 1.7rem 1.8rem; margin:1.6rem 0; }
+.zovo-k{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--amber); }
+.zovo-t{ font-family:var(--ff-serif); font-size:2.2rem; color:var(--bone); line-height:1; margin:0.3rem 0 0.7rem; }
+.zovo-t span{ font-size:1rem; font-family:var(--ff-mono); color:var(--mute); letter-spacing:0.08em; }
+.contact-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0; border:1px solid var(--rule); margin:1rem 0; }
+.contact-row a, .contact-row div.c-cell{ display:block; padding:1.1rem 1.2rem; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); text-decoration:none; }
+.contact-row a:hover{ background:rgba(212,162,75,0.04); }
+.c-cell .c-k{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--mute-2); }
+.c-cell .c-v{ font-family:var(--ff-mono); font-size:14px; color:var(--bone); margin-top:0.3rem; }
+.c-cell .c-v.amber{ color:var(--amber); }
+@media (max-width:760px){ .zovo-t{ font-size:1.8rem; } }
 @media (max-width:760px){ .fact-row{ grid-template-columns:1fr 1fr; } .fact:nth-child(2n){ border-right:none; } .offer .price{ font-size:2rem; } }
 .tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
 .tbl-scroll > table{ margin:0; }
+
+/* ── mobile anti-clipping: let grid/flex items shrink below content (min-width:0),
+   wrap long labels, and stack KPI grids so nothing is clipped by overflow-x:hidden ── */
+.card, .grid-2 > *, .grid-3 > *, .two-col > *, .auto-grid > *, .pay-cards > *, .layers > *,
+.kpi-grid > *, .kpi-strip > *, .agent-grid > * { min-width: 0; }
+@media (max-width: 760px){
+  .subhead { white-space: normal; word-break: break-word; }
+  .kpi .value, .kpi-strip .value { overflow-wrap: anywhere; }
+}
+@media (max-width: 460px){
+  .kpi-strip, .kpi-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -122,19 +145,29 @@
       <li>The target and scope shortlist I'd hunt next</li>
     </ul>
     <p>Good fit if you want quality research data to save time rather than rebuild the rig yourself. Tell me what you're hunting and I'll point you at the slice that helps.</p>
-    <a class="cta editable" href="mailto:research@scanthechain.com?subject=Research%20data%20pack%20(%2499)">Request the pack</a>
+    <a class="cta" href="https://discord.gg/scanthechain">Ping me on Discord</a>
     <a class="cta ghost" href="index.html">See the free reports first</a>
   </div>
 
-  <h2>Reach me</h2>
-  <p>Email is best. Send a line about what you're working on and I'll reply with specifics. The address below is a placeholder until the domain is live.</p>
-  <p class="editable" style="font-family:var(--ff-mono);font-size:13px;color:var(--bone)">research@scanthechain.com</p>
+  <h2>Where to find me</h2>
+  <p>Discord is the fastest way to reach me. Tell me what you're hunting and I'll point you at the data that helps, or just talk shop. Email works too if that's easier.</p>
+  <div class="contact-row">
+    <a class="editable" href="https://discord.gg/scanthechain"><div class="c-cell"><div class="c-k">Discord</div><div class="c-v amber">find me here, fastest reply</div></div></a>
+    <a class="editable" href="mailto:research@scanthechain.com"><div class="c-cell"><div class="c-k">Email</div><div class="c-v">research@scanthechain.com</div></div></a>
+  </div>
+
+  <div class="zovo">
+    <div class="zovo-k">Also from me</div>
+    <div class="zovo-t">zovo.one <span>lifetime access</span></div>
+    <p>I build a whole stack of tools over at zovo.one. Grab lifetime access once and skip the monthly subscriptions. If this case study was useful, that's where the rest of my work lives.</p>
+    <a class="cta" href="https://www.zovo.one">Visit zovo.one</a>
+  </div>
 
 </div>
 
 <footer class="report-foot">
-  <span>SC Audit Pipeline &middot; about the researcher</span>
-  <span>Free reports, paid data pack</span>
+  <span>Scan the Chain &middot; about the researcher</span>
+  <span>Free reports &middot; data pack &middot; zovo.one</span>
 </footer>
 
 </body>
