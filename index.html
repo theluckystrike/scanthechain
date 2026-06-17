@@ -16,6 +16,10 @@
 <meta property="og:description" content="58 automated audit campaigns across 50+ DeFi protocols, and the honest economics of systematic white hat research. Methodology, costs, and live findings.">
 <meta property="og:url" content="https://scanthechain.com/">
 <meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://scanthechain.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://scanthechain.com/og.png">
 <meta name="twitter:title" content="What smart contract bug hunting actually pays">
 <meta name="twitter:description" content="58 automated audit campaigns across 50+ DeFi protocols, and the honest economics of white hat research. Methodology, costs, live findings.">
 <script type="application/ld+json">
@@ -1021,7 +1025,33 @@ em.note { font-style: normal; color: var(--mute); font-family: var(--ff-mono); f
 @media (max-width: 460px){
   .kpi-strip, .kpi-grid { grid-template-columns: 1fr; }
 }
+
+/* ── FAQ (long-tail capture) ───────────────────────────────── */
+.faq{ border-top:1px solid var(--rule); margin-top:0.4rem; }
+.faq-item{ border-bottom:1px solid var(--rule); padding:1.1rem 0; }
+.faq-q{ font-family:var(--ff-serif); font-size:1.18rem; color:var(--bone); line-height:1.3; margin-bottom:0.45rem; }
+.faq-a{ color:var(--bone-d); font-size:13.5px; line-height:1.7; max-width:82ch; }
+.faq-a a{ color:var(--amber); }
+.faq-cta{ margin:1.6rem 0 0; padding:1.5rem 1.6rem; border:1px solid var(--amber-d); background:linear-gradient(180deg,rgba(212,162,75,0.10),rgba(212,162,75,0.02)); display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.faq-cta .fc-t{ font-family:var(--ff-serif); font-size:1.2rem; color:var(--bone); }
+.faq-cta .fc-s{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute); margin-top:0.25rem; }
+.faq-cta a{ font-family:var(--ff-mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-0); background:var(--amber); border:1px solid var(--amber); padding:0.7rem 1.2rem; text-decoration:none; white-space:nowrap; transition:background .15s; }
+.faq-cta a:hover{ background:var(--bone); border-color:var(--bone); }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Can you actually make money hunting smart contract bugs with AI?","acceptedAnswer":{"@type":"Answer","text":"Yes, but less and slower than the hype suggests. Across 58 campaigns this pipeline surfaced real, confirmed bugs, and the realized payouts are still modest. The campaign reports on this site show the actual numbers, not the screenshots."}},
+    {"@type":"Question","name":"Is smart contract bug bounty worth it in 2026?","acceptedAnswer":{"@type":"Answer","text":"It depends almost entirely on speed and target choice. Audited, stable code mostly returns duplicates that were already reported and patched. Beta features with no CVE history are where being early pays. The reports here show which bets worked and which wasted weeks."}},
+    {"@type":"Question","name":"How much do smart contract bug bounties actually pay?","acceptedAnswer":{"@type":"Answer","text":"The advertised pools are large, but the realized number is usually far smaller. This case study tracks expected value against real payouts across more than 50 protocols, so you can see the gap before you commit a year to it."}},
+    {"@type":"Question","name":"Can AI find smart contract vulnerabilities on its own?","acceptedAnswer":{"@type":"Answer","text":"It pulls strong leads out of thousands of noisy signals, which is the hard, slow part. A human still confirms the bug and writes the report that gets paid. The pipeline is the AI half, the judgment is still yours."}},
+    {"@type":"Question","name":"What is the hardest part of white hat security for a beginner?","acceptedAnswer":{"@type":"Answer","text":"Arrival. You have to be first, before the patch, on every feature, every time. Being right is not enough when the protocol's own team is racing the same clock."}},
+    {"@type":"Question","name":"How do I start hunting smart contract bugs with AI?","acceptedAnswer":{"@type":"Answer","text":"Read the methodology and the campaign reports here for free to see how the pipeline is wired. When you want the full dataset, the prompt chain, and the rest of the tooling, it comes with a lifetime membership on zovo.one."}}
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -2296,6 +2326,22 @@ em.note { font-style: normal; color: var(--mute); font-family: var(--ff-mono); f
   </table></div>
 </div>
 </details>
+
+<div class="section" id="faq">
+  <h2>Questions people ask</h2>
+  <div class="faq">
+    <div class="faq-item"><div class="faq-q">Can you actually make money hunting smart contract bugs with AI?</div><div class="faq-a">Yes, but less and slower than the hype suggests. Across 58 campaigns this pipeline surfaced real, confirmed bugs, and the realized payouts are still modest. The campaign reports on this site show the actual numbers, not the screenshots.</div></div>
+    <div class="faq-item"><div class="faq-q">Is smart contract bug bounty worth it in 2026?</div><div class="faq-a">It depends almost entirely on speed and target choice. Audited, stable code mostly returns duplicates that were already reported and patched. Beta features with no CVE history are where being early pays. The reports here show which bets worked and which wasted weeks.</div></div>
+    <div class="faq-item"><div class="faq-q">How much do smart contract bug bounties actually pay?</div><div class="faq-a">The advertised pools are large, but the realized number is usually far smaller. This case study tracks expected value against real payouts across more than 50 protocols, so you can see the gap before you commit a year to it.</div></div>
+    <div class="faq-item"><div class="faq-q">Can AI find smart contract vulnerabilities on its own?</div><div class="faq-a">It pulls strong leads out of thousands of noisy signals, which is the hard, slow part. A human still confirms the bug and writes the report that gets paid. The pipeline is the AI half, the judgment is still yours.</div></div>
+    <div class="faq-item"><div class="faq-q">What is the hardest part of white hat security for a beginner?</div><div class="faq-a">Arrival. You have to be first, before the patch, on every feature, every time. Being right is not enough when the protocol's own team is racing the same clock.</div></div>
+    <div class="faq-item"><div class="faq-q">How do I start hunting smart contract bugs with AI?</div><div class="faq-a">Read the methodology and the campaign reports here for free to see how the pipeline is wired. When you want the full dataset, the prompt chain, and the rest of the tooling, it comes with a lifetime membership on <a href="https://zovo.one/">zovo.one</a>.</div></div>
+  </div>
+  <div class="faq-cta">
+    <div><div class="fc-t">Want the full dataset and the tooling?</div><div class="fc-s">It all comes with the zovo.one lifetime membership</div></div>
+    <a href="https://zovo.one/">Get lifetime access</a>
+  </div>
+</div>
 
 
 </div>
