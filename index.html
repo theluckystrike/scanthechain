@@ -315,19 +315,20 @@ body > * { position: relative; z-index: 2; }
 .live-card--primary { background: rgba(212,162,75,0.035); }
 
 .live-card-header {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;
   font-family: var(--ff-mono); font-size: 10px;
   letter-spacing: 0.12em; text-transform: uppercase;
 }
 .live-tag {
-  display: inline-flex; align-items: center; gap: 0.35rem;
-  padding: 0.18rem 0.5rem 0.22rem;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.22rem 0.6rem 0.26rem;
   border: 1px solid;
   font-weight: 500;
+  flex: 0 0 auto;
 }
 .live-tag--anchor  { color: var(--amber); border-color: rgba(212,162,75,0.4); background: var(--amber-bg); }
 .live-tag--pending { color: var(--warn);  border-color: rgba(201,135,74,0.3); background: var(--warn-bg); }
-.live-card-time { color: var(--mute-2); }
+.live-card-time { color: var(--mute-2); line-height: 1.65; letter-spacing: 0.06em; }
 
 .live-card-title {
   font-family: var(--ff-serif);
