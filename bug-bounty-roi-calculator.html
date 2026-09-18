@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart contract bug bounty ROI: an expected value calculator with live market data</title>
+<meta name="description" content="Compute expected value and ROI for a bug bounty campaign from your own inputs, framed by 237 active Immunefi programs and a $1.83B year-to-date DeFi exploit total.">
+<meta name="keywords" content="smart contract bug bounty ROI, expected value bug bounty, is bug bounty worth it, smart contract bug hunting, DeFi security research">
+<meta name="author" content="Scan the Chain">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="canonical" href="https://scanthechain.com/bug-bounty-roi-calculator.html">
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+/* ==========================================================================
+   SC AUDIT PIPELINE  ·  shared design kit
+   Canonical, copied from DASHBOARD.html so every report renders native
+   inside the command-center iframe. Standalone-report build (no tab-bar).
+
+   PALETTE GUIDE (map bespoke classes onto these, never raw hex):
+     amber  (--amber)  = primary signal, the one accent, live/submitted
+     bone   (--bone)   = headline text, neutral emphasis
+     moss   (--good)   = good / escalated / pass / positive delta
+     rust   (--kill)   = dead / rejected / zero / negative
+     burnt  (--warn)   = pending / in-progress / caution
+     slate  (--info)   = neutral data / informational
+   Sharp corners only (radius 0, or 2px on chips). No neon, no gradients
+   except the quiet vignette and progress fills already defined here.
+   ========================================================================== */
+:root {
+  --ink-0:#0a0a0c; --ink-1:#0e0e11; --ink-2:#131318; --ink-3:#1a1a20;
+  --rule:#23232b; --rule-2:#2d2d36;
+  --bone:#e8e3d6; --bone-d:#d6d1c2; --mute:#aaa595; --mute-2:#8f8979; --dim:#6f6a5e;
+  --amber:#d4a24b; --amber-d:#a37a30; --amber-bg:rgba(212,162,75,0.08);
+  --alive:#b9a36a;
+  --good:#8aa672; --good-bg:rgba(138,166,114,0.07);
+  --kill:#b15247; --kill-bg:rgba(177,82,71,0.07);
+  --warn:#c9874a; --warn-bg:rgba(201,135,74,0.06);
+  --info:#7a8499; --info-bg:rgba(122,132,153,0.06);
+  --ff-sans:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;
+  --ff-serif:'IBM Plex Serif',ui-serif,Georgia,serif;
+  --ff-mono:'IBM Plex Mono',ui-monospace,'JetBrains Mono','SF Mono',Menlo,monospace;
+  /* legacy aliases so old inline token names keep working */
+  --bg:var(--ink-0); --card:var(--ink-1); --card2:var(--ink-2); --border:var(--rule);
+  --text:var(--bone); --muted:var(--mute); --accent:var(--amber); --accent2:var(--bone-d);
+  --green:var(--good); --red:var(--kill); --orange:var(--warn); --cyan:var(--info);
+  --gold:var(--amber); --blue:var(--info); --purple:var(--mute); --danger:var(--kill);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*::selection{background:var(--amber);color:var(--ink-0)}
+html,body{font-feature-settings:"ss01","ss02","cv11","tnum"}
+body{
+  font-family:var(--ff-sans); background:var(--ink-0); color:var(--bone);
+  line-height:1.55; font-size:14px; min-height:100vh;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  padding:0;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:1; mix-blend-mode:screen;
+  background:
+    radial-gradient(120% 80% at 50% -10%,rgba(212,162,75,0.04),transparent 60%),
+    repeating-linear-gradient(180deg,rgba(255,255,255,0.012) 0 1px,transparent 1px 3px);
+}
+body>*{position:relative;z-index:2}
+
+/* ── report shell ─────────────────────────────────────────── */
+.report-head{
+  display:flex; align-items:center; gap:0.7rem;
+  padding:0 1.6rem; height:48px;
+  background:linear-gradient(180deg,#0c0c0f 0%,#0a0a0c 100%);
+  border-bottom:1px solid var(--rule);
+  position:sticky; top:0; z-index:1000;
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase;
+}
+.report-head .rh-mark{ width:8px; height:8px; background:var(--amber); box-shadow:0 0 10px rgba(212,162,75,0.6); animation:pulse 2.4s ease-in-out infinite; }
+.report-head .rh-name{ color:var(--bone); font-weight:600; }
+.report-head .rh-sep{ color:var(--dim); }
+.report-head .rh-tag{ color:var(--mute); }
+.report-head .rh-back{ margin-left:auto; color:var(--mute); text-decoration:none; border:1px solid var(--rule); padding:0.3rem 0.7rem; transition:color .15s,border-color .15s; }
+.report-head .rh-back:hover{ color:var(--amber); border-color:var(--amber-d); }
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 10px rgba(212,162,75,0.6)}50%{opacity:.5;box-shadow:0 0 4px rgba(212,162,75,0.3)}}
+
+.wrap{ max-width:1320px; margin:0 auto; padding:2.4rem 2rem 4rem; }
+
+/* ── headings ─────────────────────────────────────────────── */
+h1{ font-family:var(--ff-serif); font-size:2.2rem; font-weight:500; letter-spacing:-0.012em; line-height:1.06; color:var(--bone); margin:0.2rem 0 0.4rem; }
+h1 em{ font-style:italic; font-weight:400; color:var(--bone-d); }
+h2{ font-family:var(--ff-mono); font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.22em; color:var(--bone); margin:2.6rem 0 1.1rem; padding-bottom:0.7rem; border-bottom:1px solid var(--rule); display:flex; align-items:center; gap:0.8rem; }
+h3{ font-family:var(--ff-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin:1.6rem 0 0.7rem; }
+.subtitle,.subhead-deck{ color:var(--mute); font-size:13px; margin-bottom:1.6rem; font-family:var(--ff-sans); }
+p{ color:var(--bone-d); line-height:1.62; margin:0.6rem 0; max-width:78ch; }
+a{ color:var(--amber); }
+
+/* ── tables ───────────────────────────────────────────────── */
+table{ width:100%; border-collapse:collapse; margin:1rem 0; font-size:13px; font-variant-numeric:tabular-nums; }
+thead{ background:var(--ink-1); }
+th{ text-align:left; padding:0.65rem 0.9rem; font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.14em; color:var(--mute); border-bottom:1px solid var(--rule-2); border-top:1px solid var(--rule); }
+td{ padding:0.65rem 0.9rem; border-bottom:1px solid var(--rule); font-size:13px; color:var(--bone-d); vertical-align:top; }
+td strong,td b{ color:var(--bone); font-weight:500; }
+tr:hover td{ background:rgba(212,162,75,0.025); }
+td code,td .num{ font-family:var(--ff-mono); font-size:12px; color:var(--bone); }
+tr.row-live td{ background:rgba(212,162,75,0.07)!important; box-shadow:inset 2px 0 0 var(--amber); }
+tr.row-good td{ background:var(--good-bg)!important; }
+tr.row-warn td{ background:var(--warn-bg)!important; }
+tr.row-dead td{ background:var(--kill-bg)!important; }
+tr.row-killed td{ opacity:.45; }
+tr.row-total td{ font-weight:500; border-top:1px solid var(--amber); background:var(--ink-1)!important; }
+
+/* ── KPI grid ─────────────────────────────────────────────── */
+.kpi-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:0; margin:1.6rem 0 2.4rem; border:1px solid var(--rule); background:var(--ink-1); }
+.kpi{ background:transparent; border:none; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); border-radius:0; padding:1.4rem 1.2rem 1.2rem; text-align:left; position:relative; transition:background .2s; }
+.kpi:hover{ background:rgba(212,162,75,0.025); }
+.kpi::before{ content:""; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--amber); }
+.kpi .value{ font-family:var(--ff-mono); font-size:1.75rem; font-weight:400; letter-spacing:-0.02em; color:var(--bone); line-height:1.05; font-variant-numeric:tabular-nums; }
+.kpi .label{ font-family:var(--ff-mono); color:var(--mute-2); font-size:10px; text-transform:uppercase; letter-spacing:0.16em; margin-top:0.6rem; display:block; }
+.kpi.green .value,.kpi.good .value{ color:var(--good); } .kpi.green::before,.kpi.good::before{ background:var(--good); }
+.kpi.orange .value,.kpi.warn .value{ color:var(--amber); } .kpi.orange::before,.kpi.warn::before{ background:var(--amber); }
+.kpi.cyan .value,.kpi.info .value{ color:var(--info); } .kpi.cyan::before,.kpi.info::before{ background:var(--info); }
+.kpi.red .value,.kpi.danger .value{ color:var(--kill); } .kpi.red::before,.kpi.danger::before{ background:var(--kill); }
+.kpi.blue .value{ color:var(--bone); } .kpi.blue::before{ background:var(--bone-d); }
+.kpi.purple .value{ color:var(--bone); } .kpi.purple::before{ background:var(--mute); }
+
+/* ── badges / tags / pills ────────────────────────────────── */
+.badge,.tag,.pill,.flag,.flow-tag,.layer-badge,.card-badge{
+  display:inline-block; padding:0.15rem 0.55rem 0.2rem; border-radius:2px;
+  font-family:var(--ff-mono); font-size:10px; font-weight:500; letter-spacing:0.08em;
+  text-transform:uppercase; border:1px solid;
+}
+.badge-escalated,.badge-green,.badge-pass,.badge-verified,.badge-ready,.tag-pass,.pill-green,.badge-g{ background:var(--good-bg); color:var(--good); border-color:rgba(138,166,114,0.3); }
+.badge-submitted,.badge-automated,.badge-y,.tag-submitted{ background:var(--amber-bg); color:var(--amber); border-color:rgba(212,162,75,0.35); }
+.badge-dead,.badge-red,.badge-critical,.tag-critical,.badge-o{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); }
+.badge-pending,.badge-queued,.badge-semi,.badge-manual,.badge-orange,.badge-high,.tag-high,.tag-medium{ background:var(--warn-bg); color:var(--warn); border-color:rgba(201,135,74,0.3); }
+.badge-blue,.badge-purple,.badge-gray,.tag-skip,.badge-b{ background:var(--info-bg); color:var(--info); border-color:rgba(122,132,153,0.3); }
+.badge-duplicate{ background:var(--kill-bg); color:var(--kill); border-color:rgba(177,82,71,0.3); text-decoration:line-through; }
+
+/* ── sections / cards / alerts ────────────────────────────── */
+.section{ margin:2.4rem 0; }
+.card,.handoff-card,.finding-card,.col-card,.force-card,.pnl-card,.counter,.bottleneck{
+  background:var(--ink-1); border:1px solid var(--rule); border-radius:0; padding:1.1rem 1.2rem; margin:0.7rem 0;
+}
+.alert{ padding:0.9rem 1.1rem; border-radius:0; margin:0.5rem 0; font-size:13px; line-height:1.6; border:1px solid var(--rule); border-left-width:2px; background:var(--ink-1); color:var(--bone-d); }
+.alert strong{ color:var(--bone); font-weight:500; }
+.alert-green{ border-left-color:var(--good); background:var(--good-bg); }
+.alert-red{ border-left-color:var(--kill); background:var(--kill-bg); }
+.alert-orange{ border-left-color:var(--warn); background:var(--warn-bg); }
+.alert-blue{ border-left-color:var(--info); background:var(--info-bg); }
+
+/* ── checklist / timeline ─────────────────────────────────── */
+.checklist{ list-style:none; padding:0; }
+.checklist li{ padding:0.45rem 0 0.45rem 1.8rem; position:relative; font-size:13px; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+.checklist li::before{ content:'[ ]'; position:absolute; left:0; color:var(--mute-2); font-family:var(--ff-mono); font-size:11px; top:0.55rem; }
+.checklist li.done{ color:var(--mute); } .checklist li.done::before{ content:'[\2713]'; color:var(--good); }
+.timeline{ border-left:1px solid var(--rule-2); margin-left:0.5rem; padding-left:1.8rem; }
+.timeline-item{ margin-bottom:1.4rem; position:relative; }
+.timeline-item::before{ content:''; position:absolute; left:-2.1rem; top:0.4rem; width:9px; height:9px; background:var(--mute); border:2px solid var(--ink-0); outline:1px solid var(--rule-2); transform:rotate(45deg); }
+.timeline-item.green::before{ background:var(--good); outline-color:var(--good); }
+.timeline-item.red::before{ background:var(--kill); outline-color:var(--kill); }
+.timeline-item.orange::before{ background:var(--amber); outline-color:var(--amber); }
+.timeline-item .time{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin-bottom:0.3rem; display:block; }
+
+/* ── bars / progress ──────────────────────────────────────── */
+.bar,.budget-bar{ height:8px; background:var(--ink-3); border:1px solid var(--rule); overflow:hidden; display:inline-block; width:80px; vertical-align:middle; border-radius:0; }
+.budget-bar{ width:100%; height:20px; }
+.bar-fill,.budget-fill,.fill,.filled{ height:100%; background:var(--amber); box-shadow:0 0 8px rgba(212,162,75,0.4); border-radius:0; }
+.bar-h{ background:var(--kill); } .bar-cost{ background:var(--info); }
+
+/* ── layout helpers ───────────────────────────────────────── */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.auto-grid,.pay-cards,.layers{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+@media(max-width:768px){ .two-col,.auto-grid{ grid-template-columns:1fr; } }
+
+/* ── inline helpers / utility colors ──────────────────────── */
+code{ font-family:var(--ff-mono); font-size:0.92em; color:var(--amber); background:rgba(212,162,75,0.06); padding:1px 4px; border-radius:2px; }
+.mono{ font-family:var(--ff-mono); } .tnum{ font-variant-numeric:tabular-nums; }
+.amber,.gold,.accent{ color:var(--amber)!important; }
+.green,.good{ color:var(--good)!important; } .red,.danger,.kill,.hot{ color:var(--kill)!important; }
+.orange,.warn{ color:var(--warn)!important; } .cyan,.blue,.info,.cool{ color:var(--info)!important; }
+.muted,.dim{ color:var(--mute)!important; }
+.subhead{ font-family:var(--ff-mono); font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:0.18em; color:var(--bone); margin-bottom:0.6rem; display:block; }
+
+/* ── footer ───────────────────────────────────────────────── */
+.report-foot{ max-width:1320px; margin:3rem auto 0; padding:1.4rem 2rem 2.4rem; border-top:1px solid var(--rule); font-family:var(--ff-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute-2); display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+
+/* ── scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:var(--ink-0); }
+::-webkit-scrollbar-thumb{ background:var(--rule-2); border:2px solid var(--ink-0); }
+::-webkit-scrollbar-thumb:hover{ background:var(--amber-d); }
+
+/* ========================================================================
+   PAGE OVERRIDES · C19 session bespoke classes remapped to kit variables
+   ======================================================================== */
+.scan-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(30px,1fr)); gap:2px; margin:1.2rem 0 2rem; }
+.scan-block{ height:30px; display:flex; align-items:center; justify-content:center; font-family:var(--ff-mono); font-size:8px; font-weight:500; color:var(--ink-0); border-radius:0; cursor:default; }
+/* heatmap ramp · hot to cool remapped to warm palette (rust → burnt → slate/mute) */
+.hm-1{ background:#b15247; } .hm-2{ background:#b35a4b; } .hm-3{ background:#b66250; }
+.hm-4{ background:#b96b53; } .hm-5{ background:#bd7549; } .hm-6{ background:#c17e48; }
+.hm-7{ background:#c58448; } .hm-8{ background:#c9874a; } .hm-9{ background:#bf8650; }
+.hm-10{ background:#b48459; } .hm-11{ background:#a3855f; color:var(--bone); }
+.hm-12{ background:#94836a; color:var(--bone); } .hm-13{ background:#aaa595; color:var(--bone); }
+.hm-14{ background:#84807a; color:var(--bone); } .hm-15{ background:#7c7f83; color:var(--bone); }
+.hm-16{ background:#7a8499; color:var(--bone); }
+.handoff-card .title{ font-family:var(--ff-mono); font-size:12px; font-weight:600; color:var(--amber); letter-spacing:0.04em; display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+.handoff-card .bounty{ font-family:var(--ff-mono); font-size:13px; font-weight:500; color:var(--good); margin-top:0.4rem; }
+.handoff-card .detail{ color:var(--mute); font-size:12px; margin-top:0.4rem; font-family:var(--ff-sans); }
+.budget-fill{ display:flex; align-items:center; justify-content:flex-end; padding-right:0.7rem; font-family:var(--ff-mono); font-size:10px; color:var(--ink-0); font-weight:600; }
+.plain-list{ list-style:none; padding:0; margin:0.4rem 0; }
+.plain-list li{ padding:0.4rem 0 0.4rem 1.4rem; position:relative; font-size:13px; color:var(--bone-d); border-bottom:1px dashed var(--rule); }
+.mark-good::before{ content:'+'; position:absolute; left:0; color:var(--good); font-family:var(--ff-mono); }
+.mark-bad::before{ content:'\2212'; position:absolute; left:0; color:var(--kill); font-family:var(--ff-mono); }
+.note{ color:var(--mute); font-size:12px; margin-top:0.7rem; font-family:var(--ff-mono); }
+
+/* ── RESPONSIVE (shared, kit-based report pages) ───────────── */
+@media (max-width: 900px){
+  .auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px){
+  html,body{ overflow-x:hidden; max-width:100%; }
+  .report-head .rh-sep, .report-head .rh-tag{ display:none; }
+  body{ font-size: 13.5px; }
+  .report-head{ height: 44px; padding: 0 1rem; font-size: 10px; letter-spacing: 0.1em; }
+  .report-head .rh-tag{ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw; }
+  .report-head .rh-back{ padding: 0.25rem 0.55rem; }
+  .wrap{ padding: 1.4rem 1rem 2.4rem; }
+  h1{ font-size: 1.6rem; }
+  h2{ margin: 2rem 0 0.9rem; }
+  .two-col,.auto-grid,.pay-cards,.layers{ grid-template-columns: 1fr; }
+  .kpi{ border-right: none; }
+  table{ white-space: nowrap; }
+  .report-foot{ padding: 1.2rem 1rem 2rem; flex-direction: column; gap: 0.4rem; }
+}
+@media (max-width: 460px){
+  .kpi-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.tbl-scroll{ display:block; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1rem 0; }
+.tbl-scroll > table{ margin:0; }
+
+/* ── mobile anti-clipping: let grid/flex items shrink below content (min-width:0),
+   wrap long labels, and stack KPI grids so nothing is clipped by overflow-x:hidden ── */
+.card, .grid-2 > *, .grid-3 > *, .two-col > *, .auto-grid > *, .pay-cards > *, .layers > *,
+.kpi-grid > *, .kpi-strip > *, .agent-grid > * { min-width: 0; }
+@media (max-width: 760px){
+  .subhead { white-space: normal; word-break: break-word; }
+  .kpi .value, .kpi-strip .value { overflow-wrap: anywhere; }
+}
+@media (max-width: 460px){
+  .kpi-strip, .kpi-grid { grid-template-columns: 1fr; }
+}
+
+/* conversion CTAs for organic landings */
+.report-head .rh-cta{ margin-left:auto; color:var(--amber); text-decoration:none; border:1px solid var(--amber-d); padding:0.3rem 0.7rem; transition:color .15s, background .15s, border-color .15s; }
+.report-head .rh-cta:hover{ background:var(--amber); color:var(--ink-0); border-color:var(--amber); }
+.report-head .rh-cta + .rh-back{ margin-left:0.6rem; }
+.page-cta{ max-width:1320px; margin:3rem auto 0; padding:1.6rem 2rem; border:1px solid var(--amber-d); background:linear-gradient(180deg,rgba(212,162,75,0.10),rgba(212,162,75,0.02)); display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.page-cta .pc-t{ font-family:var(--ff-serif); font-size:1.25rem; color:var(--bone); }
+.page-cta .pc-s{ font-family:var(--ff-mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute); margin-top:0.25rem; }
+.page-cta .pc-btn{ font-family:var(--ff-mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-0); background:var(--amber); border:1px solid var(--amber); padding:0.7rem 1.2rem; text-decoration:none; white-space:nowrap; transition:background .15s; }
+.page-cta .pc-btn:hover{ background:var(--bone); border-color:var(--bone); }
+@media (max-width:760px){ .page-cta{ padding:1.3rem 1rem; } }
+@media (max-width:520px){ .report-head .rh-cta{ display:none; } }
+
+
+/* ---- EV calculator additions (page-local) ---- */
+#evcalc{border:1px solid var(--rule);background:var(--ink-1);padding:1.4rem 1.6rem;margin:1.2rem 0;}
+#evcalc label{display:block;font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:var(--mute);margin:0 0 1.2rem;}
+#evcalc input{display:block;width:100%;max-width:280px;margin-top:0.5rem;background:var(--ink-2);border:1px solid var(--rule-2);color:var(--bone);font-family:var(--ff-mono);font-size:14px;padding:0.5rem 0.7rem;border-radius:0;}
+#evcalc input:focus{outline:none;border-color:var(--amber);}
+#evcalc output{font-family:var(--ff-mono);color:var(--amber);font-size:1.05rem;}
+#evcalc p{margin:0.6rem 0 0;font-size:13px;color:var(--bone-d);}
+article p{max-width:72ch;color:var(--bone-d);}
+article a{color:var(--amber);text-decoration:none;border-bottom:1px solid var(--amber-d);}
+article a:hover{color:var(--bone);}
+article em{color:var(--mute);}
+.byline{font-family:var(--ff-mono);font-size:11px;letter-spacing:0.06em;color:var(--mute);border-left:2px solid var(--amber);padding-left:1rem;margin:1.2rem 0 0;}
+.disc{font-size:11px;color:var(--dim);border-top:1px solid var(--rule);padding-top:1rem;margin-top:2rem;}
+.pagehead{font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.22em;color:var(--mute);margin-bottom:0.6rem;}
+.pagehead .he-dot{display:inline-block;width:6px;height:6px;background:var(--amber);margin-right:0.6rem;vertical-align:1px;}
+footer{border-top:1px solid var(--rule);margin-top:3rem;padding-top:1.2rem;font-family:var(--ff-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim);}
+footer a{color:var(--mute);text-decoration:none;}
+
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Smart contract bug bounty ROI: an expected value calculator","author":{"@type":"Person","name":"Mike","url":"https://scanthechain.com/about/","description":"Independent smart contract security researcher; runs autonomous audit campaigns across DeFi protocols and publishes full cost, payout, and outcome data for each campaign."},"datePublished":"2026-10-01","dateModified":"2026-10-01","publisher":{"@type":"Organization","name":"Scan the Chain"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why do most hunters earn nothing from a campaign?", "acceptedAnswer": {"@type": "Answer", "text": "Pool dynamics. A program's reward pool is finite and the payout distribution is a power law: one hunter takes the critical, everyone else takes a duplicate or nothing. Immunefi's public bounty API exposes 237 programs, so competition concentrates on the same funded targets. Expected value must be computed net of that concentration, which is exactly what the p x payout - cost formula makes explicit."}}, {"@type": "Question", "name": "Why does program count matter?", "acceptedAnswer": {"@type": "Answer", "text": "Because it bounds diversification. Running parallel campaigns across more of the 237 programs exposed by Immunefi's public API spreads fixed infrastructure cost across more draws, without changing the per-draw probability. The calculator's cost input should include that shared infra, priced honestly."}}, {"@type": "Question", "name": "What does the year-to-date exploit total tell me?", "acceptedAnswer": {"@type": "Answer", "text": "The $1.83B lost year to date across DeFi per DeFiLlama's hacks feed is a map of what nobody caught yet. High totals in a category mean the bug class is still paying; a quiet category usually means programs paid out, patched, and burned that class. Aim your probability estimate where the losses still are."}}]}</script>
+</head>
+<body>
+<div class="wrap">
+<div class="pagehead"><span class="he-dot"></span>SCAN THE CHAIN // TOOL · EXPECTED VALUE CALCULATOR</div>
+<article><h1>Smart contract bug bounty ROI, computed from your own inputs</h1><p class="byline">By <a href="https://scanthechain.com/about/">Mike</a>, independent smart contract security researcher. Scan the Chain is an independent security research operation publishing open case studies from autonomous smart contract audit campaigns. All findings, costs, and outcomes are reported transparently.</p><h2>Why a calculator and not an essay</h2><p>Nobody ranking for this query will let you run your own numbers. They argue about averages; averages are useless here because the payout distribution is a power law. The only honest move is to show the formula, supply the market context, and let you type in your own probability and payout. The math is one line: expected value = p × payout − cost, and ROI = EV ÷ cost. Your inputs, your result. The site asserts nothing about what you will earn.</p><h2>Expected value calculator</h2><p><em>Illustrative inputs are pre-filled below; yours will differ.</em></p><div id="evcalc"><label>Campaign cost in USD (infra, tooling, your time priced honestly)<input type="number" id="cost" value="4000" min="0" step="100"></label><label>Estimated success probability, 0 to 1 (realistic single-campaign range is 0.01 to 0.10; see the FAQ below for why)<input type="number" id="prob" value="0.05" min="0" max="1" step="0.01"></label><label>Expected payout in USD if the critical lands (pull this from your target program's critical-severity table)<input type="number" id="payout" value="50000" min="0" step="1000"></label><p>Expected value: $<output id="ev">0</output></p><p>ROI on cost: <output id="roi">0</output></p></div><p class="disc">Past campaign results do not predict future bounty payouts. Expected value estimates assume probability-weighted outcomes and actual payouts may be zero. This site documents one independent researcher's experience and does not constitute financial or security advice.</p><h2>Market context, validated at fetch time</h2><p>The pool you are fishing in. Immunefi's public bounty API exposes <a href="https://immunefi.com/public-api/bounties">237 programs</a> right now, which bounds how many distinct target sets you can run against. The largest maximum critical-severity payout offered by any program on the platform is <a href="https://immunefi.com/public-api/bounties">15000000 USD</a>. That is the ceiling, not the median; treat it as a tail number.</p><p>The money at risk, which drives program budgets. Total value locked for the target protocol, per <a href="https://api.llama.fi/">DeFiLlama's protocol API</a>, sits at 24394262391.301197 USD. Programs funded from protocol treasuries tend to scale reward pools with what an exploit would actually cost them.</p><p>The burned bug classes. Year to date across DeFi, aggregated by <a href="https://api.llama.fi/hacks">DeFiLlama's hacks feed</a>, exploits have burned 1828777601.17 USD. Every dollar in that total is a bug class some program has already paid to learn about, and low-hanging reentrancy and oracle bugs are the first to go.</p><h2>Worked example, symbolically</h2><p>Take the calculator's three inputs: cost C, probability p, payout R. Expected value is p × R − C. With the illustrative pre-fill, that is 0.05 × 50,000 − 4,000, so EV equals 2,500 − 4,000, a negative 1,500. ROI divides EV by cost: −1,500 ÷ 4,000 = −0.375, or −37.5%. Run it yourself in the tool above; the outputs recompute on every keystroke. The lesson the formula forces on you: below some probability threshold, even a generous payout table cannot rescue the campaign economics. Note that a rejected or duplicate submission contributes zero to expected value, so dead submissions must never be counted in p or R. Vulnerability details are disclosed only after responsible disclosure timelines have passed, which also delays when a payout actually lands.</p><h2>Methodology</h2><p>Where these numbers come from. Program count and payout ceilings come from Immunefi's public bounty API, TVL and hack totals from DeFiLlama's public feeds, and each figure was fetched and cross-checked at page build time with a spread tolerance applied. Every displayed number is recomputed in code from a validated source, not typed by hand, and each one links to its origin inline. The calculator itself runs entirely in your browser on your own inputs; nothing you type leaves the page.</p><h2>FAQ</h2><h3>Why do most hunters earn nothing from a campaign?</h3><p>Pool dynamics. A program's reward pool is finite and the payout distribution is a power law: one hunter takes the critical, everyone else takes a duplicate or nothing. Immunefi's public bounty API exposes 237 programs, so competition concentrates on the same funded targets. Your expected value has to be computed net of that concentration, which is exactly what the p × payout − cost formula makes explicit. Past campaign results do not predict future bounty payouts, and actual payouts may be zero.</p><h3>Why does program count matter?</h3><p>Because it bounds diversification. Running one campaign against one program is a lottery ticket; running parallel campaigns across more of the 237 programs exposed by <a href="https://immunefi.com/public-api/bounties">Immunefi's public API</a> spreads your fixed infrastructure cost across more draws, without changing the per-draw probability. The calculator's cost input should include that shared infra, priced honestly.</p><h3>What does the year-to-date exploit total tell me?</h3><p>The 1828777601.17 USD lost year to date across DeFi, aggregated by <a href="https://api.llama.fi/hacks">DeFiLlama's hacks feed</a>, is a map of what nobody caught yet. High totals in a category mean the bug class is still paying; a quiet quarter for, say, oracle manipulation after repeated hits usually means programs paid out, patched, and burned that class. Aim your p estimate where the losses still are.</p></article>
+<footer>SCAN THE CHAIN · <a href="/">OVERVIEW</a> · <a href="about.html">ABOUT</a> · <a href="https://zovo.one/">GET THE DATA · $99</a></footer>
+</div>
+<script>(function(){var c=document.getElementById('cost'),p=document.getElementById('prob'),r=document.getElementById('payout'),ev=document.getElementById('ev'),roi=document.getElementById('roi');function f(n){return isFinite(n)?n.toLocaleString('en-US',{maximumFractionDigits:2}):'invalid input'}function calc(){var C=parseFloat(c.value),P=parseFloat(p.value),R=parseFloat(r.value);if(!(C>=0)||!(P>=0&&P<=1)||!(R>=0)){ev.textContent='invalid input';roi.textContent='invalid input';return}var E=P*R-C;ev.textContent=f(E);roi.textContent=C>0?(E/C*100).toFixed(2)+'%':'n/a (cost is zero)'}[c,p,r].forEach(function(i){i.addEventListener('input',calc)});calc()})()</script>
+</body>
+</html>
