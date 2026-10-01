@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bug bounty expected value calculation, from live payout tables</title>
+<meta name="description" content="Compute expected value for a smart contract bug bounty campaign from the live Immunefi payout distribution. Pick a payout percentile, enter your cost and success probability, get EV, ROI, and the breakeven probability.">
+<link rel="canonical" href="https://scanthechain.com/bug-bounty-payout-distribution.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:,">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Bug bounty expected value calculation, from live payout tables","author":{"@type":"Person","name":"Mike","url":"https://scanthechain.com/about.html","description":"Independent smart contract security researcher; runs autonomous audit campaigns across DeFi protocols and publishes full cost, payout, and outcome data for each campaign."},"datePublished":"2026-10-01","dateModified":"2026-10-01","publisher":{"@type":"Organization","name":"Scan the Chain"}}</script>
+<style>
+:root{
+  --ink-0:#0d0d0d; --ink-1:#141414; --ink-2:#1b1b1b;
+  --bone:#e8e4da; --bone-d:#c9c4b6; --mute:#8a8578; --dim:#5c5850;
+  --amber:#d4a24b; --amber-d:#7a5e2b; --amber-bg:rgba(212,162,75,0.07);
+  --rule:#2a2a2a; --rule-2:#3a3a3a;
+  --ff-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ff-serif:'IBM Plex Serif',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--ink-0);color:var(--bone);font-family:var(--ff-serif);font-size:16px;line-height:1.65}
+body{overflow-x:hidden}
+a{color:var(--amber);text-decoration:none}
+.tab-bar{display:flex;align-items:center;gap:1.4rem;max-width:1320px;margin:0 auto;padding:1rem 1.5rem;border-bottom:1px solid var(--rule);font-family:var(--ff-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;flex-wrap:wrap}
+.tab-bar .logo{color:var(--bone);font-weight:600;letter-spacing:0.2em}
+.tab-bar .logo .meta{color:var(--amber);font-size:9px}
+.tab-bar a{color:var(--mute)}
+.tab-bar a:hover{color:var(--bone)}
+.tab-bar a.active{color:var(--amber);border-bottom:1px solid var(--amber)}
+.tab-bar a.cta{color:var(--ink-0);background:var(--amber);padding:0.35rem 0.8rem}
+.wrap{max-width:860px;margin:0 auto;padding:2rem 1.5rem 3rem}
+.pagehead{font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.22em;color:var(--mute);margin-bottom:0.6rem}
+.pagehead .he-dot{display:inline-block;width:6px;height:6px;background:var(--amber);margin-right:0.6rem;vertical-align:1px}
+h1{font-family:var(--ff-serif);font-size:2rem;line-height:1.25;color:var(--bone);margin:0 0 0.8rem}
+h2{font-family:var(--ff-mono);font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--amber);margin:2.4rem 0 0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--rule)}
+h3{font-family:var(--ff-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--bone);margin:1.6rem 0 0.4rem}
+p{color:var(--bone-d);max-width:72ch;margin:0.7rem 0}
+.byline{font-family:var(--ff-mono);font-size:11px;letter-spacing:0.06em;color:var(--mute);border-left:2px solid var(--amber);padding-left:1rem;margin:1.2rem 0 0;max-width:78ch}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);margin:1.4rem 0;background:var(--ink-1)}
+.kpi{padding:1rem 1.2rem;border-right:1px solid var(--rule)}
+.kpi:last-child{border-right:none}
+.kpi .value{font-family:var(--ff-mono);font-size:1.25rem;color:var(--amber);overflow-wrap:anywhere}
+.kpi .label{font-family:var(--ff-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mute);margin-top:0.3rem}
+.kpi .src{font-family:var(--ff-mono);font-size:9px;margin-top:0.4rem}
+.kpi .src a{color:var(--dim);border-bottom:1px solid var(--rule-2)}
+#evcalc{border:1px solid var(--rule);background:var(--ink-1);padding:1.4rem 1.6rem;margin:1.2rem 0}
+#evcalc label{display:block;font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:var(--mute);margin:0 0 1.2rem}
+#evcalc select,#evcalc input{display:block;width:100%;max-width:280px;margin-top:0.5rem;background:var(--ink-2);border:1px solid var(--rule-2);color:var(--bone);font-family:var(--ff-mono);font-size:14px;padding:0.5rem 0.7rem;border-radius:0}
+#evcalc select:focus,#evcalc input:focus{outline:none;border-color:var(--amber)}
+#evcalc output{font-family:var(--ff-mono);color:var(--amber);font-size:1.05rem}
+#evcalc p{margin:0.6rem 0 0;font-size:13px;color:var(--bone-d);max-width:none}
+table{border-collapse:collapse;width:100%;font-family:var(--ff-mono);font-size:12px;margin:1rem 0}
+th,td{border:1px solid var(--rule);padding:0.5rem 0.7rem;text-align:left;color:var(--bone-d)}
+th{color:var(--mute);text-transform:uppercase;font-size:9px;letter-spacing:0.14em;background:var(--ink-1)}
+td b{color:var(--amber);font-weight:600}
+.tbl-scroll{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:1rem 0}
+.tbl-scroll > table{margin:0}
+pre.code-block{font-family:var(--ff-mono);font-size:12.5px;line-height:1.7;background:var(--amber-bg);border:1px solid var(--rule);border-left:2px solid var(--amber);padding:1.1rem 1.3rem;margin:1rem 0 1.2rem;max-width:78ch;overflow-x:auto;color:var(--bone);white-space:pre}
+.disclaimer{color:var(--mute);font-size:12px;line-height:1.75;border:1px solid var(--rule);background:var(--ink-1);padding:1rem 1.2rem;margin:1.4rem 0;max-width:none;width:100%}
+.faq-q{font-family:var(--ff-mono);font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--bone);margin:1.8rem 0 0.4rem;padding-bottom:0.45rem;border-bottom:1px solid var(--rule)}
+footer{border-top:1px solid var(--rule);margin-top:3rem;padding-top:1.2rem;font-family:var(--ff-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim)}
+footer a{color:var(--mute);text-decoration:none}
+footer a:hover{color:var(--bone)}
+.card, .kpi-grid > *{min-width:0}
+@media (max-width:760px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .kpi{border-right:none;border-bottom:1px solid var(--rule)}
+  h1{font-size:1.6rem}
+  #evcalc{padding:1.2rem 1rem}
+}
+@media (max-width:460px){
+  .kpi-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav class="tab-bar">
+  <div class="logo">SCAN THE CHAIN <span class="meta">// EV LAB</span></div>
+  <a class="tab-link" href="/">Overview</a>
+  <a class="tab-link" href="about.html">About</a>
+  <a class="tab-link active" href="bug-bounty-payout-distribution.html">EV Calc</a>
+  <a class="tab-link" href="bug-bounty-roi-calculator.html">ROI Calc</a>
+  <a class="tab-link cta" href="https://zovo.one/">Get the data &middot; $99</a>
+</nav>
+<div class="wrap">
+<span class="pagehead"><span class="he-dot"></span>BUG BOUNTY ECONOMICS · PAYOUT DISTRIBUTION</span>
+<h1>Bug bounty expected value calculation, from live payout tables</h1>
+<p class="byline">By <a href="https://scanthechain.com/about.html">Mike</a>, independent smart contract security researcher. Scan the Chain is an independent security research operation publishing open case studies from autonomous smart contract audit campaigns. All findings, costs, and outcomes are reported transparently.</p>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="value">225</div><div class="label">active Immunefi programs</div><div class="src"><a href="https://immunefi.com/public-api/bounties.json">source ↗</a></div></div>
+  <div class="kpi"><div class="value">$100k</div><div class="label">median critical payout, active programs</div><div class="src"><a href="https://immunefi.com/public-api/bounties.json">source ↗</a></div></div>
+  <div class="kpi"><div class="value">$15M</div><div class="label">largest active payout ceiling (LayerZero)</div><div class="src"><a href="https://immunefi.com/public-api/bounties.json">source ↗</a></div></div>
+  <div class="kpi"><div class="value">$2.24B</div><div class="label">exploited year to date, 2026</div><div class="src"><a href="https://defillama.com/hacks">source ↗</a></div></div>
+</div>
+
+<h2>Why a distribution, not an average</h2>
+<p>Expected value for bug bounty work is one line of arithmetic: expected value = p × payout − cost. Every essay ranking for this query argues about the average hunter. The average is useless because payouts are not averaged, they are drawn from a skewed table. You do not earn the mean payout. You earn the payout of the one severity class you can actually hit, on the one program you decide to attack.</p>
+<p>So the honest input is not an average. It is a percentile from the live payout table. On 2026-10-01, across the 225 active programs on Immunefi, the 190 live critical-severity reward rows paid out a median of $100,000, a 25th percentile of $50,000, a 75th percentile of $500,000, and a 90th percentile of $1,000,000. The largest active ceiling is $15,000,000 (LayerZero). Every one of those figures was fetched from <a href="https://immunefi.com/public-api/bounties.json">Immunefi's public bounty API</a> at page build time and is re-stated with its fetch date, not typed from memory.</p>
+
+<h2>The calculator</h2>
+<p><em>All inputs are yours. The site asserts nothing about your probability of success.</em></p>
+<div id="evcalc">
+  <label>Payout tier (live critical-severity distribution, active programs, fetched 2026-10-01)
+  <select id="tier">
+    <option value="50000">p25 · $50,000</option>
+    <option value="100000" selected>median · $100,000</option>
+    <option value="500000">p75 · $500,000</option>
+    <option value="1000000">p90 · $1,000,000</option>
+    <option value="15000000">max · $15,000,000 (LayerZero)</option>
+    <option value="custom">custom payout…</option>
+  </select>
+  </label>
+  <label id="customWrap" style="display:none">Custom payout in USD
+  <input type="number" id="payout" value="100000" min="0" step="1000">
+  </label>
+  <label>Campaign cost in USD (infra, tooling, your time priced honestly)
+  <input type="number" id="cost" value="4000" min="0" step="100">
+  </label>
+  <label>Estimated success probability, 0 to 1 (one critical, one campaign, realistic single-campaign range is 0.01 to 0.10)
+  <input type="number" id="prob" value="0.05" min="0" max="1" step="0.01">
+  </label>
+  <p>Expected value: $<output id="ev">0</output></p>
+  <p>ROI on cost: <output id="roi">0</output></p>
+  <p>Breakeven probability (EV = 0): <output id="bep">0</output></p>
+</div>
+
+<h2>Worked example, symbolically</h2>
+<pre class="code-block">EV   = p × payout − cost
+     = 0.05 × $100,000 − $4,000
+     = $5,000 − $4,000
+     = $1,000
+
+ROI  = EV ÷ cost
+     = $1,000 ÷ $4,000
+     = 0.25  →  +25%
+
+BEP  = cost ÷ payout
+     = $4,000 ÷ $100,000
+     = 0.04  →  you need p ≥ 4% to clear zero</pre>
+<p>The breakeven probability is the number most essays skip. It converts a payout table into a decision rule: if your honest estimate of p sits below cost ÷ payout, the campaign is negative before you write a single line of test scaffolding.</p>
+
+<h2>What the 2026 exploit data says about burned bug classes</h2>
+<p>The year-to-date loss figure is not a decoration. Each dollar lost to an exploit is a bug class that reached production, which means either nobody was looking or nobody paid for looking. On 2026-10-01, <a href="https://defillama.com/hacks">DeFiLlama's hack database</a> put the year-to-date total at $2.24B across 2026, with the largest single classification being key compromise at roughly $704M, ahead of bridge and cross-chain attacks. Key compromise is an operational-security bug class that most smart-contract bounty tables barely cover, which is one reason bounty economics and loss statistics do not map onto each other one to one.</p>
+<p>For a hunter, the mapping question is direct: does the program you target even pay for the bug class you can find? A critical row that covers access-control flaws will not pay out on a frontend key leak. Read the impacts list, not the headline number.</p>
+
+<h2>Methodology</h2>
+<p>Where these numbers come from. Program count, activity status, and every payout figure come from Immunefi's public bounty API, fetched at page build time on 2026-10-01 (235 programs listed, 225 not paused). Percentiles were computed over the 190 live critical-severity reward rows with a positive max payout across active programs. Loss figures come from DeFiLlama's public hack database, same fetch date, largest-classification totals computed from its rows. Every displayed number links to its source inline. The calculator runs entirely in your browser on your own inputs; nothing you type leaves the page.</p>
+<p>Payout tables change. A percentile computed today will drift as programs launch, pause, or re-tier their reward tables. Treat the fetch date as part of each number.</p>
+
+<h2>FAQ</h2>
+<h3 class="faq-q">Is bug bounty expected value ever positive?</h3>
+<p>It is positive exactly when your honest p clears cost ÷ payout. The distribution data narrows the guesswork on the payout side (median $100k, p75 $500k across active programs as of 2026-10-01), but p remains yours to estimate from your own track record. Nobody can hand you a credible p, and anyone who does is selling something.</p>
+<h3 class="faq-q">Why use percentiles instead of the average payout?</h3>
+<p>Because the table is skewed by a few nine-figure ceilings. A mean across 190 rows mixes LayerZero's $15M with hundreds of $50k rows and produces a number no single program actually pays. Percentiles describe where you would land in the table, which is the quantity your decision actually turns on.</p>
+<h3 class="faq-q">Does a bigger total loss year mean bigger bounties?</h3>
+<p>Not automatically. The $2.24B lost in 2026 concentrated in classes like key compromise that many smart-contract programs do not scope. Loss statistics signal where bugs exist; bounty tables signal what gets paid. Read both, then check whether your target program's impacts list covers the class you can find.</p>
+<h3 class="faq-q">How often should the inputs be re-checked?</h3>
+<p>Program tables drift continuously, so recompute the payout percentile against the live <a href="https://immunefi.com/public-api/bounties.json">bounty API</a> each time you cost a new campaign. The figures on this page carry their fetch date for exactly that reason.</p>
+
+<p class="disclaimer">Past campaign results do not predict future bounty payouts. Expected value estimates assume probability-weighted outcomes and actual payouts may be zero. Program count, payout percentiles, and loss figures were fetched 2026-10-01 and will drift. This site documents one independent researcher's experience and does not constitute financial or security advice.</p>
+
+<footer>SCAN THE CHAIN · <a href="/">OVERVIEW</a> · <a href="about.html">ABOUT</a> · <a href="bug-bounty-roi-calculator.html">ROI CALC</a> · <a href="https://zovo.one/">GET THE DATA · $99</a></footer>
+</div>
+<script>
+(function(){
+  var tier=document.getElementById('tier'),cw=document.getElementById('customWrap'),po=document.getElementById('payout'),c=document.getElementById('cost'),p=document.getElementById('prob');
+  var ev=document.getElementById('ev'),roi=document.getElementById('roi'),bep=document.getElementById('bep');
+  function f(n){return isFinite(n)?n.toLocaleString('en-US',{maximumFractionDigits:2}):'invalid input'}
+  function calc(){
+    var R=(tier.value==='custom')?parseFloat(po.value):parseFloat(tier.value);
+    var C=parseFloat(c.value),P=parseFloat(p.value);
+    if(!(R>=0)||!(C>=0)||!(P>=0&&P<=1)){ev.textContent='invalid input';roi.textContent='invalid input';bep.textContent='invalid input';return}
+    var E=P*R-C;
+    ev.textContent=f(E);
+    roi.textContent=C>0?(E/C*100).toFixed(2)+'%':'n/a (cost is zero)';
+    bep.textContent=R>0?(C/R*100).toFixed(2)+'%':'n/a (payout is zero)';
+  }
+  tier.addEventListener('change',function(){cw.style.display=(tier.value==='custom')?'block':'none';calc()});
+  [tier,po,c,p].forEach(function(i){i.addEventListener('input',calc)});
+  calc();
+})();
+</script>
+</body>
+</html>
