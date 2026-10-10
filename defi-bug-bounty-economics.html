@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeFi bug bounty economics in 2026, rewards offered and money lost</title>
+<meta name="description" content="DeFi bug bounty economics as of 2026-10-10. 154 open Immunefi programs offer a median maximum of $150,000. Exploits lost $2.24 billion in 2026.">
+<link rel="canonical" href="https://scanthechain.com/defi-bug-bounty-economics.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:,">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"DeFi bug bounty economics in 2026, rewards offered and money lost","description":"DeFi bug bounty economics as of 2026-10-10. 154 open Immunefi programs offer a median maximum of $150,000. Exploits lost $2.24 billion in 2026.","mainEntityOfPage":"https://scanthechain.com/defi-bug-bounty-economics.html","author":{"@type":"Person","name":"Mike","url":"https://scanthechain.com/about.html"},"datePublished":"2026-10-10","dateModified":"2026-10-10","publisher":{"@type":"Organization","name":"Scan the Chain"}}</script>
+<style>
+:root{
+  --ink-0:#0d0d0d; --ink-1:#141414; --ink-2:#1b1b1b;
+  --bone:#e8e4da; --bone-d:#c9c4b6; --mute:#8a8578; --dim:#5c5850;
+  --amber:#d4a24b; --amber-d:#7a5e2b; --amber-bg:rgba(212,162,75,0.07);
+  --rule:#2a2a2a; --rule-2:#3a3a3a;
+  --ff-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ff-serif:'IBM Plex Serif',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--ink-0);color:var(--bone);font-family:var(--ff-serif);font-size:16px;line-height:1.65}
+body{overflow-x:hidden}
+a{color:var(--amber);text-decoration:none}
+.tab-bar{display:flex;align-items:center;gap:1.4rem;max-width:1320px;margin:0 auto;padding:1rem 1.5rem;border-bottom:1px solid var(--rule);font-family:var(--ff-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;flex-wrap:wrap}
+.tab-bar .logo{color:var(--bone);font-weight:600;letter-spacing:0.2em}
+.tab-bar .logo .meta{color:var(--amber);font-size:9px}
+.tab-bar a{color:var(--mute)}
+.tab-bar a:hover{color:var(--bone)}
+.tab-bar a.active{color:var(--amber);border-bottom:1px solid var(--amber)}
+.tab-bar a.cta{color:var(--ink-0);background:var(--amber);padding:0.35rem 0.8rem}
+.wrap{max-width:860px;margin:0 auto;padding:2rem 1.5rem 3rem}
+.pagehead{font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.22em;color:var(--mute);margin-bottom:0.6rem}
+.pagehead .he-dot{display:inline-block;width:6px;height:6px;background:var(--amber);margin-right:0.6rem;vertical-align:1px}
+h1{font-family:var(--ff-serif);font-size:2rem;line-height:1.25;color:var(--bone);margin:0 0 0.8rem}
+h2{font-family:var(--ff-mono);font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--amber);margin:2.4rem 0 0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--rule)}
+h3{font-family:var(--ff-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--bone);margin:1.6rem 0 0.4rem}
+p{color:var(--bone-d);max-width:72ch;margin:0.7rem 0}
+.byline{font-family:var(--ff-mono);font-size:11px;letter-spacing:0.06em;color:var(--mute);border-left:2px solid var(--amber);padding-left:1rem;margin:1.2rem 0 0;max-width:78ch}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);margin:1.4rem 0;background:var(--ink-1)}
+.kpi{padding:1rem 1.2rem;border-right:1px solid var(--rule)}
+.kpi:last-child{border-right:none}
+.kpi .value{font-family:var(--ff-mono);font-size:1.25rem;color:var(--amber);overflow-wrap:anywhere}
+.kpi .label{font-family:var(--ff-mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mute);margin-top:0.3rem}
+.kpi .src{font-family:var(--ff-mono);font-size:9px;margin-top:0.4rem}
+.kpi .src a{color:var(--dim);border-bottom:1px solid var(--rule-2)}
+#evcalc{border:1px solid var(--rule);background:var(--ink-1);padding:1.4rem 1.6rem;margin:1.2rem 0}
+#evcalc label{display:block;font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:var(--mute);margin:0 0 1.2rem}
+#evcalc select,#evcalc input{display:block;width:100%;max-width:280px;margin-top:0.5rem;background:var(--ink-2);border:1px solid var(--rule-2);color:var(--bone);font-family:var(--ff-mono);font-size:14px;padding:0.5rem 0.7rem;border-radius:0}
+#evcalc select:focus,#evcalc input:focus{outline:none;border-color:var(--amber)}
+#evcalc output{font-family:var(--ff-mono);color:var(--amber);font-size:1.05rem}
+#evcalc p{margin:0.6rem 0 0;font-size:13px;color:var(--bone-d);max-width:none}
+table{border-collapse:collapse;width:100%;font-family:var(--ff-mono);font-size:12px;margin:1rem 0}
+th,td{border:1px solid var(--rule);padding:0.5rem 0.7rem;text-align:left;color:var(--bone-d)}
+th{color:var(--mute);text-transform:uppercase;font-size:9px;letter-spacing:0.14em;background:var(--ink-1)}
+td b{color:var(--amber);font-weight:600}
+.tbl-scroll{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:1rem 0}
+.tbl-scroll > table{margin:0}
+pre.code-block{font-family:var(--ff-mono);font-size:12.5px;line-height:1.7;background:var(--amber-bg);border:1px solid var(--rule);border-left:2px solid var(--amber);padding:1.1rem 1.3rem;margin:1rem 0 1.2rem;max-width:78ch;overflow-x:auto;color:var(--bone);white-space:pre}
+.disclaimer{color:var(--mute);font-size:12px;line-height:1.75;border:1px solid var(--rule);background:var(--ink-1);padding:1rem 1.2rem;margin:1.4rem 0;max-width:none;width:100%}
+.faq-q{font-family:var(--ff-mono);font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--bone);margin:1.8rem 0 0.4rem;padding-bottom:0.45rem;border-bottom:1px solid var(--rule)}
+footer{border-top:1px solid var(--rule);margin-top:3rem;padding-top:1.2rem;font-family:var(--ff-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim)}
+footer a{color:var(--mute);text-decoration:none}
+footer a:hover{color:var(--bone)}
+.card, .kpi-grid > *{min-width:0}
+@media (max-width:760px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .kpi{border-right:none;border-bottom:1px solid var(--rule)}
+  h1{font-size:1.6rem}
+  #evcalc{padding:1.2rem 1rem}
+}
+@media (max-width:460px){
+  .kpi-grid{grid-template-columns:1fr}
+}
+td.num,th.num{text-align:right}
+td.num{white-space:nowrap}
+caption{caption-side:top;text-align:left;font-family:var(--ff-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mute);padding:0 0 0.5rem}
+tr.total td{color:var(--bone);font-weight:600}
+.src-line{font-family:var(--ff-mono);font-size:11px;color:var(--mute);margin:0.4rem 0 1rem}
+.kpi .src a{color:var(--mute);display:inline-block;padding:0.35rem 0}
+code{font-family:var(--ff-mono);font-size:0.86em;color:var(--bone);overflow-wrap:anywhere}
+.tab-bar a{padding:0.45rem 0}
+footer{color:var(--mute)}
+footer a{display:inline-block;padding:0.45rem 0}
+@media (max-width:460px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .kpi{padding:0.8rem 0.9rem}
+  .kpi .value{font-size:1.1rem}
+  th,td{padding:0.4rem 0.35rem}
+  table{font-size:11px}
+  th{letter-spacing:0.06em}
+}
+</style>
+</head>
+<body>
+<nav class="tab-bar">
+  <div class="logo">SCAN THE CHAIN <span class="meta">// ECONOMICS</span></div>
+  <a class="tab-link" href="/">Overview</a>
+  <a class="tab-link" href="about.html">About</a>
+  <a class="tab-link" href="bug-bounty-payout-distribution.html">EV Calc</a>
+  <a class="tab-link" href="bug-bounty-roi-calculator.html">ROI Calc</a>
+  <a class="tab-link active" href="defi-bug-bounty-economics.html">Economics</a>
+</nav>
+<div class="wrap">
+<span class="pagehead"><span class="he-dot"></span>BUG BOUNTY ECONOMICS · 2026 DATA</span>
+<h1>DeFi bug bounty economics in 2026</h1>
+<p class="byline">By <a href="https://scanthechain.com/about.html">Mike</a>, independent smart contract security researcher. Data fetched 2026-10-10.</p>
+
+<p>This page sets three public numbers side by side. The first is what bug bounty programs offer to pay. The second is what ended contests recorded as earnings. The third is what exploits cost in 2026. All come from two public feeds fetched on 2026-10-10. Each table names its source.</p>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="value">154</div><div class="label">open Immunefi programs</div><div class="src"><a href="https://immunefi.com/public-api/bounties.json">source</a></div></div>
+  <div class="kpi"><div class="value">$150,000</div><div class="label">median maximum reward</div><div class="src"><a href="https://immunefi.com/public-api/bounties.json">source</a></div></div>
+  <div class="kpi"><div class="value">$290.50</div><div class="label">median earning per leaderboard row, ended contests</div><div class="src"><a href="https://immunefi.com/public-api/bounties.json">source</a></div></div>
+  <div class="kpi"><div class="value">$2.24B</div><div class="label">lost to exploits in 2026</div><div class="src"><a href="https://api.llama.fi/hacks">source</a></div></div>
+</div>
+
+<h2>What open programs offer</h2>
+<p>On 2026-10-10 the <a href="https://immunefi.com/public-api/bounties.json">Immunefi public bounty API</a> returned 232 program records. 62 have an end date in the past and 16 are paused. The other 154 are open. 103 of them carry the project type Defi, 136 list smart contracts as a program type, and 87 require identity checks (KYC).</p>
+<div class="tbl-scroll"><table><caption>Open Immunefi programs by maximum reward, as of 2026-10-10</caption>
+<thead><tr>
+<th>Maximum reward</th>
+<th class="num">Programs</th>
+<th class="num">Share</th>
+<th class="num">Median</th>
+<th class="num">Sum</th>
+</tr></thead><tbody>
+<tr><td>$10,000,000 or more</td><td class="num">3</td><td class="num">1.9%</td><td class="num">$10,000,000</td><td class="num">$35.0M</td></tr>
+<tr><td>$1,000,000 to under $10,000,000</td><td class="num">27</td><td class="num">17.5%</td><td class="num">$1,000,000</td><td class="num">$52.9M</td></tr>
+<tr><td>$100,000 to under $1,000,000</td><td class="num">73</td><td class="num">47.4%</td><td class="num">$200,000</td><td class="num">$17.9M</td></tr>
+<tr><td>$10,000 to under $100,000</td><td class="num">42</td><td class="num">27.3%</td><td class="num">$45,000</td><td class="num">$1.6M</td></tr>
+<tr><td>Under $10,000</td><td class="num">9</td><td class="num">5.8%</td><td class="num">$5,000</td><td class="num">$31,000</td></tr>
+<tr class="total"><td>All open programs</td><td class="num">154</td><td class="num">100.0%</td><td class="num">$150,000</td><td class="num">$107.5M</td></tr>
+</tbody></table></div>
+<p class="src-line">Source: <a href="https://immunefi.com/public-api/bounties.json">Immunefi public bounty API</a>, fetched 2026-10-10.</p>
+<p>The median open program offers a maximum of $150,000. For the 103 programs with the project type Defi the median is $150,000. There are 3 programs at $10,000,000 or more, namely LayerZero ($15,000,000), Stargate ($10,000,000) and Sky ($10,000,000). The maximums of all 154 programs add up to $107,467,597. The 30 programs at $1,000,000 or more hold 81.8% of that sum.</p>
+<p>A maximum is the top of a reward table. 136 of the 154 programs publish reward rows in the API. In 134 of those 136, the maximum sits on the critical severity row.</p>
+
+<h2>What ended contests paid</h2>
+<p>The API holds no payment data for the open programs. It does hold leaderboards for 60 of the 62 ended records. 39 of the 60 are named as audit competitions. Their end dates run from 2023-12-04 to 2026-09-14. One leaderboard row is one researcher in one contest, with the earnings that Immunefi records.</p>
+<div class="tbl-scroll"><table><caption>Leaderboard earnings in 60 ended Immunefi contests, as of 2026-10-10</caption>
+<thead><tr>
+<th>Earnings per row</th>
+<th class="num">Rows</th>
+<th class="num">Share of rows</th>
+<th class="num">Sum</th>
+<th class="num">Share of sum</th>
+</tr></thead><tbody>
+<tr><td>$0</td><td class="num">172</td><td class="num">9.3%</td><td class="num">$0</td><td class="num">0.0%</td></tr>
+<tr><td>$1 to under $100</td><td class="num">513</td><td class="num">27.6%</td><td class="num">$17,037</td><td class="num">0.2%</td></tr>
+<tr><td>$100 to under $1,000</td><td class="num">583</td><td class="num">31.4%</td><td class="num">$229,910</td><td class="num">3.2%</td></tr>
+<tr><td>$1,000 to under $10,000</td><td class="num">437</td><td class="num">23.5%</td><td class="num">$1,483,677</td><td class="num">20.7%</td></tr>
+<tr><td>$10,000 or more</td><td class="num">153</td><td class="num">8.2%</td><td class="num">$5,448,011</td><td class="num">75.9%</td></tr>
+<tr class="total"><td>All rows</td><td class="num">1,858</td><td class="num">100.0%</td><td class="num">$7,178,635</td><td class="num">100.0%</td></tr>
+</tbody></table></div>
+<p class="src-line">Source: <a href="https://immunefi.com/public-api/bounties.json">Immunefi public bounty API</a>, fetched 2026-10-10.</p>
+<p>The 60 leaderboards hold 1,858 rows and $7,178,635 of earnings. The reward pools of the same contests add up to $9,855,000, so the recorded earnings are 72.8% of the pools. The median row earned $290.50. 172 rows earned nothing. In the median contest the top row took 32.0% of the recorded earnings.</p>
+
+<h2>What exploits cost in 2026</h2>
+<p>On 2026-10-10 the <a href="https://api.llama.fi/hacks">DeFiLlama hacks feed</a> listed 292 incidents dated in 2026. The latest is dated 2026-10-07. 280 of them carry a loss amount above zero. The amounts add up to $2,243,485,659, or $2.24 billion. Among those 280, the median loss is $500,430.</p>
+<div class="tbl-scroll"><table><caption>2026 exploit losses by target type, as of 2026-10-10</caption>
+<thead><tr>
+<th>Target type</th>
+<th class="num">Incidents</th>
+<th class="num">Lost</th>
+<th class="num">Share</th>
+</tr></thead><tbody>
+<tr><td>DeFi Protocol</td><td class="num">210</td><td class="num">$1,177.6M</td><td class="num">52.5%</td></tr>
+<tr><td>Chain</td><td class="num">23</td><td class="num">$432.6M</td><td class="num">19.3%</td></tr>
+<tr><td>CEX</td><td class="num">2</td><td class="num">$400.7M</td><td class="num">17.9%</td></tr>
+<tr><td>Wallet</td><td class="num">8</td><td class="num">$142.2M</td><td class="num">6.3%</td></tr>
+<tr><td>Token</td><td class="num">25</td><td class="num">$43.1M</td><td class="num">1.9%</td></tr>
+<tr><td>10 other target types</td><td class="num">24</td><td class="num">$47.2M</td><td class="num">2.1%</td></tr>
+<tr class="total"><td>All targets</td><td class="num">292</td><td class="num">$2,243.5M</td><td class="num">100.0%</td></tr>
+</tbody></table></div>
+<p class="src-line">Source: <a href="https://api.llama.fi/hacks">DeFiLlama hacks feed</a>, fetched 2026-10-10.</p>
+<p>The feed covers all crypto targets. DeFi protocols were the target in 210 incidents and lost $1,177.6M, which is 52.5% of the total. The largest single loss in the feed is Bitget, a centralized exchange (CEX), at $387,000,000 on 2026-09-24.</p>
+<div class="tbl-scroll"><table><caption>2026 exploit losses by class, as of 2026-10-10</caption>
+<thead><tr>
+<th>Class</th>
+<th class="num">Incidents</th>
+<th class="num">Lost</th>
+<th class="num">Share</th>
+</tr></thead><tbody>
+<tr><td>Key Compromise</td><td class="num">31</td><td class="num">$703.8M</td><td class="num">31.4%</td></tr>
+<tr><td>Bridge &amp; Cross-Chain</td><td class="num">32</td><td class="num">$700.1M</td><td class="num">31.2%</td></tr>
+<tr><td>Access Control</td><td class="num">53</td><td class="num">$370.2M</td><td class="num">16.5%</td></tr>
+<tr><td>Token &amp; Share Accounting</td><td class="num">50</td><td class="num">$245.6M</td><td class="num">10.9%</td></tr>
+<tr><td>Oracle Manipulation</td><td class="num">41</td><td class="num">$73.4M</td><td class="num">3.3%</td></tr>
+<tr><td>Frontend &amp; Infrastructure</td><td class="num">10</td><td class="num">$43.2M</td><td class="num">1.9%</td></tr>
+<tr><td>Governance</td><td class="num">8</td><td class="num">$42.9M</td><td class="num">1.9%</td></tr>
+<tr><td>Protocol Logic</td><td class="num">38</td><td class="num">$25.2M</td><td class="num">1.1%</td></tr>
+<tr><td>6 other classes</td><td class="num">29</td><td class="num">$39.1M</td><td class="num">1.7%</td></tr>
+<tr class="total"><td>All classes</td><td class="num">292</td><td class="num">$2,243.5M</td><td class="num">100.0%</td></tr>
+</tbody></table></div>
+<p class="src-line">Source: <a href="https://api.llama.fi/hacks">DeFiLlama hacks feed</a>, fetched 2026-10-10.</p>
+<p>Key Compromise lost $703.8M in 31 incidents. Bridge &amp; Cross-Chain lost $700.1M in 32 incidents. Access Control has the most incidents, 53.</p>
+
+<h2>Rewards set against losses</h2>
+<p>The sum of all 154 maximum rewards equals 4.8% of the 2026 losses. 16 incidents each lost more than $15,000,000, the largest maximum on offer. Of the 280 incidents with an amount, 197 lost more than $150,000, the median maximum.</p>
+<p>Programs also limit what they pay for. 140 of the 154 open programs carry the Immunefi default exclusion for "attacks requiring access to leaked keys/credentials". The other 14 have no default exclusion text in the API. Key Compromise is the largest loss class in the table above. The two feeds use different labels, so read this as a rough match and not as an exact one.</p>
+
+<h2>What these numbers do not show</h2>
+<p>A maximum reward is an offer. It is not a payment. For the 154 open programs the API holds no payment data, so this page gives no payout distribution for them. The contest leaderboards cover ended contests only. They show the researchers that Immunefi lists, and this page cannot tell how many others took part.</p>
+<p>The counts depend on the filter. Immunefi's own <a href="https://immunefi.com/bug-bounty/">program list</a> showed 169 programs on 2026-10-10. The filter on this page gives 154. Programs on other platforms are not counted.</p>
+<p>The loss amounts are as DeFiLlama records them. They are not reduced by returned funds. The feed records $5,675,416 of returned funds across 8 incidents in 2026. Both feeds change, so read each number as of 2026-10-10.</p>
+
+<h2>How these numbers were computed</h2>
+<p>Program data comes from <code>https://immunefi.com/public-api/bounties.json</code>, fetched 2026-10-10 06:19 UTC. A program counts as open when <code>isPaused</code> is false and <code>endDate</code> is empty or later than the fetch time. The maximum reward is the <code>maxBounty</code> field, in US dollars. The scope count looks for the text "leaked keys/credentials" in <code>defaultOutOfScopeGeneral</code>. Contest earnings come from <code>boostedLeaderboard</code>. The earning of a row is <code>totalEarnings</code> when the row has it and <code>earnings</code> when it does not. The pool is <code>rewardsPool</code>.</p>
+<p>Loss data comes from <code>https://api.llama.fi/hacks</code>, fetched at the same time. An incident counts for 2026 when its <code>date</code> is on or after 2026-01-01 00:00 UTC. The loss is the <code>amount</code> field, in US dollars, and an empty amount counts as zero. Groups use the <code>targetType</code> and <code>classification</code> fields. A group under 1.0% of the total goes into the "other" row. Shares are rounded to one decimal, so a column can differ from 100.0% by 0.1.</p>
+
+<h2>Put your own inputs against these numbers</h2>
+<p>These tables give the size of the offers, the recorded contest earnings and the losses. They do not give your odds. To work out the expected value of a campaign from your own cost and probability, use the <a href="bug-bounty-roi-calculator.html">ROI calculator</a>, the <a href="bug-bounty-payout-distribution.html">payout distribution calculator</a> or the <a href="bug-bounty-expected-value-calculation.html">expected value calculation page</a>.</p>
+
+<p class="disclaimer">Figures were fetched on 2026-10-10 and will change. A maximum reward is not a payout, and actual payouts may be zero. This site documents one independent researcher's experience and does not constitute financial or security advice.</p>
+
+<footer>SCAN THE CHAIN · <a href="/">OVERVIEW</a> · <a href="about.html">ABOUT</a> · <a href="bug-bounty-roi-calculator.html">ROI CALC</a></footer>
+</div>
+</body>
+</html>
