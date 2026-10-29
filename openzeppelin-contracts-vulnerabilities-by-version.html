@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenZeppelin vulnerabilities by version</title>
+<meta name="description" content="Look up an @openzeppelin/contracts or contracts-upgradeable version. 24 GitHub advisory ids (21 issues), both severities and first patched versions.">
+<link rel="canonical" href="https://scanthechain.com/openzeppelin-contracts-vulnerabilities-by-version.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:,">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"OpenZeppelin Contracts vulnerabilities by version","description":"Per-version index of 24 GitHub advisory ids (21 issues) for @openzeppelin/contracts and @openzeppelin/contracts-upgradeable.","mainEntityOfPage":"https://scanthechain.com/openzeppelin-contracts-vulnerabilities-by-version.html","author":{"@type":"Person","name":"Michael Lip","url":"https://scanthechain.com/about.html","sameAs":["https://zovo.one/about/michael-lip"]},"datePublished":"2026-10-29","dateModified":"2026-10-29","publisher":{"@type":"Organization","name":"Scan the Chain"}}
+</script>
+<style>
+:root{
+  --ink-0:#0d0d0d; --ink-1:#141414; --ink-2:#1b1b1b;
+  --bone:#e8e4da; --bone-d:#c9c4b6; --mute:#8a8578; --dim:#5c5850;
+  --amber:#d4a24b; --amber-d:#7a5e2b; --amber-bg:rgba(212,162,75,0.07);
+  --rule:#2a2a2a; --rule-2:#3a3a3a;
+  --ff-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ff-serif:'IBM Plex Serif',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--ink-0);color:var(--bone);font-family:var(--ff-serif);font-size:16px;line-height:1.65}
+body{overflow-x:hidden}
+a{color:var(--amber);text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.tab-bar{display:flex;align-items:center;gap:1.4rem;max-width:1320px;margin:0 auto;padding:1rem 1.5rem;border-bottom:1px solid var(--rule);font-family:var(--ff-mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;flex-wrap:wrap}
+.tab-bar .logo{color:var(--bone);font-weight:600;letter-spacing:0.2em}
+.tab-bar .logo .meta{color:var(--amber);font-size:12px}
+.tab-bar a{color:var(--mute);padding:0.45rem 0}
+.tab-bar a:hover{color:var(--bone)}
+.tab-bar a.active{color:var(--amber);border-bottom:1px solid var(--amber)}
+.tab-bar a.cta{color:var(--ink-0);background:var(--amber);padding:0.35rem 0.8rem}
+.wrap{max-width:860px;margin:0 auto;padding:2rem 1.5rem 3rem}
+.pagehead{font-family:var(--ff-mono);font-size:12px;text-transform:uppercase;letter-spacing:0.22em;color:var(--mute);margin-bottom:0.6rem}
+.pagehead .he-dot{display:inline-block;width:6px;height:6px;background:var(--amber);margin-right:0.6rem;vertical-align:1px}
+h1{font-family:var(--ff-serif);font-size:2rem;line-height:1.25;color:var(--bone);margin:0 0 0.8rem}
+h2{font-family:var(--ff-mono);font-size:13px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--amber);margin:2.4rem 0 0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--rule)}
+h3{font-family:var(--ff-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--bone);margin:1.6rem 0 0.4rem}
+p{color:var(--bone-d);max-width:72ch;margin:0.7rem 0}
+.byline{font-family:var(--ff-mono);font-size:14px;letter-spacing:0.06em;color:var(--mute);border-left:2px solid var(--amber);padding-left:1rem;margin:1.2rem 0 0;max-width:78ch}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);margin:1.4rem 0;background:var(--ink-1)}
+.kpi{padding:1rem;border-right:1px solid var(--rule)}
+.kpi:last-child{border-right:0}
+.kpi .value{font-family:var(--ff-mono);font-size:1.6rem;color:var(--amber)}
+.kpi .label{font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:var(--mute);margin-top:0.2rem}
+.kpi .src{font-family:var(--ff-mono);font-size:10px;margin-top:0.3rem}
+.jump{font-family:var(--ff-mono);font-size:12px;color:var(--mute)}
+.lookup-box{border:1px solid var(--rule);background:var(--ink-1);padding:1.2rem;margin:1.4rem 0}
+.lookup-box label{font-family:var(--ff-mono);font-size:12px;color:var(--bone);display:block;margin-bottom:0.4rem}
+.lookup-box input{font-family:var(--ff-mono);font-size:15px;background:var(--ink-2);color:var(--bone);border:1px solid var(--rule-2);padding:0.55rem 0.7rem;width:220px;max-width:100%}
+.lookup-box button{font-family:var(--ff-mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;background:var(--amber);color:var(--ink-0);border:0;padding:0.55rem 1rem;cursor:pointer;margin-left:0.5rem}
+.lookup-box button:hover{filter:brightness(1.1)}
+.err{font-family:var(--ff-mono);font-size:12px;color:#e08a7a;margin-top:0.5rem;display:none}
+.result{margin-top:0.9rem;font-family:var(--ff-mono);font-size:13px;color:var(--bone);display:none;border-top:1px solid var(--rule);padding-top:0.7rem}
+.sev{display:inline-block;font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;padding:0.1rem 0.45rem;border:1px solid}
+.sev.low{color:#9ab89a;border-color:#3d5340}
+.sev.medium{color:#d8c069;border-color:#6b5c25}
+.sev.high{color:#e0965f;border-color:#6e4526}
+.sev.critical{color:#e08a7a;border-color:#6e352c}
+.tbl-scroll{overflow-x:auto;border:1px solid var(--rule);background:var(--ink-1)}
+table{border-collapse:collapse;width:100%;font-family:var(--ff-mono);font-size:12.5px}
+caption{text-align:left;font-family:var(--ff-mono);font-size:11px;color:var(--mute);padding:0.6rem 0.8rem;letter-spacing:0.08em}
+th{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--amber);text-align:left;padding:0.6rem 0.8rem;border-bottom:1px solid var(--rule-2);white-space:normal;cursor:pointer}
+td{padding:0.5rem 0.8rem;border-bottom:1px solid var(--rule);color:var(--bone-d);vertical-align:top}
+tr:hover td{background:var(--amber-bg)}
+td.num{color:var(--bone)}
+.latest td{background:rgba(212,162,75,0.05)}
+.badge{display:inline-block;width:8px;height:8px;margin-right:4px;vertical-align:1px}
+.badge.low{background:#9ab89a}.badge.medium{background:#d8c069}.badge.high{background:#e0965f}.badge.critical{background:#e08a7a}
+details{border:1px solid var(--rule);background:var(--ink-1);margin:0.6rem 0;padding:0.7rem 1rem}
+summary{font-family:var(--ff-mono);font-size:12.5px;color:var(--amber);cursor:pointer}
+.note{border-left:2px solid var(--amber-d);padding-left:1rem;color:var(--mute);font-size:14px}
+.src-line{font-family:var(--ff-mono);font-size:14px;color:var(--mute)}
+code{font-family:var(--ff-mono);font-size:1em}
+footer{border-top:1px solid var(--rule);margin-top:3rem;padding:1.2rem 1.5rem;font-family:var(--ff-mono);font-size:12px;letter-spacing:0.14em;color:var(--mute);max-width:1320px;margin-left:auto;margin-right:auto}
+@media(max-width:640px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .kpi{border-bottom:1px solid var(--rule)}
+  h1{font-size:1.5rem}
+  .tab-bar{gap:0.9rem}
+  .lookup-box input{width:100%;margin-bottom:0.5rem}
+  .lookup-box button{margin-left:0}
+  table{font-size:14px}
+  th{font-size:14px}
+  caption{font-size:14px}
+  .kpi .label{font-size:14px}
+  .kpi .src{font-size:14px}
+  .jump,.src-line{font-size:14px}
+  .sev{font-size:14px}
+  .result,.err{font-size:14px}
+  h2,.pagehead,.lookup-box label,.lookup-box button{font-size:14px}
+  .tab-bar,.tab-bar .logo .meta,footer{font-size:14px}
+}
+@media print{
+  :root{--ink-0:#fff;--ink-1:#fff;--ink-2:#fff;--bone:#000;--bone-d:#1a1a1a;--mute:#444;--dim:#444;--amber:#6b4a00;--amber-d:#6b4a00;--amber-bg:transparent;--rule:#999;--rule-2:#999}
+  body{background:#fff;color:#000}
+  .tab-bar,.lookup-box button,.jump{display:none}
+  .tbl-scroll{border:0;overflow:visible}
+  td,th{color:#000;border-color:#bbb}
+  p{color:#222}
+}
+.sev-critical{color:#e08a7a}.sev-high{color:#e0965f}.sev-medium{color:#d8c069}.sev-low,.sev-none{color:var(--mute)}
+td.sev{display:table-cell;font-size:14px;border:0;border-bottom:1px solid var(--rule);padding:0.5rem 0.8rem;text-transform:none;letter-spacing:0}
+th{font-size:12px;cursor:default}
+.src-line{display:block;font-size:12px}
+.dual{color:var(--mute);font-size:12px}
+.dep-flag{color:#e08a7a;font-size:12px;margin-left:.4rem}
+.num{white-space:nowrap}
+.lookup{border:1px solid var(--rule);background:var(--ink-1);padding:1.2rem;margin:1.4rem 0}
+.lookup label{font-family:var(--ff-mono);font-size:14px;color:var(--bone);display:block;margin:0.6rem 0 0.4rem}
+.lookup select,.lookup input{font-family:var(--ff-mono);font-size:15px;background:var(--ink-2);color:var(--bone);border:1px solid var(--rule-2);padding:0.55rem 0.7rem;max-width:100%}
+.lookup select{width:100%}
+.lookup input{width:220px}
+.lookup button{font-family:var(--ff-mono);font-size:14px;letter-spacing:0.1em;text-transform:uppercase;background:var(--amber);color:var(--ink-0);border:0;padding:0.55rem 1rem;cursor:pointer;margin-left:0.5rem}
+#lookup-result{margin-top:0.9rem;font-family:var(--ff-mono);font-size:14px;color:var(--bone)}
+#lookup-result ul{padding-left:1.2rem}
+#lookup-result .bad{color:#e08a7a;font-weight:600}
+#lookup-result .good{color:#9ab89a;font-weight:600}
+blockquote{border-left:2px solid var(--amber);padding:.4rem 1rem;margin:.8rem 0;color:var(--bone-d)}
+.scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;border:1px solid var(--rule);background:var(--ink-1);margin:1rem 0}
+td code,td a,p code{overflow-wrap:anywhere}
+.num .src-line,.num .dep-flag{white-space:normal}
+select:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media(max-width:640px){
+  th,td{padding:.4rem .35rem;word-break:break-word}
+  h1,h2,h3{overflow-wrap:anywhere}
+  h3,th,summary,.src-line,.dual,.dep-flag,footer a,.lookup select,td.sev{font-size:14px}
+  .lookup input{width:100%;margin-bottom:0.5rem}
+  .lookup button{margin-left:0}
+  #adv-table,#ver-table{min-width:640px}
+  #adv-table th,#adv-table td,#ver-table th,#ver-table td{word-break:normal}
+}
+@media print{
+  td.sev,.sev-critical,.sev-high,.sev-medium,.sev-low,.sev-none,#lookup-result{color:#000}
+  .lookup{display:none}
+  .scrollx{border:0;overflow:visible}
+}
+</style>
+</head>
+<body>
+<nav class="tab-bar" aria-label="Site navigation">
+  <div class="logo">SCAN THE CHAIN <span class="meta">// CONTRACT SECURITY</span></div>
+  <a class="tab-link" href="/">Overview</a>
+  <a class="tab-link" href="about.html">About</a>
+  <a class="tab-link" href="bug-bounty-payout-distribution.html">EV Calc</a>
+  <a class="tab-link" href="bug-bounty-roi-calculator.html">ROI Calc</a>
+  <a class="tab-link" href="defi-bug-bounty-economics.html">Economics</a>
+  <a class="tab-link" href="solidity-compiler-bugs-by-version.html">Solidity Bugs</a>
+  <a class="tab-link" href="vyper-compiler-bugs-by-version.html">Vyper Bugs</a>
+  <a class="tab-link active" href="openzeppelin-contracts-vulnerabilities-by-version.html">OpenZeppelin Bugs</a>
+</nav>
+<div class="wrap">
+<p class="pagehead"><span class="he-dot"></span>LIBRARY SECURITY</p>
+<h1>OpenZeppelin Contracts vulnerabilities by version</h1>
+<p class="byline">By Michael Lip (<a href="about.html">Mike</a>), independent smart contract security researcher. Data fetched 2026-10-29.</p>
+<p>This page lists the 24 GitHub advisory ids for <code>@openzeppelin/contracts</code> and <code>@openzeppelin/contracts-upgradeable</code>, from the 2021 TimelockController advisory to the 2025 <code>lastIndexOf</code> memory-access bug. The two OpenZeppelin repositories published 23 of them. GitHub added GHSA-88g8-f5mf-f5rj. The page counts the advisories per stable npm release, and the lookup shows the advisories for your version.</p>
+<p class="jump">On this page <a href="#lookup">Version lookup</a> <a href="#advisories">All advisories</a> <a href="#dedup">Duplicates</a> <a href="#all-versions">All versions</a> <a href="#by-major">By major line</a> <a href="#support">Support status</a> <a href="#method">Method</a></p>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="value">24</div><div class="label">GHSA ids in the GitHub database (21 issues)</div><div class="src"><a href="https://github.com/advisories?query=%40openzeppelin%2Fcontracts">GitHub database</a></div></div>
+  <div class="kpi"><div class="value">23</div><div class="label">advisories in the two OpenZeppelin repositories</div><div class="src"><a href="https://github.com/OpenZeppelin/openzeppelin-contracts/security/advisories">contracts repo</a> · <a href="https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/security/advisories">upgradeable repo</a></div></div>
+  <div class="kpi"><div class="value">8</div><div class="label">repository advisories rated higher by GitHub</div><div class="src"><a href="#advisories">advisory table</a></div></div>
+  <div class="kpi"><div class="value">5.6.1</div><div class="label">npm dist-tag latest (dev is 5.7.0)</div><div class="src"><a href="https://registry.npmjs.org/@openzeppelin/contracts">npm registry</a></div></div>
+</div>
+
+<h2 id="lookup">Lookup a version</h2>
+<div class="lookup">
+<label for="vpkg">Package</label>
+<select id="vpkg"><option value="@openzeppelin/contracts">@openzeppelin/contracts</option><option value="@openzeppelin/contracts-upgradeable">@openzeppelin/contracts-upgradeable</option></select>
+<label for="vgo">Your OpenZeppelin version, for example 4.9.4</label>
+<input id="vgo" inputmode="text" placeholder="4.9.4" aria-label="OpenZeppelin version">
+<button id="vbtn" type="button">Check</button>
+<div id="lookup-result" role="status"></div>
+</div>
+<p>Ranges and severities below are read from the global GitHub Advisory Database on 2026-10-29.
+Where the repository advisory gives a different severity, both are shown. Every count on this page and the worst severity in the lookup use the GitHub database rating.</p>
+<p>The lookup covers only @openzeppelin/contracts and @openzeppelin/contracts-upgradeable. GHSA-7grf-83vw-6f5x also names the legacy packages openzeppelin-solidity and openzeppelin-eth, which have no patched version.</p>
+
+<h2 id="advisories">All 24 advisories, newest first</h2>
+<details class="fold"><summary>Show all 24 advisories with severities and first patched versions</summary><div class="scrollx"><table id="adv-table">
+<thead><tr><th>Published (GitHub database)</th><th>Advisory</th><th>Title, package</th><th>Severity (GitHub database; repository if different)</th><th>First patched</th></tr></thead>
+<tbody>
+<tr><td class="num">2025-07-17</td><td><a href="https://github.com/advisories/GHSA-9rcw-c2f9-2j55" target="_blank" rel="noopener">GHSA-9rcw-c2f9-2j55</a></td><td>OpenZeppelin Contracts Bytes&#x27;s lastIndexOf function with position argument performs out-of-bound memory access on empty buffers<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium <span class="dual">(repo: low)</span></td><td class="num">5.4.0</td></tr>
+<tr><td class="num">2024-02-29</td><td><a href="https://github.com/advisories/GHSA-9vx6-7xxf-x967" target="_blank" rel="noopener">GHSA-9vx6-7xxf-x967</a></td><td>OpenZeppelin Contracts base64 encoding may read from potentially dirty memory<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium <span class="dual">(repo: low)</span></td><td class="num">4.9.6, 5.0.2</td></tr>
+<tr><td class="num">2023-12-12</td><td><a href="https://github.com/advisories/GHSA-699g-q6qh-q4v8" target="_blank" rel="noopener">GHSA-699g-q6qh-q4v8</a></td><td>OpenZeppelin Contracts and Contracts Upgradeable duplicated execution of subcalls in v4.9.4<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium</td><td class="num">4.9.5</td></tr>
+<tr><td class="num">2023-08-11</td><td><a href="https://github.com/advisories/GHSA-g4vp-m682-qqmp" target="_blank" rel="noopener">GHSA-g4vp-m682-qqmp</a></td><td>OpenZeppelin Contracts vulnerable to Improper Escaping of Output<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium <span class="dual">(repo: low)</span></td><td class="num">4.9.3</td></tr>
+<tr><td class="num">2023-06-19</td><td><a href="https://github.com/advisories/GHSA-wprv-93r4-jj2p" target="_blank" rel="noopener">GHSA-wprv-93r4-jj2p</a></td><td>OpenZeppelin Contracts using MerkleProof multiproofs may allow proving arbitrary leaves for specific trees<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium</td><td class="num">4.9.2</td></tr>
+<tr><td class="num">2023-06-08</td><td><a href="https://github.com/advisories/GHSA-5h3x-9wvq-w4m2" target="_blank" rel="noopener">GHSA-5h3x-9wvq-w4m2</a></td><td>OpenZeppelin Contracts&#x27;s governor proposal creation may be blocked by frontrunning<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium</td><td class="num">4.9.1</td></tr>
+<tr><td class="num">2023-04-20</td><td><a href="https://github.com/advisories/GHSA-93hq-5wgc-jc82" target="_blank" rel="noopener">GHSA-93hq-5wgc-jc82</a></td><td>GovernorCompatibilityBravo may trim proposal calldata<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-high">high <span class="dual">(repo: medium)</span></td><td class="num">4.8.3</td></tr>
+<tr><td class="num">2023-04-17</td><td><a href="https://github.com/advisories/GHSA-mx2q-35m2-x2rh" target="_blank" rel="noopener">GHSA-mx2q-35m2-x2rh</a></td><td>OpenZeppelin Contracts TransparentUpgradeableProxy clashing selector calls may not be delegated<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium <span class="dual">(repo: low)</span></td><td class="num">4.8.3</td></tr>
+<tr><td class="num">2023-03-03</td><td><a href="https://github.com/advisories/GHSA-878m-3g6q-594q" target="_blank" rel="noopener">GHSA-878m-3g6q-594q</a></td><td>OpenZeppelin Contracts contains Incorrect Calculation<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium</td><td class="num">4.8.2</td></tr>
+<tr><td class="num">2022-08-18</td><td><a href="https://github.com/advisories/GHSA-xrc4-737v-9q75" target="_blank" rel="noopener">GHSA-xrc4-737v-9q75</a></td><td>OpenZeppelin Contracts&#x27;s GovernorVotesQuorumFraction updates to quorum may affect past defeated proposals<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-high">high</td><td class="num">4.7.2</td></tr>
+<tr><td class="num">2022-08-18</td><td><a href="https://github.com/advisories/GHSA-4h98-2769-gh6h" target="_blank" rel="noopener">GHSA-4h98-2769-gh6h</a></td><td>OpenZeppelin Contracts vulnerable to ECDSA signature malleability<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-high">high</td><td class="num">4.7.3</td></tr>
+<tr><td class="num">2022-08-14</td><td><a href="https://github.com/advisories/GHSA-9j3m-g383-29qr" target="_blank" rel="noopener">GHSA-9j3m-g383-29qr</a></td><td>OpenZeppelin Contracts&#x27;s Cross chain utilities for Arbitrum L2 see EOA calls as cross chain calls<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium <span class="dual">(repo: low)</span></td><td class="num">4.7.2</td></tr>
+<tr><td class="num">2022-08-14</td><td><a href="https://github.com/advisories/GHSA-7grf-83vw-6f5x" target="_blank" rel="noopener">GHSA-7grf-83vw-6f5x</a></td><td>OpenZeppelin Contracts ERC165Checker unbounded gas consumption<span class="src-line">contracts, contracts-upgradeable, openzeppelin-eth, openzeppelin-solidity</span></td><td class="sev sev-medium">medium</td><td class="num">4.7.2</td></tr>
+<tr><td class="num">2022-07-21</td><td><a href="https://github.com/advisories/GHSA-qh9x-gcfh-pcrw" target="_blank" rel="noopener">GHSA-qh9x-gcfh-pcrw</a></td><td>OpenZeppelin Contracts&#x27;s ERC165Checker may revert instead of returning false<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-high">high</td><td class="num">4.7.1</td></tr>
+<tr><td class="num">2022-07-21</td><td><a href="https://github.com/advisories/GHSA-4g63-c64m-25w9" target="_blank" rel="noopener">GHSA-4g63-c64m-25w9</a></td><td>OpenZeppelin Contracts&#x27;s SignatureChecker may revert on invalid EIP-1271 signers<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-high">high <span class="dual">(repo: medium)</span></td><td class="num">4.7.1</td></tr>
+<tr><td class="num">2022-03-14</td><td><a href="https://github.com/advisories/GHSA-7j52-6fjp-58gr" target="_blank" rel="noopener">GHSA-7j52-6fjp-58gr</a></td><td>Inconsistent storage layout for ERC2771ContextUpgradeable<span class="src-line">contracts-upgradeable</span></td><td class="sev sev-low">low</td><td class="num">4.3.0</td></tr>
+<tr><td class="num">2022-02-05</td><td><a href="https://github.com/advisories/GHSA-88g8-f5mf-f5rj" target="_blank" rel="noopener">GHSA-88g8-f5mf-f5rj</a></td><td>Improper Initialization in OpenZeppelin<span class="src-line">contracts</span></td><td class="sev sev-high">high <span class="dual">(no repository advisory)</span></td><td class="num">4.4.1</td></tr>
+<tr><td class="num">2022-01-13</td><td><a href="https://github.com/advisories/GHSA-m6w8-fq7v-ph4m" target="_blank" rel="noopener">GHSA-m6w8-fq7v-ph4m</a></td><td>GovernorCompatibilityBravo incorrect ABI encoding may lead to unexpected behavior<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium</td><td class="num">4.4.2</td></tr>
+<tr><td class="num">2021-12-14</td><td><a href="https://github.com/advisories/GHSA-9c22-pwxw-p6hx" target="_blank" rel="noopener">GHSA-9c22-pwxw-p6hx</a></td><td>OpenZeppelin Contracts initializer reentrancy may lead to double initialization<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-medium">medium <span class="dual">(repo: low)</span></td><td class="num">4.4.1</td></tr>
+<tr><td class="num">2021-11-15</td><td><a href="https://github.com/advisories/GHSA-wmpv-c2jp-j2xg" target="_blank" rel="noopener">GHSA-wmpv-c2jp-j2xg</a></td><td>ERC1155Supply vulnerability in OpenZeppelin Contracts<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-low">low</td><td class="num">4.3.3</td></tr>
+<tr><td class="num">2021-09-15</td><td><a href="https://github.com/advisories/GHSA-q4h9-46xg-m3x9" target="_blank" rel="noopener">GHSA-q4h9-46xg-m3x9</a></td><td>UUPSUpgradeable vulnerability in @openzeppelin/contracts-upgradeable<span class="src-line">contracts-upgradeable</span></td><td class="sev sev-critical">critical</td><td class="num">4.3.2</td></tr>
+<tr><td class="num">2021-09-15</td><td><a href="https://github.com/advisories/GHSA-5vp3-v4hc-gx76" target="_blank" rel="noopener">GHSA-5vp3-v4hc-gx76</a></td><td>UUPSUpgradeable vulnerability in @openzeppelin/contracts<span class="src-line">contracts, contracts-upgradeable</span></td><td class="sev sev-critical">critical</td><td class="num">4.3.2</td></tr>
+<tr><td class="num">2021-08-30</td><td><a href="https://github.com/advisories/GHSA-vrw4-w73r-6mm8" target="_blank" rel="noopener">GHSA-vrw4-w73r-6mm8</a></td><td>TimelockController vulnerability in OpenZeppelin Contracts<span class="src-line">contracts-upgradeable</span></td><td class="sev sev-critical">critical</td><td class="num">3.4.2, 4.3.1</td></tr>
+<tr><td class="num">2021-08-30</td><td><a href="https://github.com/advisories/GHSA-fg47-3c2x-m2wr" target="_blank" rel="noopener">GHSA-fg47-3c2x-m2wr</a></td><td>TimelockController vulnerability in OpenZeppelin Contracts <span class="src-line">contracts</span></td><td class="sev sev-critical">critical</td><td class="num">3.4.2, 4.3.1</td></tr>
+
+</tbody>
+</table></div></details>
+
+<h2 id="dedup">Duplicate advisories</h2>
+<p>Three issues have two GHSA ids each. GHSA-88g8-f5mf-f5rj is a GitHub-reviewed entry for the issue of GHSA-9c22-pwxw-p6hx; OSV lists CVE-2021-46320 and CVE-2022-39384 as aliases of both. The TimelockController and UUPSUpgradeable issues have one advisory in each OpenZeppelin repository. The other 18 ids are one issue each.</p>
+<div class="scrollx"><table id="dedup-table">
+<thead><tr><th>Issue</th><th>Advisories</th></tr></thead>
+<tbody>
+<tr><td>Initializer reentrancy (CVE-2021-46320)</td><td>GHSA-9c22-pwxw-p6hx and GHSA-88g8-f5mf-f5rj</td></tr><tr><td>TimelockController (CVE-2021-39167, CVE-2021-39168)</td><td>GHSA-fg47-3c2x-m2wr and GHSA-vrw4-w73r-6mm8</td></tr><tr><td>UUPSUpgradeable (CVE-2021-41264; GHSA-q4h9-46xg-m3x9 has no CVE)</td><td>GHSA-5vp3-v4hc-gx76 and GHSA-q4h9-46xg-m3x9</td></tr>
+</tbody>
+</table>
+<p>24 GHSA ids are 21 distinct issues. The advisory table and the version table count ids; the major-line table counts issues.</p></div>
+
+<h2 id="all-versions">All 51 stable npm releases of @openzeppelin/contracts</h2>
+<p>contracts-upgradeable has 45 stable releases. Its releases 4.5.1 and 4.5.2 are not in this table. Use the lookup for them.</p>
+<p>Counts use the global database ranges for <code>@openzeppelin/contracts</code> only. Use the lookup for <code>@openzeppelin/contracts-upgradeable</code>. The severity columns use the GitHub database rating.</p>
+<details class="fold"><summary>Show all 51 stable releases with per-version advisory counts</summary><div class="scrollx"><table id="ver-table">
+<thead><tr><th>Version</th><th>Advisory ids</th><th>Critical or high (GitHub)</th><th>Medium (GitHub)</th><th>Low (GitHub)</th></tr></thead>
+<tbody>
+<tr class="latest"><td class="num">5.7.0 <span class="src-line">(newest release, npm dist-tag dev; dist-tag latest is 5.6.1)</span></td><td class="num">0</td><td class="num sev-none">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td class="num">5.6.1</td><td class="num">0</td><td class="num sev-none">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td class="num">5.6.0</td><td class="num">0</td><td class="num sev-none">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td class="num">5.5.0</td><td class="num">0</td><td class="num sev-none">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td class="num">5.4.0</td><td class="num">0</td><td class="num sev-none">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td class="num">5.3.0</td><td class="num">1</td><td class="num sev-none">0</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">5.2.0</td><td class="num">1</td><td class="num sev-none">0</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">5.1.0</td><td class="num">0</td><td class="num sev-none">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td class="num">5.0.2</td><td class="num">0</td><td class="num sev-none">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td class="num">5.0.1</td><td class="num">1</td><td class="num sev-none">0</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">5.0.0</td><td class="num">1</td><td class="num sev-none">0</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">4.9.6</td><td class="num">0</td><td class="num sev-none">0</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td class="num">4.9.5</td><td class="num">1</td><td class="num sev-none">0</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">4.9.4 <span class="dep-flag">deprecated on npm</span></td><td class="num">2</td><td class="num sev-none">0</td><td class="num">2</td><td class="num">0</td></tr>
+<tr><td class="num">4.9.3</td><td class="num">1</td><td class="num sev-none">0</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">4.9.2</td><td class="num">2</td><td class="num sev-none">0</td><td class="num">2</td><td class="num">0</td></tr>
+<tr><td class="num">4.9.1</td><td class="num">3</td><td class="num sev-none">0</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td class="num">4.9.0</td><td class="num">4</td><td class="num sev-none">0</td><td class="num">4</td><td class="num">0</td></tr>
+<tr><td class="num">4.8.3</td><td class="num">4</td><td class="num sev-none">0</td><td class="num">4</td><td class="num">0</td></tr>
+<tr><td class="num">4.8.2</td><td class="num">6</td><td class="num sev-high">1</td><td class="num">5</td><td class="num">0</td></tr>
+<tr><td class="num">4.8.1</td><td class="num">7</td><td class="num sev-high">1</td><td class="num">6</td><td class="num">0</td></tr>
+<tr><td class="num">4.8.0</td><td class="num">7</td><td class="num sev-high">1</td><td class="num">6</td><td class="num">0</td></tr>
+<tr><td class="num">4.7.3</td><td class="num">6</td><td class="num sev-high">1</td><td class="num">5</td><td class="num">0</td></tr>
+<tr><td class="num">4.7.2</td><td class="num">7</td><td class="num sev-high">2</td><td class="num">5</td><td class="num">0</td></tr>
+<tr><td class="num">4.7.1</td><td class="num">10</td><td class="num sev-high">3</td><td class="num">7</td><td class="num">0</td></tr>
+<tr><td class="num">4.7.0</td><td class="num">12</td><td class="num sev-high">5</td><td class="num">7</td><td class="num">0</td></tr>
+<tr><td class="num">4.6.0</td><td class="num">11</td><td class="num sev-high">5</td><td class="num">6</td><td class="num">0</td></tr>
+<tr><td class="num">4.5.0</td><td class="num">10</td><td class="num sev-high">5</td><td class="num">5</td><td class="num">0</td></tr>
+<tr><td class="num">4.4.2</td><td class="num">9</td><td class="num sev-high">5</td><td class="num">4</td><td class="num">0</td></tr>
+<tr><td class="num">4.4.1</td><td class="num">10</td><td class="num sev-high">5</td><td class="num">5</td><td class="num">0</td></tr>
+<tr><td class="num">4.4.0</td><td class="num">12</td><td class="num sev-high">6</td><td class="num">6</td><td class="num">0</td></tr>
+<tr><td class="num">4.3.3</td><td class="num">12</td><td class="num sev-high">6</td><td class="num">6</td><td class="num">0</td></tr>
+<tr><td class="num">4.3.2</td><td class="num">13</td><td class="num sev-high">6</td><td class="num">6</td><td class="num">1</td></tr>
+<tr><td class="num">4.3.1</td><td class="num">14</td><td class="num sev-critical">7</td><td class="num">6</td><td class="num">1</td></tr>
+<tr><td class="num">4.3.0</td><td class="num">15</td><td class="num sev-critical">8</td><td class="num">6</td><td class="num">1</td></tr>
+<tr><td class="num">4.2.0</td><td class="num">11</td><td class="num sev-critical">6</td><td class="num">4</td><td class="num">1</td></tr>
+<tr><td class="num">4.1.0</td><td class="num">10</td><td class="num sev-critical">6</td><td class="num">4</td><td class="num">0</td></tr>
+<tr><td class="num">4.0.0</td><td class="num">7</td><td class="num sev-critical">3</td><td class="num">4</td><td class="num">0</td></tr>
+<tr><td class="num">3.4.2</td><td class="num">4</td><td class="num sev-high">1</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td class="num">3.4.1</td><td class="num">5</td><td class="num sev-critical">2</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td class="num">3.4.0</td><td class="num">5</td><td class="num sev-critical">2</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td class="num">3.3.0</td><td class="num">5</td><td class="num sev-critical">2</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td class="num">3.2.0</td><td class="num">4</td><td class="num sev-high">1</td><td class="num">3</td><td class="num">0</td></tr>
+<tr><td class="num">3.1.0</td><td class="num">2</td><td class="num sev-high">1</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">3.0.2</td><td class="num">2</td><td class="num sev-high">1</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">3.0.1</td><td class="num">2</td><td class="num sev-high">1</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">3.0.0</td><td class="num">2</td><td class="num sev-high">1</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">2.5.1</td><td class="num">2</td><td class="num sev-high">1</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">2.5.0</td><td class="num">2</td><td class="num sev-high">1</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">2.4.0</td><td class="num">2</td><td class="num sev-high">1</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td class="num">2.3.0</td><td class="num">2</td><td class="num sev-high">1</td><td class="num">1</td><td class="num">0</td></tr>
+
+</tbody>
+</table></div></details>
+
+<h2 id="by-major">By major release line</h2>
+<p>Distinct issues per major line. An issue counts once in a line when its range covers at least one stable npm release of that line. Each duplicate pair counts as one issue. 4.x carries the bulk of the history: it lived through the 2021 to 2023 advisory cluster.</p>
+<div class="scrollx"><table id="major-table">
+<thead><tr><th>Package</th><th>2.x</th><th>3.x</th><th>4.x</th><th>5.x</th></tr></thead>
+<tbody><tr><td>@openzeppelin/contracts</td><td class="num">2</td><td class="num">4</td><td class="num">19</td><td class="num">2</td></tr><tr><td>@openzeppelin/contracts-upgradeable</td><td class="num">no release</td><td class="num">4</td><td class="num">20</td><td class="num">2</td></tr></tbody>
+</table></div>
+
+<h2 id="support">Support status and upgrade advice</h2>
+<p>The project's own <a href="https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/SECURITY.md" target="_blank" rel="noopener">security policy</a> says, quoting:</p>
+<blockquote>Security patches will be released for the latest minor of a given major release. For example, if an issue is found in versions &gt;=4.6.0 and the latest is 4.8.0, the patch will be released only in version 4.8.1.</blockquote>
+<blockquote>Only critical severity bug fixes will be backported to past major releases.</blockquote>
+<p>Supported lines, quoted from the same policy (5.x gets all security fixes; 4.9 and 3.4 get critical fixes only; 2.5 and versions below 2.0 get none):</p>
+<div class="scrollx"><table id="support-table">
+<thead><tr><th>Version</th><th>Critical security fixes</th><th>Other security fixes</th></tr></thead>
+<tbody>
+<tr><td class="num">5.x</td><td>yes</td><td>yes</td></tr>
+<tr><td class="num">4.9</td><td>yes</td><td>no</td></tr>
+<tr><td class="num">3.4</td><td>yes</td><td>no</td></tr>
+<tr><td class="num">2.5</td><td>no</td><td>no</td></tr>
+<tr><td class="num">&lt; 2.0</td><td>no</td><td>no</td></tr>
+</tbody>
+</table></div>
+<p>If you are on 4.9.x or 3.4.x, the policy promises only critical fixes. Two non-critical fixes still reached 4.9.x after 5.0.0 (released 2023-10-05): 4.9.5 for GHSA-699g-q6qh-q4v8 and 4.9.6 for GHSA-9vx6-7xxf-x967. The policy does not promise more.</p>
+
+<h3 id="critical-only-quote">The TimelockController critical advisory</h3>
+<p>One critical TimelockController issue has two ids in the GitHub database: GHSA-fg47-3c2x-m2wr for contracts and GHSA-vrw4-w73r-6mm8 for contracts-upgradeable. In both packages it affects the stable releases 4.0.0 to 4.3.0 and 3.3.0 to 3.4.1. The
+<a href="https://github.com/advisories/GHSA-fg47-3c2x-m2wr" target="_blank" rel="noopener">TimelockController advisory</a> (CVE-2021-39167) says, quoting:</p>
+<blockquote>Deployed instances of <code>TimelockController</code> should be replaced with a fixed version by migrating all assets, ownership, and roles.</blockquote>
+<p>Replacing a deployed contract is not an <code>npm update</code>. The workaround of the advisory, quoting: &quot;Revoke the executor role from accounts not strictly under the team's control.&quot;</p>
+
+<h3 id="delegatecall-quote">The deprecated 4.9.4 release</h3>
+<p>The <a href="https://github.com/advisories/GHSA-699g-q6qh-q4v8" target="_blank" rel="noopener">4.9.4 advisory</a> (CVE-2023-49798, duplicated <code>delegatecall</code> in <code>Multicall</code>) says, quoting:</p>
+<blockquote>The duplicated <code>delegatecall</code> was removed in 4.9.5. The 4.9.4 version is marked as deprecated.</blockquote>
+<p>npm confirms: both <code>@openzeppelin/contracts@4.9.4</code> and <code>@openzeppelin/contracts-upgradeable@4.9.4</code> carry an npm deprecation notice. If your lockfile pins 4.9.4, move to 4.9.6. Version 4.9.5 is still in the range of GHSA-9vx6-7xxf-x967.</p>
+
+<h3 id="upgrade-quote">The 5.0 to 4.9 backport pattern</h3>
+<p>The <a href="https://github.com/advisories/GHSA-9vx6-7xxf-x967" target="_blank" rel="noopener">Base64 advisory</a> (CVE-2024-27094) patches two branches at once. Its fix line, quoting:</p>
+<blockquote>Upgrade to 5.0.2 or 4.9.6.</blockquote>
+<p>The policy promises backports to past majors only for critical fixes. This advisory is low in the repository and medium in the GitHub database. This fix was also backported to 4.9.6.</p>
+
+<h2 id="method">Method and sources</h2>
+<p>Fetched 2026-10-29 with the GitHub API: the advisories of both repositories
+(<code>repos/OpenZeppelin/openzeppelin-contracts/security-advisories</code> and <code>repos/OpenZeppelin/openzeppelin-contracts-upgradeable/security-advisories</code>), the global GitHub Advisory
+Database entries for both packages (<code>advisories?ecosystem=npm&amp;affects=@openzeppelin/contracts</code> and the same query for <code>@openzeppelin/contracts-upgradeable</code>). Also fetched: the npm
+registry metadata for both packages (versions, dist-tags and deprecation notices), the
+project's SECURITY.md, and the OSV record of each of the 24 ids (<code>api.osv.dev/v1/vulns/&lt;id&gt;</code>), which gives the CVE aliases in the duplicate section. The lookup and the tables use global-database ranges; where the repository advisory
+disagrees on severity, the advisory table shows the global rating and names the repository rating next to it.
+First-patched versions come from the advisory's <code>first_patched_version</code> field. Data fetched 2026-10-29 at 07:30 UTC. A second fetch at 10:33 UTC gave the same ids, severities, ranges, stable versions and npm dist-tags.</p>
+<p>Counts in the version table are advisory ids whose published range for @openzeppelin/contracts covers the version, computed from the global database ranges in the fetched files. The major-line table counts issues per package, as its note says. npm also lists 53 pre-releases and solc-0.7 builds of @openzeppelin/contracts and 35 of @openzeppelin/contracts-upgradeable (rc and beta tags, and builds named like 3.4.2-solc-0.7). The tables and the lookup do not count them; only stable npm releases are counted.</p>
+<p>Related: <a href="/solidity-compiler-bugs-by-version.html">Solidity compiler bugs by version</a>,
+<a href="/vyper-compiler-bugs-by-version.html">Vyper compiler bugs by version</a>.</p>
+
+<footer>SCAN THE CHAIN · <a href="/">OVERVIEW</a> · <a href="about.html">ABOUT</a> · <a href="bug-bounty-roi-calculator.html">ROI CALC</a></footer></div>
+<script>
+var REL = {"@openzeppelin/contracts":["2.3.0","2.4.0","2.5.0","2.5.1","3.0.0","3.0.1","3.0.2","3.1.0","3.2.0","3.3.0","3.4.0","3.4.1","3.4.2","4.0.0","4.1.0","4.2.0","4.3.0","4.3.1","4.3.2","4.3.3","4.4.0","4.4.1","4.4.2","4.5.0","4.6.0","4.7.0","4.7.1","4.7.2","4.7.3","4.8.0","4.8.1","4.8.2","4.8.3","4.9.0","4.9.1","4.9.2","4.9.3","4.9.4","4.9.5","4.9.6","5.0.0","5.0.1","5.0.2","5.1.0","5.2.0","5.3.0","5.4.0","5.5.0","5.6.0","5.6.1","5.7.0"],"@openzeppelin/contracts-upgradeable":["3.2.0","3.3.0","3.4.0","3.4.1","3.4.2","4.0.0","4.1.0","4.2.0","4.3.0","4.3.1","4.3.2","4.3.3","4.4.0","4.4.1","4.4.2","4.5.0","4.5.1","4.5.2","4.6.0","4.7.0","4.7.1","4.7.2","4.7.3","4.8.0","4.8.1","4.8.2","4.8.3","4.9.0","4.9.1","4.9.2","4.9.3","4.9.4","4.9.5","4.9.6","5.0.0","5.0.1","5.0.2","5.1.0","5.2.0","5.3.0","5.4.0","5.5.0","5.6.0","5.6.1","5.7.0"]};
+var DATA = [{"g": "GHSA-fg47-3c2x-m2wr", "c": "CVE-2021-39167", "sg": "critical", "sr": "critical", "p": "2021-08-30", "t": "TimelockController vulnerability in OpenZeppelin Contracts ", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.0.0, < 4.3.1", "fp": "4.3.1"}, {"pkg": "@openzeppelin/contracts", "range": ">= 3.3.0, < 3.4.2", "fp": "3.4.2"}], "ru": []}, {"g": "GHSA-vrw4-w73r-6mm8", "c": "CVE-2021-39168", "sg": "critical", "sr": "critical", "p": "2021-08-30", "t": "TimelockController vulnerability in OpenZeppelin Contracts", "r": [], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.0.0, < 4.3.1", "fp": "4.3.1"}, {"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 3.3.0, < 3.4.2", "fp": "3.4.2"}]}, {"g": "GHSA-5vp3-v4hc-gx76", "c": "CVE-2021-41264", "sg": "critical", "sr": "critical", "p": "2021-09-15", "t": "UUPSUpgradeable vulnerability in @openzeppelin/contracts", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.1.0, < 4.3.2", "fp": "4.3.2"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.1.0, < 4.3.2", "fp": "4.3.2"}]}, {"g": "GHSA-q4h9-46xg-m3x9", "c": "", "sg": "critical", "sr": "critical", "p": "2021-09-15", "t": "UUPSUpgradeable vulnerability in @openzeppelin/contracts-upgradeable", "r": [], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.1.0, < 4.3.2", "fp": "4.3.2"}]}, {"g": "GHSA-wmpv-c2jp-j2xg", "c": "", "sg": "low", "sr": "low", "p": "2021-11-15", "t": "ERC1155Supply vulnerability in OpenZeppelin Contracts", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.2.0, < 4.3.3", "fp": "4.3.3"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.2.0, < 4.3.3", "fp": "4.3.3"}]}, {"g": "GHSA-9c22-pwxw-p6hx", "c": "CVE-2022-39384", "sg": "medium", "sr": "low", "p": "2021-12-14", "t": "OpenZeppelin Contracts initializer reentrancy may lead to double initialization", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 3.2.0, < 4.4.1", "fp": "4.4.1"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 3.2.0, < 4.4.1", "fp": "4.4.1"}]}, {"g": "GHSA-m6w8-fq7v-ph4m", "c": "", "sg": "medium", "sr": "medium", "p": "2022-01-13", "t": "GovernorCompatibilityBravo incorrect ABI encoding may lead to unexpected behavior", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.3.0, < 4.4.2", "fp": "4.4.2"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.3.0, < 4.4.2", "fp": "4.4.2"}]}, {"g": "GHSA-88g8-f5mf-f5rj", "c": "CVE-2021-46320", "sg": "high", "sr": "", "p": "2022-02-05", "t": "Improper Initialization in OpenZeppelin", "r": [{"pkg": "@openzeppelin/contracts", "range": "< 4.4.1", "fp": "4.4.1"}], "ru": []}, {"g": "GHSA-7j52-6fjp-58gr", "c": "", "sg": "low", "sr": "low", "p": "2022-03-14", "t": "Inconsistent storage layout for ERC2771ContextUpgradeable", "r": [], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.0.0, < 4.3.0", "fp": "4.3.0"}]}, {"g": "GHSA-4g63-c64m-25w9", "c": "CVE-2022-31172", "sg": "high", "sr": "medium", "p": "2022-07-21", "t": "OpenZeppelin Contracts's SignatureChecker may revert on invalid EIP-1271 signers", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.1.0, < 4.7.1", "fp": "4.7.1"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.1.0, < 4.7.1", "fp": "4.7.1"}]}, {"g": "GHSA-qh9x-gcfh-pcrw", "c": "CVE-2022-31170", "sg": "high", "sr": "high", "p": "2022-07-21", "t": "OpenZeppelin Contracts's ERC165Checker may revert instead of returning false", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.0.0, < 4.7.1", "fp": "4.7.1"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.0.0, < 4.7.1", "fp": "4.7.1"}]}, {"g": "GHSA-7grf-83vw-6f5x", "c": "CVE-2022-35915", "sg": "medium", "sr": "medium", "p": "2022-08-14", "t": "OpenZeppelin Contracts ERC165Checker unbounded gas consumption", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 2.0.0, < 4.7.2", "fp": "4.7.2"}, {"pkg": "openzeppelin-solidity", "range": ">= 2.0.0, <= 4.6.0", "fp": null}, {"pkg": "openzeppelin-eth", "range": ">= 2.0.0, <= 2.2.0", "fp": null}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 3.2.0, < 4.7.2", "fp": "4.7.2"}]}, {"g": "GHSA-9j3m-g383-29qr", "c": "CVE-2022-35916", "sg": "medium", "sr": "low", "p": "2022-08-14", "t": "OpenZeppelin Contracts's Cross chain utilities for Arbitrum L2 see EOA calls as cross chain calls", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.6.0, < 4.7.2", "fp": "4.7.2"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.6.0, < 4.7.2", "fp": "4.7.2"}]}, {"g": "GHSA-4h98-2769-gh6h", "c": "CVE-2022-35961", "sg": "high", "sr": "high", "p": "2022-08-18", "t": "OpenZeppelin Contracts vulnerable to ECDSA signature malleability", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.1.0, < 4.7.3", "fp": "4.7.3"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.1.0, < 4.7.3", "fp": "4.7.3"}]}, {"g": "GHSA-xrc4-737v-9q75", "c": "CVE-2022-31198", "sg": "high", "sr": "high", "p": "2022-08-18", "t": "OpenZeppelin Contracts's GovernorVotesQuorumFraction updates to quorum may affect past defeated proposals", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.3.0, < 4.7.2", "fp": "4.7.2"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.3.0, < 4.7.2", "fp": "4.7.2"}]}, {"g": "GHSA-878m-3g6q-594q", "c": "CVE-2023-26488", "sg": "medium", "sr": "medium", "p": "2023-03-03", "t": "OpenZeppelin Contracts contains Incorrect Calculation", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.8.0, < 4.8.2", "fp": "4.8.2"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.8.0, < 4.8.2", "fp": "4.8.2"}]}, {"g": "GHSA-mx2q-35m2-x2rh", "c": "CVE-2023-30541", "sg": "medium", "sr": "low", "p": "2023-04-17", "t": "OpenZeppelin Contracts TransparentUpgradeableProxy clashing selector calls may not be delegated", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 3.2.0, < 4.8.3", "fp": "4.8.3"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 3.2.0, < 4.8.3", "fp": "4.8.3"}]}, {"g": "GHSA-93hq-5wgc-jc82", "c": "CVE-2023-30542", "sg": "high", "sr": "medium", "p": "2023-04-20", "t": "GovernorCompatibilityBravo may trim proposal calldata", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.3.0, < 4.8.3", "fp": "4.8.3"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.3.0, < 4.8.3", "fp": "4.8.3"}]}, {"g": "GHSA-5h3x-9wvq-w4m2", "c": "CVE-2023-34234", "sg": "medium", "sr": "medium", "p": "2023-06-08", "t": "OpenZeppelin Contracts's governor proposal creation may be blocked by frontrunning", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.3.0, < 4.9.1", "fp": "4.9.1"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.3.0, < 4.9.1", "fp": "4.9.1"}]}, {"g": "GHSA-wprv-93r4-jj2p", "c": "CVE-2023-34459", "sg": "medium", "sr": "medium", "p": "2023-06-19", "t": "OpenZeppelin Contracts using MerkleProof multiproofs may allow proving arbitrary leaves for specific trees", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.7.0, < 4.9.2", "fp": "4.9.2"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.7.0, < 4.9.2", "fp": "4.9.2"}]}, {"g": "GHSA-g4vp-m682-qqmp", "c": "CVE-2023-40014", "sg": "medium", "sr": "low", "p": "2023-08-11", "t": "OpenZeppelin Contracts vulnerable to Improper Escaping of Output", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.0.0, < 4.9.3", "fp": "4.9.3"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.0.0, < 4.9.3", "fp": "4.9.3"}]}, {"g": "GHSA-699g-q6qh-q4v8", "c": "CVE-2023-49798", "sg": "medium", "sr": "medium", "p": "2023-12-12", "t": "OpenZeppelin Contracts and Contracts Upgradeable duplicated execution of subcalls in v4.9.4", "r": [{"pkg": "@openzeppelin/contracts", "range": "= 4.9.4", "fp": "4.9.5"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": "= 4.9.4", "fp": "4.9.5"}]}, {"g": "GHSA-9vx6-7xxf-x967", "c": "CVE-2024-27094", "sg": "medium", "sr": "low", "p": "2024-02-29", "t": "OpenZeppelin Contracts base64 encoding may read from potentially dirty memory", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 4.5.0, < 4.9.6", "fp": "4.9.6"}, {"pkg": "@openzeppelin/contracts", "range": ">= 5.0.0-rc.0, < 5.0.2", "fp": "5.0.2"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 5.0.0-rc.0, < 5.0.2", "fp": "5.0.2"}, {"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 4.5.0, < 4.9.6", "fp": "4.9.6"}]}, {"g": "GHSA-9rcw-c2f9-2j55", "c": "CVE-2025-54070", "sg": "medium", "sr": "low", "p": "2025-07-17", "t": "OpenZeppelin Contracts Bytes's lastIndexOf function with position argument performs out-of-bound memory access on empty buffers", "r": [{"pkg": "@openzeppelin/contracts", "range": ">= 5.2.0, < 5.4.0", "fp": "5.4.0"}], "ru": [{"pkg": "@openzeppelin/contracts-upgradeable", "range": ">= 5.2.0, < 5.4.0", "fp": "5.4.0"}]}];
+var PRE = {"@openzeppelin/contracts":["2.4.0-beta.0","2.4.0-beta.1","2.4.0-beta.2","2.5.0-rc.0","3.0.0-beta.0","3.0.0-rc.0","3.0.0-rc.1","3.1.0-rc.0","3.1.0-solc-0.7","3.2.0-rc.0","3.2.0-solc-0.7","3.2.1-solc-0.7","3.2.2-solc-0.7","3.3.0-rc.0","3.3.0-rc.1","3.3.0-rc.2","3.3.0-solc-0.7","3.4.0-rc.0","3.4.0-solc-0.7","4.0.0-beta.0","4.0.0-beta.1","3.4.1-solc-0.7","3.4.1-solc-0.7-2","4.0.0-rc.0","4.1.0-rc.0","4.2.0-rc.0","4.3.0-rc.0","3.4.2-solc-0.7","4.4.0-rc.0","4.4.0-rc.1","4.5.0-rc.0","4.6.0-rc.0","4.7.0-rc.0","4.8.0-rc.0","4.8.0-rc.1","4.8.0-rc.2","4.9.0-rc.0","4.9.0-rc.1","5.0.0-rc.0","5.0.0-rc.1","5.0.0-rc.2","5.1.0-rc.0","5.1.0-rc.1","5.2.0-rc.0","5.2.0-rc.1","5.3.0-rc.0","5.4.0-rc.0","5.4.0-rc.1","5.5.0-rc.0","5.5.0-rc.1","5.6.0-rc.0","5.6.0-rc.1","5.7.0-rc.0"],"@openzeppelin/contracts-upgradeable":["3.2.2-solc-0.7","3.3.0-solc-0.7","3.4.0-rc.0","3.4.0-solc-0.7","3.4.0-solc-0.7-2","4.0.0-beta.0","3.4.1-solc-0.7","3.4.1-solc-0.7-2","4.0.0-rc.0","4.1.0-rc.0","4.3.0-rc.0","3.4.2-solc-0.7","4.4.0-rc.1","4.5.0-rc.0","4.6.0-rc.0","4.7.0-rc.0","4.8.0-rc.0","4.8.0-rc.1","4.8.0-rc.2","4.9.0-rc.0","4.9.0-rc.1","5.0.0-rc.0","5.0.0-rc.1","5.0.0-rc.2","5.1.0-rc.0","5.2.0-rc.0","5.2.0-rc.1","5.3.0-rc.0","5.4.0-rc.0","5.4.0-rc.1","5.5.0-rc.0","5.5.0-rc.1","5.6.0-rc.0","5.6.0-rc.1","5.7.0-rc.0"]};
+var DEP = {"@openzeppelin/contracts":{"3.4.1-solc-0.7":"This version was not properly published, use instead 3.4.1-solc-0.7-2"},"@openzeppelin/contracts-upgradeable":{"3.4.0-solc-0.7":"This version does not contain upgradeable contracts. Install @openzeppelin/contracts-upgradeable@3.4.1-solc-0.7-2","3.4.1-solc-0.7":"This version was not properly published, use instead 3.4.1-solc-0.7-2"}};
+(function () {
+  var el = document.getElementById('lookup-result');
+  function vkey(v) {
+    var m = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(String(v).trim());
+    if (!m) return null;
+    return [+m[1], +m[2], +m[3]];
+  }
+  function inside(rng, k) {
+    rng = String(rng).replace(/(>=|<=|>|<|=)\s+/g, '$1');
+    var parts = rng.trim().split(/[\s,]+/);
+    for (var i = 0; i < parts.length; i++) {
+      var m = /^(>=|<=|>|<|=)?(\d+\.\d+\.\d+)(?:-[0-9A-Za-z.]+)?$/.exec(parts[i].trim());
+      if (!m) return false;
+      var op = m[1] || '=';
+      var w = vkey(m[2]);
+      if (!w) return false;
+      var c = (k[0] - w[0]) || (k[1] - w[1]) || (k[2] - w[2]);
+      if (op === '>=' && c < 0) return false;
+      if (op === '<=' && c > 0) return false;
+      if (op === '>' && c <= 0) return false;
+      if (op === '<' && c >= 0) return false;
+      if (op === '=' && c !== 0) return false;
+    }
+    return true;
+  }
+  function preHits(pkg, raw) {
+    var r = /^(\d+\.\d+\.\d+)-rc\.(\d+)$/.exec(raw), out = '';
+    if (!r) return '';
+    DATA.forEach(function (rec) {
+      (pkg === '@openzeppelin/contracts-upgradeable' ? (rec.ru || []) : (rec.r || [])).forEach(function (x) {
+        var m = /^>=\s*(\d+\.\d+\.\d+)-rc\.(\d+),\s*<\s*(\d+\.\d+\.\d+)$/.exec(x.range);
+        if (!m) return;
+        var k = vkey(r[1]), lo = vkey(m[1]), hi = vkey(m[3]);
+        var c1 = (k[0] - lo[0]) || (k[1] - lo[1]) || (k[2] - lo[2]), c2 = (k[0] - hi[0]) || (k[1] - hi[1]) || (k[2] - hi[2]);
+        if (c1 < 0 || (c1 === 0 && +r[2] < +m[2]) || c2 >= 0) return;
+        out += ' ' + esc(rec.g) + ' (GitHub: ' + esc(rec.sg) + ') names it: its GitHub database range is ' + esc(x.range) + ', which includes ' + esc(m[1]) + '-rc.' + esc(m[2]) + ' and later pre-releases below ' + esc(m[3]) + '. First patched: ' + esc(x.fp) + '.';
+      });
+    });
+    return out;
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (ch) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+  }
+  function run() {
+    var k = vkey(document.getElementById('vgo').value);
+    if (!k) {
+      var raw = document.getElementById('vgo').value.trim();
+      var pk0 = document.getElementById('vpkg').value;
+      if (PRE[pk0].indexOf(raw) !== -1) {
+        var solc = raw.indexOf('-solc-') !== -1;
+        el.innerHTML = esc(raw) + ' is a pre-release or a solc-0.7 build. This lookup covers only stable npm releases.' +
+          (solc ? ' For TimelockController, the repository ' + (pk0 === '@openzeppelin/contracts-upgradeable' ? 'advisories GHSA-fg47-3c2x-m2wr and GHSA-vrw4-w73r-6mm8 name' : 'advisory GHSA-fg47-3c2x-m2wr names') + ' 3.3.0-solc-0.7, 3.4.0-solc-0.7 and 3.4.1-solc-0.7-2 as affected and 3.4.2-solc-0.7 as patched.' : '') +
+          (DEP[pk0][raw] ? ' ' + esc(raw) + ' is deprecated on npm.' + ' The npm notice says: ' + esc(DEP[pk0][raw]) + '.' : '') + preHits(pk0, raw);
+        return;
+      }
+      el.innerHTML = /^\d+\.\d+\.\d+-/.test(raw) ? esc(raw) + ' is not an npm release of ' + esc(pk0) + '. This lookup covers only stable npm releases.' : 'Enter a version like 4.9.4.';
+      return;
+    }
+    var v = k.join('.');
+    var pkg = document.getElementById('vpkg').value; if (REL[pkg].indexOf(v) === -1) { el.innerHTML = esc(v) + ' is not a stable npm release of ' + esc(pkg) + (pkg === '@openzeppelin/contracts' ? '. Check the version table.' : '. The version table lists only @openzeppelin/contracts releases.'); return; }
+    var hits = [];
+    for (var i = 0; i < DATA.length; i++) {
+      var rec = DATA[i];
+      var touched = false;
+      var fp = [];
+      (document.getElementById('vpkg').value === '@openzeppelin/contracts-upgradeable' ? (rec.ru || []) : (rec.r || [])).forEach(function (x) {
+        if (inside(x.range, k)) { touched = true; if (x.fp) fp.push(x.fp); }
+      });
+      if (touched) hits.push({ rec: rec, fp: fp });
+    }
+    var dep = (v === '4.9.4') ? ' 4.9.4 is deprecated on npm. Use 4.9.6.' : '';
+    var maj = k[0]; var sup = maj >= 5 ? '5.x gets all security fixes, in the latest 5.x minor only.' : maj === 4 ? '4.x gets critical fixes only, released in 4.9.x.' : maj === 3 ? '3.x gets critical fixes only, released in 3.4.x.' : '2.x gets no security fixes.';
+    var status = ' Support status. ' + sup;
+    if (!hits.length) {
+      el.innerHTML = '<span class="good">' + esc(v) + ': no published advisory range covers it in the global database.</span>' + dep + status;
+      return;
+    }
+    var worst = null;
+    hits.forEach(function (h) {
+      var s = h.rec.sg;
+      if (!worst) worst = h;
+      else {
+        var order = { critical: 0, high: 1, medium: 2, low: 3 };
+        if (order[s] < order[worst.rec.sg]) worst = h;
+      }
+    });
+    var lines = hits.map(function (h) {
+      var fps = h.fp.length ? ' First patched: ' + esc(h.fp.join(', ')) + '.' : '';
+      return '<li>' + esc(h.rec.g) + ' (GitHub: ' + esc(h.rec.sg) + (h.rec.sr && h.rec.sr !== h.rec.sg ? '; repository: ' + esc(h.rec.sr) : (h.rec.sr ? '; repository: same' : '; no repository advisory')) + '): ' + esc(String(h.rec.t).trim()) + '.' + fps + '</li>';
+    });
+    el.innerHTML = '<span class="bad">' + esc(v) + ': ' + hits.length + (hits.length === 1 ? ' advisory matches' : ' advisories match') +
+      '; worst GitHub severity ' + esc(worst.rec.sg) + '.</span>' + dep + status + '<ul>' + lines.join('') + '</ul>';
+  }
+  document.getElementById('vpkg').addEventListener('change', function () { el.innerHTML = ''; });
+  document.getElementById('vbtn').addEventListener('click', run);
+  document.getElementById('vgo').addEventListener('input', function () { el.innerHTML = ''; });
+  window.addEventListener('beforeprint', function () { var d = document.querySelectorAll('details'); for (var i = 0; i < d.length; i++) d[i].open = true; });
+  window.addEventListener('pageshow', function () { if (document.getElementById('vgo').value.trim()) run(); else el.innerHTML = ''; });
+  document.getElementById('vgo').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') run();
+  });
+})();
+</script>
+</body>
+</html>
