@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geth vulnerabilities by version</title>
+<meta name="description" content="Look up a Geth version or client string. See 17 repository advisories, 26 GitHub database ids and 12 vulnerabilities.json entries with both severities.">
+<link rel="canonical" href="https://scanthechain.com/geth-vulnerabilities-by-version.html">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:,">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Geth vulnerabilities by version","description":"Version lookup and merged table of 17 go-ethereum repository advisories, 26 GitHub database ids and 12 vulnerabilities.json entries.","author":{"@type":"Person","name":"Michael Lip","url":"https://scanthechain.com/about.html","sameAs":["https://zovo.one/about/michael-lip"]},"publisher":{"@type":"Organization","name":"Scan the Chain"},"datePublished":"2026-11-08","dateModified":"2026-11-08","mainEntityOfPage":"https://scanthechain.com/geth-vulnerabilities-by-version.html"}</script>
+<style>
+:root{
+  --ink-0:#0d0d0d; --ink-1:#141414; --ink-2:#1b1b1b;
+  --bone:#e8e4da; --bone-d:#c9c4b6; --mute:#8a8578; --dim:#5c5850;
+  --amber:#d4a24b; --amber-d:#7a5e2b; --amber-bg:rgba(212,162,75,0.07);
+  --rule:#2a2a2a; --rule-2:#3a3a3a;
+  --ff-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ff-serif:'IBM Plex Serif',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--ink-0);color:var(--bone);font-family:var(--ff-serif);font-size:16px;line-height:1.65}
+body{overflow-x:hidden}
+a{color:var(--amber);text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.tab-bar{display:flex;align-items:center;gap:1.4rem;max-width:1320px;margin:0 auto;padding:1rem 1.5rem;border-bottom:1px solid var(--rule);font-family:var(--ff-mono);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;flex-wrap:wrap}
+.tab-bar .logo{color:var(--bone);font-weight:600;letter-spacing:0.2em}
+.tab-bar .logo .meta{color:var(--amber);font-size:12px}
+.tab-bar a{color:var(--mute);padding:0.45rem 0}
+.tab-bar a:hover{color:var(--bone)}
+.tab-bar a.active{color:var(--amber);border-bottom:1px solid var(--amber)}
+.tab-bar a.cta{color:var(--ink-0);background:var(--amber);padding:0.35rem 0.8rem}
+.wrap{max-width:860px;margin:0 auto;padding:2rem 1.5rem 3rem}
+.pagehead{font-family:var(--ff-mono);font-size:12px;text-transform:uppercase;letter-spacing:0.22em;color:var(--mute);margin-bottom:0.6rem}
+.pagehead .he-dot{display:inline-block;width:6px;height:6px;background:var(--amber);margin-right:0.6rem;vertical-align:1px}
+h1{font-family:var(--ff-serif);font-size:2rem;line-height:1.25;color:var(--bone);margin:0 0 0.8rem}
+h2{font-family:var(--ff-mono);font-size:13px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--amber);margin:2.4rem 0 0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--rule)}
+h3{font-family:var(--ff-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--bone);margin:1.6rem 0 0.4rem}
+p{color:var(--bone-d);max-width:72ch;margin:0.7rem 0}
+.byline{font-family:var(--ff-mono);font-size:14px;letter-spacing:0.06em;color:var(--mute);border-left:2px solid var(--amber);padding-left:1rem;margin:1.2rem 0 0;max-width:78ch}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);margin:1.4rem 0;background:var(--ink-1)}
+.kpi{padding:1rem;border-right:1px solid var(--rule)}
+.kpi:last-child{border-right:0}
+.kpi .value{font-family:var(--ff-mono);font-size:1.6rem;color:var(--amber)}
+.kpi .label{font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:var(--mute);margin-top:0.2rem}
+.kpi .src{font-family:var(--ff-mono);font-size:10px;margin-top:0.3rem}
+.jump{font-family:var(--ff-mono);font-size:12px;color:var(--mute)}
+.lookup-box{border:1px solid var(--rule);background:var(--ink-1);padding:1.2rem;margin:1.4rem 0}
+.lookup-box label{font-family:var(--ff-mono);font-size:12px;color:var(--bone);display:block;margin-bottom:0.4rem}
+.lookup-box input{font-family:var(--ff-mono);font-size:15px;background:var(--ink-2);color:var(--bone);border:1px solid var(--rule-2);padding:0.55rem 0.7rem;width:220px;max-width:100%}
+.lookup-box button{font-family:var(--ff-mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;background:var(--amber);color:var(--ink-0);border:0;padding:0.55rem 1rem;cursor:pointer;margin-left:0.5rem}
+.lookup-box button:hover{filter:brightness(1.1)}
+.err{font-family:var(--ff-mono);font-size:12px;color:#e08a7a;margin-top:0.5rem;display:none}
+.result{margin-top:0.9rem;font-family:var(--ff-mono);font-size:13px;color:var(--bone);display:none;border-top:1px solid var(--rule);padding-top:0.7rem}
+.sev{display:inline-block;font-family:var(--ff-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;padding:0.1rem 0.45rem;border:1px solid}
+.sev.low{color:#9ab89a;border-color:#3d5340}
+.sev.medium{color:#d8c069;border-color:#6b5c25}
+.sev.high{color:#e0965f;border-color:#6e4526}
+.sev.critical{color:#e08a7a;border-color:#6e352c}
+.tbl-scroll{overflow-x:auto;border:1px solid var(--rule);background:var(--ink-1)}
+table{border-collapse:collapse;width:100%;font-family:var(--ff-mono);font-size:12.5px}
+caption{text-align:left;font-family:var(--ff-mono);font-size:11px;color:var(--mute);padding:0.6rem 0.8rem;letter-spacing:0.08em}
+th{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--amber);text-align:left;padding:0.6rem 0.8rem;border-bottom:1px solid var(--rule-2);white-space:normal;cursor:pointer}
+td{padding:0.5rem 0.8rem;border-bottom:1px solid var(--rule);color:var(--bone-d);vertical-align:top}
+tr:hover td{background:var(--amber-bg)}
+td.num{color:var(--bone)}
+.latest td{background:rgba(212,162,75,0.05)}
+.badge{display:inline-block;width:8px;height:8px;margin-right:4px;vertical-align:1px}
+.badge.low{background:#9ab89a}.badge.medium{background:#d8c069}.badge.high{background:#e0965f}.badge.critical{background:#e08a7a}
+details{border:1px solid var(--rule);background:var(--ink-1);margin:0.6rem 0;padding:0.7rem 1rem}
+summary{font-family:var(--ff-mono);font-size:12.5px;color:var(--amber);cursor:pointer}
+.note{border-left:2px solid var(--amber-d);padding-left:1rem;color:var(--mute);font-size:14px}
+.src-line{font-family:var(--ff-mono);font-size:14px;color:var(--mute)}
+code{font-family:var(--ff-mono);font-size:1em}
+footer{border-top:1px solid var(--rule);margin-top:3rem;padding:1.2rem 1.5rem;font-family:var(--ff-mono);font-size:12px;letter-spacing:0.14em;color:var(--mute);max-width:1320px;margin-left:auto;margin-right:auto}
+@media(max-width:640px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .kpi{border-bottom:1px solid var(--rule)}
+  h1{font-size:1.5rem}
+  .tab-bar{gap:0.9rem}
+  .lookup-box input{width:100%;margin-bottom:0.5rem}
+  .lookup-box button{margin-left:0}
+  table{font-size:14px}
+  th{font-size:14px}
+  caption{font-size:14px}
+  .kpi .label{font-size:14px}
+  .kpi .src{font-size:14px}
+  .jump,.src-line{font-size:14px}
+  .sev{font-size:14px}
+  .result,.err{font-size:14px}
+  h2,.pagehead,.lookup-box label,.lookup-box button{font-size:14px}
+  .tab-bar,.tab-bar .logo .meta,footer{font-size:14px}
+}
+@media print{
+  :root{--ink-0:#fff;--ink-1:#fff;--ink-2:#fff;--bone:#000;--bone-d:#1a1a1a;--mute:#444;--dim:#444;--amber:#6b4a00;--amber-d:#6b4a00;--amber-bg:transparent;--rule:#999;--rule-2:#999}
+  body{background:#fff;color:#000}
+  .tab-bar,.lookup-box button,.jump{display:none}
+  .tbl-scroll{border:0;overflow:visible}
+  td,th{color:#000;border-color:#bbb}
+  p{color:#222}
+}
+.sev-critical{color:#e08a7a}.sev-high{color:#e0965f}.sev-medium{color:#d8c069}.sev-low,.sev-none{color:var(--mute)}
+td.sev{display:table-cell;font-size:14px;border:0;border-bottom:1px solid var(--rule);padding:0.5rem 0.8rem;text-transform:none;letter-spacing:0}
+th{font-size:12px;cursor:default}
+.src-line{display:block;font-size:12px}
+.dual{color:var(--mute);font-size:12px}
+.dep-flag{color:#e08a7a;font-size:12px;margin-left:.4rem}
+.num{white-space:nowrap}
+.lookup{border:1px solid var(--rule);background:var(--ink-1);padding:1.2rem;margin:1.4rem 0}
+.lookup label{font-family:var(--ff-mono);font-size:14px;color:var(--bone);display:block;margin:0.6rem 0 0.4rem}
+.lookup select,.lookup input{font-family:var(--ff-mono);font-size:15px;background:var(--ink-2);color:var(--bone);border:1px solid var(--rule-2);padding:0.55rem 0.7rem;max-width:100%}
+.lookup select{width:100%}
+.lookup input{width:220px}
+.lookup button{font-family:var(--ff-mono);font-size:14px;letter-spacing:0.1em;text-transform:uppercase;background:var(--amber);color:var(--ink-0);border:0;padding:0.55rem 1rem;cursor:pointer;margin-left:0.5rem}
+#lookup-result{margin-top:0.9rem;font-family:var(--ff-mono);font-size:14px;color:var(--bone)}
+#lookup-result ul{padding-left:1.2rem}
+#lookup-result .bad{color:#e08a7a;font-weight:600}
+#lookup-result .good{color:#9ab89a;font-weight:600}
+blockquote{border-left:2px solid var(--amber);padding:.4rem 1rem;margin:.8rem 0;color:var(--bone-d)}
+.scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;border:1px solid var(--rule);background:var(--ink-1);margin:1rem 0}
+td code,td a,p code{overflow-wrap:anywhere}
+.num .src-line,.num .dep-flag{white-space:normal}
+select:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media(max-width:640px){
+  th,td{padding:.4rem .35rem;word-break:break-word}
+  h1,h2,h3{overflow-wrap:anywhere}
+  h3,th,summary,.src-line,.dual,.dep-flag,footer a,.lookup select,td.sev{font-size:14px}
+  .lookup input{width:100%;margin-bottom:0.5rem}
+  .lookup button{margin-left:0}
+  #adv-table,#ver-table{min-width:640px}
+  #adv-table th,#adv-table td,#ver-table th,#ver-table td{word-break:normal}
+}
+@media print{
+  td.sev,.sev-critical,.sev-high,.sev-medium,.sev-low,.sev-none,#lookup-result{color:#000}
+  .lookup{display:none}
+  .scrollx{border:0;overflow:visible}
+}
+</style>
+<style id="qa-fix">.sev-badge{display:inline-block;padding:0 .4rem;margin:0 .2rem .2rem 0;color:#0d0d0d;font-weight:600}.lookup-result{overflow-wrap:anywhere}@media(max-width:640px){.data-table{min-width:640px}.data-table th,.data-table td{word-break:normal}}@media print{.data-table{min-width:0;table-layout:fixed;font-size:8px}.data-table th,.data-table td{padding:2px 3px;overflow-wrap:anywhere;word-break:normal}}</style>
+</head>
+<body>
+<nav class="tab-bar" aria-label="Site navigation">
+  <div class="logo">SCAN THE CHAIN <span class="meta">// CONTRACT SECURITY</span></div>
+  <a class="tab-link" href="/">Overview</a>
+  <a class="tab-link" href="about.html">About</a>
+  <a class="tab-link" href="bug-bounty-payout-distribution.html">EV Calc</a>
+  <a class="tab-link" href="bug-bounty-roi-calculator.html">ROI Calc</a>
+  <a class="tab-link" href="defi-bug-bounty-economics.html">Economics</a>
+  <a class="tab-link" href="solidity-compiler-bugs-by-version.html">Solidity Bugs</a>
+  <a class="tab-link" href="vyper-compiler-bugs-by-version.html">Vyper Bugs</a>
+  <a class="tab-link" href="openzeppelin-contracts-vulnerabilities-by-version.html">OpenZeppelin Bugs</a>
+  <a class="tab-link active" href="geth-vulnerabilities-by-version.html">Geth Bugs</a>
+</nav>
+<div class="wrap">
+<p class="pagehead"><span class="he-dot"></span>CLIENT SECURITY</p>
+<h1>Geth vulnerabilities by version</h1>
+<p class="byline">By Michael Lip (<a href="about.html">Mike</a>), independent smart contract security researcher. Data fetched 2026-11-08.</p>
+
+<p>Geth (go-ethereum) is an Ethereum execution client. The tables below map its published security issues to versions, from three sources: the 17 advisories published on the <code>ethereum/go-ethereum</code> GitHub repository, the 26 ids for go-ethereum in the GitHub advisory database, and the 12 entries in the Geth team&#39;s own <code>vulnerabilities.json</code> file. The three sources disagree on severity and coverage; the merged table shows both severity labels side by side.</p>
+
+<p class="jump">On this page <a href="#lookup">Version lookup</a> <a href="#method">Method</a> <a href="#findings">Key findings</a> <a href="#merged">Merged table</a> <a href="#releases">All releases</a> <a href="#ladder">Fix ladder</a> <a href="#advice">If you run a node</a> <a href="#limits">Limitations</a></p>
+
+<section id="lookup">
+<h2>Look up a Geth version</h2>
+<div class="lookup-box">
+<label for="geth-version">Check a Geth version against the 26 GitHub advisory database ranges</label>
+<div><input id="geth-version" inputmode="text" placeholder="1.16.8" aria-label="Geth version"> <button id="geth-lookup-go" type="button">Check</button></div>
+<p id="geth-lookup-result" class="lookup-result" role="status">Enter a Geth version such as 1.16.8, v1.13.15 or a client string like Geth/v1.16.8-stable/linux-amd64/go1.22.1.</p>
+</div>
+<p>The lookup reads the version number only. A suffix such as -stable or -unstable is ignored, and so is the rest of a client string after the version. For a client string with a node name, such as Geth/mynode/v1.16.8-stable/linux-amd64/go1.22.1, the name is skipped.</p>
+</section>
+
+<h2 id="method">How we know these numbers</h2>
+<p>We pulled the 17 advisories from the GitHub Security Advisory API for the ethereum/go-ethereum repository, the 26 ids from the GitHub advisory database for ecosystem go and package github.com/ethereum/go-ethereum, and the 12 entries from the Geth site&#39;s <a href="https://geth.ethereum.org/docs/vulnerabilities/vulnerabilities.json" rel="nofollow">vulnerabilities.json</a> file. All three were fetched 2026-11-08. A second fetch on 2026-11-08 at 03:34 UTC gave the same records, and the release dates come from the Geth releases list on GitHub. Ranges, severities and patched versions are shown verbatim from each record. The per-release table applies the affected version range of each of the 17 repository advisories (for example &quot;&gt;= 1.10.0, &lt; 1.10.8&quot;) to each release. The lookup uses the ranges of the 26 GitHub advisory database ids instead.</p>
+
+<h2 id="findings">Key findings</h2>
+<ul>
+  <li>The first release with no repository advisory in range is v1.17.0 (2026-02-17). Every release in the v1.17.x line up to v1.17.10 (2026-10-23) has zero repository advisories in range, and v1.17.10 is also outside the range of all 26 GitHub advisory database ids. No release of the lines v1.9.x to v1.16.x is clear of the 17 repository advisories. The newest release of each of those lines is still in the range of at least one of them. v1.16.9 is the last 1.16.x release. It is still in the range of GHSA-689v-6xwf-5jf3 (&lt; 1.17.0, medium), which v1.17.0 fixes.</li>
+  <li>GHSA-m6gx-rhvj-fh52 is the only id that both GitHub sources rate critical. The repository record gives it CVE-2020-28362. It is a denial of service caused by a bug in Go, so exposure depends on the Go version that built Geth, not only on the Geth version. The repository advisory lists v1.9.24 as the first patched version. The Geth vulnerabilities.json file also rates CVE-2020-26241 (GETH-2020-03) and CVE-2020-26242 (GETH-2020-04) Critical. The repository records rate both high, and the GitHub database rates both medium.</li>
+  <li>Three releases are the first patched version of two repository advisories each, the most for any release. v1.9.24 is listed for CVE-2020-26240 and CVE-2020-28362, v1.16.8 fixed CVE-2026-22862 (high) and CVE-2026-22868 (medium), and v1.16.9 fixed CVE-2026-26314 (high) and CVE-2026-26315 (medium).</li>
+  <li>Each stable v1.9.x release is in the range of 8 to 14 of the 17 repository advisories. In total, 14 different repository advisories affect the v1.9.x line. Releases before v1.9.24 are also in the range of the critical GHSA-m6gx-rhvj-fh52, subject to the Go version note above.</li>
+</ul>
+
+<h2 id="merged">The merged advisory table (all three sources)</h2>
+<p>One row per GitHub advisory database id, plus the one vulnerabilities.json entry that appears in neither GitHub source (GETH-2021-01). &quot;Repository range&quot; and &quot;maintainer severity&quot; come from the ethereum/go-ethereum repository advisory record; &quot;database range&quot; and &quot;database severity&quot; come from the GitHub advisory database record. Seven ids show a different severity in the database than in the repository record. Six ids list no patched version in the GitHub database.</p>
+<div class="scrollx">
+<table class="data-table">
+<thead><tr><th>GHSA id</th><th>CVE</th><th>Repository range</th><th>Maintainer severity</th><th>Database range</th><th>Database severity</th><th>First patched</th><th>GETH uid</th><th>GETH severity</th><th>GETH introduced</th><th>GETH fixed</th><th>What it was</th></tr></thead>
+<tbody>
+<tr><td><a href="https://github.com/advisories/GHSA-m6j8-rg6r-7mv8" rel="nofollow">GHSA-m6j8-rg6r-7mv8</a></td><td>CVE-2026-26315</td><td>&lt;= 1.16.8</td><td>medium</td><td>&lt;= 1.16.8</td><td>medium</td><td>1.16.9</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Improper ECIES Public Key Validation in RLPx Handshake</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-2gjw-fg97-vg3r" rel="nofollow">GHSA-2gjw-fg97-vg3r</a></td><td>CVE-2026-26314</td><td>&lt;= 1.16.8</td><td>high</td><td>&lt;= 1.16.8</td><td>high</td><td>1.16.9</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>DoS via malicious p2p message</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-689v-6xwf-5jf3" rel="nofollow">GHSA-689v-6xwf-5jf3</a></td><td>CVE-2026-26313</td><td>&lt; 1.17.0</td><td>medium</td><td>&lt; 1.17.0</td><td>medium</td><td>1.17.0</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>DoS via malicious p2p message</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-mq3p-rrmp-79jg" rel="nofollow">GHSA-mq3p-rrmp-79jg</a></td><td>CVE-2026-22868</td><td>&lt;= 1.16.7</td><td>medium</td><td>&lt;= 1.16.7</td><td>high</td><td>1.16.8</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>DoS via malicious p2p message</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-mr7q-c9w9-wh4h" rel="nofollow">GHSA-mr7q-c9w9-wh4h</a></td><td>CVE-2026-22862</td><td>&lt;= 1.16.7</td><td>high</td><td>&lt;= 1.16.7</td><td>high</td><td>1.16.8</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>DoS via malicious p2p message </td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-q26p-9cq4-7fc2" rel="nofollow">GHSA-q26p-9cq4-7fc2</a></td><td>CVE-2025-24883</td><td>&gt;= 1.14.0, &lt; 1.14.13</td><td>high</td><td>&gt;= 1.14.0, &lt; 1.14.13</td><td>medium</td><td>1.14.13</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>DoS via malicious p2p message</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-4xc9-8hmq-j652" rel="nofollow">GHSA-4xc9-8hmq-j652</a></td><td>CVE-2024-32972</td><td>&lt; 1.13.15</td><td>high</td><td>&lt; 1.13.15</td><td>high</td><td>1.13.15</td><td>GETH-2024-01</td><td>High</td><td>v1.10.0</td><td>v1.13.15</td><td>DoS via malicious p2p message</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-v9jh-j8px-98vq" rel="nofollow">GHSA-v9jh-j8px-98vq</a></td><td>CVE-2023-42319</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt;= 1.13.4</td><td>high</td><td>no patched version listed</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>go-ethereum vulnerable to denial of service via crafted GraphQL query</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-ppjg-v974-84cm" rel="nofollow">GHSA-ppjg-v974-84cm</a></td><td>CVE-2023-40591</td><td>&gt;= 1.10.0, &lt; 1.12.1</td><td>high</td><td>&lt; 1.12.1-stable</td><td>high</td><td>1.12.1-stable</td><td>GETH-2023-01</td><td>High</td><td>v1.10.0</td><td>v1.12.1</td><td>DoS via malicious p2p message</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-rqmg-hrg4-fm69" rel="nofollow">GHSA-rqmg-hrg4-fm69</a></td><td>CVE-2022-37450</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt;= 1.10.21</td><td>medium</td><td>no patched version listed</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Go Ethereum allows attackers to use manipulation of time-difference values to achieve replacement of main-chain blocks</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-wjxw-gh3m-7pm5" rel="nofollow">GHSA-wjxw-gh3m-7pm5</a></td><td>CVE-2022-29177</td><td>&lt; 1.10.17</td><td>low</td><td>&lt; 1.10.17</td><td>medium</td><td>1.10.17</td><td>GETH-2022-01</td><td>Low</td><td>v1.10.0</td><td>v1.10.17</td><td>DoS via malicious p2p message</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-p5gc-957x-gfw9" rel="nofollow">GHSA-p5gc-957x-gfw9</a></td><td>CVE-2018-12018</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt; 1.8.11</td><td>high</td><td>1.8.11</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Go Ethereum LES protocol implementation vulnerable to Denial of Service</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-vrcc-g6vj-mh5w" rel="nofollow">GHSA-vrcc-g6vj-mh5w</a></td><td>CVE-2021-42219</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt;= 1.10.9</td><td>high</td><td>no patched version listed</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Denial of service in go-ethereum</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-pvx3-gm3c-gmpr" rel="nofollow">GHSA-pvx3-gm3c-gmpr</a></td><td>CVE-2022-23327</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt;= 1.10.12</td><td>high</td><td>no patched version listed</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Denial of Service in Go-Ethereum</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-vmf7-hmh6-vv57" rel="nofollow">GHSA-vmf7-hmh6-vv57</a></td><td>CVE-2022-23328</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt;= 1.10.16</td><td>high</td><td>no patched version listed</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Denial of Service in Go-Ethereum</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-5m8f-chrv-7rw5" rel="nofollow">GHSA-5m8f-chrv-7rw5</a></td><td>CVE-2021-43668</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt;= 1.10.9</td><td>medium</td><td>no patched version listed</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Denial of Service in Go-Ethereum</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-59hh-656j-3p7v" rel="nofollow">GHSA-59hh-656j-3p7v</a></td><td>CVE-2021-41173</td><td>&lt; 1.10.9</td><td>medium</td><td>&lt; 1.10.9</td><td>medium</td><td>1.10.9</td><td>GETH-2021-03</td><td>Medium</td><td>v1.10.0</td><td>v1.10.9</td><td>DoS via malicious snap/1 request</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-9856-9gg9-qcmq" rel="nofollow">GHSA-9856-9gg9-qcmq</a></td><td>CVE-2021-39137</td><td>&gt;= 1.10.0, &lt; 1.10.8</td><td>high</td><td>&gt;= 1.10.0, &lt; 1.10.8</td><td>medium</td><td>1.10.8</td><td>GETH-2021-02</td><td>High</td><td>v1.10.0</td><td>v1.10.8</td><td>RETURNDATA corruption via datacopy</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-9h4h-8w5p-f28w" rel="nofollow">GHSA-9h4h-8w5p-f28w</a></td><td>CVE-2018-19184</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt; 1.8.14</td><td>high</td><td>1.8.14</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Go Ethereum Denial of Service</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-xw37-57qp-9mm4" rel="nofollow">GHSA-xw37-57qp-9mm4</a></td><td>CVE-2020-26265</td><td>&gt;= v1.9.4, &lt; 1.9.20</td><td>high</td><td>&gt;= 1.9.4, &lt; 1.9.20</td><td>medium</td><td>1.9.20</td><td>GETH-2020-06</td><td>High</td><td>v1.9.4</td><td>v1.9.20</td><td>Consensus flaw during block processing</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-r33q-22hv-j29q" rel="nofollow">GHSA-r33q-22hv-j29q</a></td><td>CVE-2020-26264</td><td>&lt; 1.9.25</td><td>medium</td><td>&lt; 1.9.25</td><td>medium</td><td>1.9.25</td><td>GETH-2020-05</td><td>Medium</td><td>v1.8.0</td><td>v1.9.25</td><td>LES Server DoS via GetProofsV2</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-m6gx-rhvj-fh52" rel="nofollow">GHSA-m6gx-rhvj-fh52</a></td><td>&mdash;</td><td>&lt; 1.9.24</td><td>critical</td><td>&lt; 1.9.24</td><td>critical</td><td>1.9.24</td><td>GETH-2020-02</td><td>Critical</td><td>v0.0.0</td><td>v1.9.24</td><td>Denial of service due to Go CVE-2020-28362</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-jm5c-rv3w-w83m" rel="nofollow">GHSA-jm5c-rv3w-w83m</a></td><td>CVE-2020-26242</td><td>&gt;= 1.9.16, &lt; 1.9.18</td><td>high</td><td>&gt;= 1.9.16, &lt; 1.9.18</td><td>medium</td><td>1.9.18</td><td>GETH-2020-04</td><td>Critical</td><td>v1.9.16</td><td>v1.9.18</td><td>Denial of service via `MulMod`</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-69v6-xc2j-r2jf" rel="nofollow">GHSA-69v6-xc2j-r2jf</a></td><td>CVE-2020-26241</td><td>&gt;= 1.9.7, &lt; 1.9.17</td><td>high</td><td>&gt;= 1.9.7, &lt; 1.9.17</td><td>medium</td><td>1.9.17</td><td>GETH-2020-03</td><td>Critical</td><td>v1.9.7</td><td>v1.9.17</td><td>Shallow copy in the 0x4 precompile could lead to EVM memory corruption</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-v592-xf75-856p" rel="nofollow">GHSA-v592-xf75-856p</a></td><td>CVE-2020-26240</td><td>&lt; 1.9.24</td><td>medium</td><td>&lt; 1.9.24</td><td>medium</td><td>1.9.24</td><td>GETH-2020-01</td><td>Medium</td><td>v1.6.0</td><td>v1.9.24</td><td>Ethash DAG generation bug can cause miners to create invalid PoW</td></tr>
+<tr><td><a href="https://github.com/advisories/GHSA-qr2j-wrhx-4829" rel="nofollow">GHSA-qr2j-wrhx-4829</a></td><td>CVE-2018-16733</td><td>not in repository advisories</td><td>&mdash;</td><td>&lt; 1.8.14</td><td>high</td><td>1.8.14</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>Go Ethereum Improper Input Validation</td></tr>
+<tr><td>&mdash;</td><td>&mdash;</td><td>not in either GitHub source</td><td>&mdash;</td><td>not in either GitHub source</td><td>&mdash;</td><td>&mdash;</td><td>GETH-2021-01</td><td>High</td><td>v1.10.1</td><td>v1.10.6</td><td>The client is not ready for the &#x27;London&#x27; technical upgrade, and will deviate from the canonical chain when the London upgrade occurs (at block &#x27;12965000&#x27; around August 4, 2021.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Notes on individual ids. GHSA-v9jh-j8px-98vq (CVE-2023-42319, GraphQL DoS): the record adds this note (the inner quotation mark is not closed in the record): <q>NOTE: the vendor&#39;s position is that the &quot;graphql endpoint [is not] designed to withstand attacks by hostile clients, nor handle huge amounts of clients/traffic.</q> The record lists no patched version. Six ids (GHSA-v9jh, GHSA-rqmg, GHSA-vrcc, GHSA-pvx3, GHSA-vmf7 and GHSA-5m8f) have no patched version in the GitHub database. Their ranges end at an upper bound such as &lt;= 1.10.21. This means that the database lists no fix. It does not mean that current versions are affected. This page does not call these issues confirmed. GHSA-m6gx-rhvj-fh52 (denial of service due to Go CVE-2020-28362): whether a build is exposed depends on the Go version that built Geth, because the bug is in Go. Both GitHub records rate it critical. The GitHub database record has no CVE id. The repository record and vulnerabilities.json (GETH-2020-02) give CVE-2020-28362. GETH-2021-01 (not ready for London upgrade) appears only in vulnerabilities.json. GitHub has no advisory record for it.</p>
+<p>The Geth disclosures page says: &quot;As of version 1.9.25 , Geth has a built-in command to check whether it is affected by any publicly disclosed vulnerability, using the command geth version-check .&quot; That command fetches the vulnerabilities.json file. The file stops at GETH-2024-01 (published 2024-05-06). It does not list the six repository advisories published after it, one in 2025 (GHSA-q26p) and five in 2026. So geth version-check alone does not report them.</p>
+
+<div id="releases"></div>
+<h2>Stable Geth releases v1.9.0 to v1.17.10 and their repository advisories</h2>
+<p>125 stable releases from v1.9.0 to v1.17.10, checked against the 17 repository advisory ranges. &quot;First in line&quot; marks the first release (x.y.0) of each minor line. The fix ladder below names the newest release of each line. The table starts at v1.9.0. Older releases are not listed here; the lookup above accepts them. The nine global-only ids are not counted in this table.</p>
+<div class="scrollx">
+<table class="data-table">
+<thead><tr><th>Release</th><th>Published</th><th>Repository advisories in range (of 17)</th></tr></thead>
+<tbody>
+<tr class="latest-in-line"><td><code>v1.9.0</code> <span class="line-latest">first in line</span></td><td>2019-07-10</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.1</code></td><td>2019-07-24</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.2</code></td><td>2019-08-13</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.3</code></td><td>2019-09-03</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.4</code></td><td>2019-09-19</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.5</code></td><td>2019-09-20</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.6</code></td><td>2019-10-03</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.7</code></td><td>2019-11-07</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.8</code></td><td>2019-11-26</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.9</code></td><td>2019-12-06</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.10</code></td><td>2020-01-20</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.11</code></td><td>2020-02-18</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.12</code></td><td>2020-03-16</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.13</code></td><td>2020-04-16</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.14</code></td><td>2020-05-13</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.15</code></td><td>2020-06-08</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.16</code></td><td>2020-07-10</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">6 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.17</code></td><td>2020-07-20</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.18</code></td><td>2020-07-27</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.19</code></td><td>2020-08-11</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.20</code></td><td>2020-08-25</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.21</code></td><td>2020-09-09</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.22</code></td><td>2020-09-28</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.23</code></td><td>2020-10-15</td><td><span class="sev-badge" style="background:#e8604f">1 critical</span> <span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">6 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.24</code></td><td>2020-11-12</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">5 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.9.25</code></td><td>2020-12-11</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr class="latest-in-line"><td><code>v1.10.0</code> <span class="line-latest">first in line</span></td><td>2021-03-03</td><td><span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.1</code></td><td>2021-03-08</td><td><span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.2</code></td><td>2021-04-08</td><td><span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.3</code></td><td>2021-05-05</td><td><span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.4</code></td><td>2021-06-17</td><td><span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.5</code></td><td>2021-07-14</td><td><span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.6</code></td><td>2021-07-22</td><td><span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.7</code></td><td>2021-08-12</td><td><span class="sev-badge" style="background:#e8710a">5 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.8</code></td><td>2021-08-24</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">4 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.9</code></td><td>2021-09-29</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.10</code></td><td>2021-10-15</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.11</code></td><td>2021-10-20</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.12</code></td><td>2021-11-08</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.13</code></td><td>2021-11-24</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.14</code></td><td>2021-12-23</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.15</code></td><td>2022-01-05</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.16</code></td><td>2022-02-16</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span> <span class="sev-badge" style="background:#4c8df0">1 low</span></td></tr>
+<tr><td><code>v1.10.17</code></td><td>2022-03-29</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.18</code></td><td>2022-05-25</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.19</code></td><td>2022-06-15</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.20</code></td><td>2022-06-29</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.21</code></td><td>2022-07-27</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.22</code></td><td>2022-08-22</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.23</code></td><td>2022-08-24</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.24</code></td><td>2022-09-14</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.25</code></td><td>2022-09-15</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.10.26</code></td><td>2022-11-03</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr class="latest-in-line"><td><code>v1.11.0</code> <span class="line-latest">first in line</span></td><td>2023-02-15</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.11.1</code></td><td>2023-02-16</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.11.2</code></td><td>2023-02-22</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.11.3</code></td><td>2023-03-07</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.11.4</code></td><td>2023-03-10</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.11.5</code></td><td>2023-03-21</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.11.6</code></td><td>2023-04-20</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr class="latest-in-line"><td><code>v1.12.0</code> <span class="line-latest">first in line</span></td><td>2023-05-25</td><td><span class="sev-badge" style="background:#e8710a">4 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.12.1</code></td><td>2023-08-10</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.12.2</code></td><td>2023-08-12</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr class="latest-in-line"><td><code>v1.13.0</code> <span class="line-latest">first in line</span></td><td>2023-09-12</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.1</code></td><td>2023-09-17</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.2</code></td><td>2023-09-28</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.3</code></td><td>2023-10-12</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.4</code></td><td>2023-10-17</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.5</code></td><td>2023-11-14</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.6</code></td><td>2023-12-18</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.7</code></td><td>2023-12-19</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.8</code></td><td>2023-12-22</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.9</code></td><td>2024-01-10</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.10</code></td><td>2024-01-11</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.11</code></td><td>2024-01-24</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.12</code></td><td>2024-02-09</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.13</code></td><td>2024-02-21</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.14</code></td><td>2024-02-27</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.13.15</code></td><td>2024-04-17</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr class="latest-in-line"><td><code>v1.14.0</code> <span class="line-latest">first in line</span></td><td>2024-04-24</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.2</code></td><td>2024-05-08</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.3</code></td><td>2024-05-09</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.4</code></td><td>2024-06-05</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.5</code></td><td>2024-06-06</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.6</code></td><td>2024-07-02</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.7</code></td><td>2024-07-11</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.8</code></td><td>2024-08-12</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.9</code></td><td>2024-09-18</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.10</code></td><td>2024-09-27</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.11</code></td><td>2024-10-01</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.12</code></td><td>2024-11-19</td><td><span class="sev-badge" style="background:#e8710a">3 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.14.13</code></td><td>2025-01-30</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr class="latest-in-line"><td><code>v1.15.0</code> <span class="line-latest">first in line</span></td><td>2025-02-06</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.1</code></td><td>2025-02-13</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.2</code></td><td>2025-02-17</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.3</code></td><td>2025-02-25</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.4</code></td><td>2025-03-01</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.5</code></td><td>2025-03-05</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.6</code></td><td>2025-03-25</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.7</code></td><td>2025-03-31</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.8</code></td><td>2025-04-11</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.9</code></td><td>2025-04-21</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.10</code></td><td>2025-04-25</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.15.11</code></td><td>2025-05-05</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr class="latest-in-line"><td><code>v1.16.0</code> <span class="line-latest">first in line</span></td><td>2025-06-26</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.16.1</code></td><td>2025-07-02</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.16.2</code></td><td>2025-08-04</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.16.3</code></td><td>2025-09-02</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.16.4</code></td><td>2025-09-26</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.16.5</code></td><td>2025-10-16</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.16.6</code></td><td>2025-11-03</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.16.7</code></td><td>2025-11-04</td><td><span class="sev-badge" style="background:#e8710a">2 high</span> <span class="sev-badge" style="background:#f9ab00">3 medium</span></td></tr>
+<tr><td><code>v1.16.8</code></td><td>2026-01-13</td><td><span class="sev-badge" style="background:#e8710a">1 high</span> <span class="sev-badge" style="background:#f9ab00">2 medium</span></td></tr>
+<tr><td><code>v1.16.9</code></td><td>2026-02-17</td><td><span class="sev-badge" style="background:#f9ab00">1 medium</span></td></tr>
+<tr class="latest-in-line"><td><code>v1.17.0</code> <span class="line-latest">first in line</span></td><td>2026-02-17</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.1</code></td><td>2026-03-03</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.2</code></td><td>2026-03-30</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.3</code></td><td>2026-05-11</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.4</code></td><td>2026-06-22</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.5</code></td><td>2026-07-27</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.6</code></td><td>2026-09-23</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.7</code></td><td>2026-09-30</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.8</code></td><td>2026-10-08</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.9</code></td><td>2026-10-21</td><td><span class="clean">0 in range</span></td></tr>
+<tr><td><code>v1.17.10</code></td><td>2026-10-23</td><td><span class="clean">0 in range</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<div id="ladder"></div>
+<h2>The fix ladder by minor line</h2>
+<p>No release of the lines v1.9.x to v1.16.x is clear of the 17 repository advisories. The newest release of each of these lines is still in the range of at least one advisory. The first clear release is v1.17.0.</p>
+<div class="scrollx">
+<table class="data-table">
+<thead><tr><th>Minor line</th><th>Last vulnerable release</th><th>First release clear of all 17</th><th>Repository advisories affecting this line</th></tr></thead>
+<tbody>
+<tr><td>v1.9.x</td><td><code>v1.9.25</code></td><td>none in this line</td><td>14</td></tr>
+<tr><td>v1.10.x</td><td><code>v1.10.26</code></td><td>none in this line</td><td>10</td></tr>
+<tr><td>v1.11.x</td><td><code>v1.11.6</code></td><td>none in this line</td><td>7</td></tr>
+<tr><td>v1.12.x</td><td><code>v1.12.2</code></td><td>none in this line</td><td>7</td></tr>
+<tr><td>v1.13.x</td><td><code>v1.13.15</code></td><td>none in this line</td><td>6</td></tr>
+<tr><td>v1.14.x</td><td><code>v1.14.13</code></td><td>none in this line</td><td>6</td></tr>
+<tr><td>v1.15.x</td><td><code>v1.15.11</code></td><td>none in this line</td><td>5</td></tr>
+<tr><td>v1.16.x</td><td><code>v1.16.9</code></td><td>none in this line</td><td>5</td></tr>
+<tr><td>v1.17.x</td><td>none</td><td><code>v1.17.0</code></td><td>0</td></tr>
+</tbody>
+</table>
+</div>
+
+<div id="advice"></div>
+<h2>What this means if you run a node</h2>
+<p>The Geth SECURITY.md file says: &quot;We recommend using the most recently released version.&quot; On 2026-11-08 that was v1.17.10 (published 2026-10-23). If a specific fork, tooling pin or chain requirement forces an older line, there is no release in that line that clears all 17 repository advisories; check the merged table for what still applies. Four of the five repository advisories published in 2026 have the title &quot;DoS via malicious p2p message&quot;. The fifth concerns ECIES public key validation in the RLPx handshake.</p>
+
+<h2 id="limits">Limitations</h2>
+<p>This page reflects the three sources as fetched on 2026-11-08. The Geth disclosure policy says: &quot;If we silently fix a vulnerability and include the fix in release X , then, After 4-8 weeks, we will disclose that X contained a security-fix. After an additional 4-8 weeks, we will publish the details about the vulnerability.&quot; So a current release can contain a fix that no advisory lists yet. The per-release table counts, for each release, the repository advisories whose range includes that exact release. The three sources can give different ranges for the same issue. For GHSA-4xc9-8hmq-j652, vulnerabilities.json (GETH-2024-01) says introduced v1.10.0 and fixed v1.13.15, while the GitHub records say &lt; 1.13.15 with no lower bound. The lookup and the tables use the GitHub ranges and show the vulnerabilities.json range in its own columns.</p>
+
+<p>Related: <a href="/solidity-compiler-bugs-by-version.html">Solidity compiler bugs by version</a>, <a href="/vyper-compiler-bugs-by-version.html">Vyper compiler bugs by version</a>, <a href="/openzeppelin-contracts-vulnerabilities-by-version.html">OpenZeppelin Contracts vulnerabilities by version</a>.</p>
+
+<footer>SCAN THE CHAIN · <a href="/">OVERVIEW</a> · <a href="about.html">ABOUT</a> · <a href="bug-bounty-roi-calculator.html">ROI CALC</a></footer></div>
+<script id="geth-data" type="application/json">[{"ghsa":"GHSA-m6j8-rg6r-7mv8","ranges":["<= 1.16.8"],"firstPatched":"1.16.9"},{"ghsa":"GHSA-2gjw-fg97-vg3r","ranges":["<= 1.16.8"],"firstPatched":"1.16.9"},{"ghsa":"GHSA-689v-6xwf-5jf3","ranges":["< 1.17.0"],"firstPatched":"1.17.0"},{"ghsa":"GHSA-mq3p-rrmp-79jg","ranges":["<= 1.16.7"],"firstPatched":"1.16.8"},{"ghsa":"GHSA-mr7q-c9w9-wh4h","ranges":["<= 1.16.7"],"firstPatched":"1.16.8"},{"ghsa":"GHSA-q26p-9cq4-7fc2","ranges":[">= 1.14.0","< 1.14.13"],"firstPatched":"1.14.13"},{"ghsa":"GHSA-4xc9-8hmq-j652","ranges":["< 1.13.15"],"firstPatched":"1.13.15"},{"ghsa":"GHSA-v9jh-j8px-98vq","ranges":["<= 1.13.4"],"firstPatched":null},{"ghsa":"GHSA-ppjg-v974-84cm","ranges":["< 1.12.1-stable"],"firstPatched":"1.12.1-stable"},{"ghsa":"GHSA-rqmg-hrg4-fm69","ranges":["<= 1.10.21"],"firstPatched":null},{"ghsa":"GHSA-wjxw-gh3m-7pm5","ranges":["< 1.10.17"],"firstPatched":"1.10.17"},{"ghsa":"GHSA-p5gc-957x-gfw9","ranges":["< 1.8.11"],"firstPatched":"1.8.11"},{"ghsa":"GHSA-vrcc-g6vj-mh5w","ranges":["<= 1.10.9"],"firstPatched":null},{"ghsa":"GHSA-pvx3-gm3c-gmpr","ranges":["<= 1.10.12"],"firstPatched":null},{"ghsa":"GHSA-vmf7-hmh6-vv57","ranges":["<= 1.10.16"],"firstPatched":null},{"ghsa":"GHSA-5m8f-chrv-7rw5","ranges":["<= 1.10.9"],"firstPatched":null},{"ghsa":"GHSA-59hh-656j-3p7v","ranges":["< 1.10.9"],"firstPatched":"1.10.9"},{"ghsa":"GHSA-9856-9gg9-qcmq","ranges":[">= 1.10.0","< 1.10.8"],"firstPatched":"1.10.8"},{"ghsa":"GHSA-9h4h-8w5p-f28w","ranges":["< 1.8.14"],"firstPatched":"1.8.14"},{"ghsa":"GHSA-xw37-57qp-9mm4","ranges":[">= 1.9.4","< 1.9.20"],"firstPatched":"1.9.20"},{"ghsa":"GHSA-r33q-22hv-j29q","ranges":["< 1.9.25"],"firstPatched":"1.9.25"},{"ghsa":"GHSA-m6gx-rhvj-fh52","ranges":["< 1.9.24"],"firstPatched":"1.9.24"},{"ghsa":"GHSA-jm5c-rv3w-w83m","ranges":[">= 1.9.16","< 1.9.18"],"firstPatched":"1.9.18"},{"ghsa":"GHSA-69v6-xc2j-r2jf","ranges":[">= 1.9.7","< 1.9.17"],"firstPatched":"1.9.17"},{"ghsa":"GHSA-v592-xf75-856p","ranges":["< 1.9.24"],"firstPatched":"1.9.24"},{"ghsa":"GHSA-qr2j-wrhx-4829","ranges":["< 1.8.14"],"firstPatched":"1.8.14"}]</script>
+<script>
+function gethParse(input){
+  var s=String(input==null?'':input).trim();
+  var m=/^Geth\//i.test(s)?s.match(/^Geth\/(?:[^\/\s]+\/)?v(\d+)\.(\d+)\.(\d+)(?:-[\w.-]+)?(?:\/.*)?$/i):s.match(/^v?(\d+)\.(\d+)\.(\d+)(?:-[\w.-]+)?(?:\/.*)?$/i);
+  if(!m || s==='') return null;
+  var v=[+m[1],+m[2],+m[3]];
+  if(!Number.isSafeInteger(v[0])||!Number.isSafeInteger(v[1])||!Number.isSafeInteger(v[2])) return null;
+  return v;
+}
+function cmp(a,b){return a[0]-b[0]||a[1]-b[1]||a[2]-b[2];}
+function gethLookup(input){
+  var v=gethParse(input); if(!v) return null;
+  var G=JSON.parse(document.getElementById('geth-data').textContent);
+  var hits=[];
+  for(const a of G){
+    var inAll=true;
+    for(const r of a.ranges){
+      var m=r.trim().match(/^(<=|>=|<|>|=)\s*v?([\d.]+)(?:-stable)?$/);
+      if(!m){inAll=false;break;}
+      var d=cmp(v,m[2].split('.').map(Number));
+      if(!({'<':d<0,'<=':d<=0,'>':d>0,'>=':d>=0,'=':d===0}[m[1]])) {inAll=false;break;}
+    }
+    if(inAll) hits.push(a.ghsa);
+  }
+  return hits;
+}
+(function(){
+  var el=document.getElementById('geth-lookup-result');
+  var btn=document.getElementById('geth-lookup-go');
+  var inp=document.getElementById('geth-version');
+  function show(){
+    var v=gethParse(inp.value);
+    if(!v){ el.textContent=inp.value.trim()===''?'Enter a Geth version such as 1.16.8, v1.13.15 or a client string like Geth/v1.16.8-stable/linux-amd64/go1.22.1.':'Could not read a Geth version from "'+inp.value+'". Use forms like 1.16.8, v1.16.8, 1.16.8-stable or Geth/v1.16.8-stable/linux-amd64/go1.22.1.'; return; }
+    var hits=gethLookup(inp.value);
+    var LATEST=[1,17,10];
+    var note=cmp(v,LATEST)>0?' No Geth release with this number was in the releases list fetched on 2026-11-08. The newest was v1.17.10.':'';
+    if(!hits.length){ el.textContent='v'+v.join('.')+' is not in the range of any of the 26 GitHub advisory database ids (data fetched 2026-11-08). An issue that is not yet disclosed would not show here.'+note; return; }
+    var G2=JSON.parse(document.getElementById('geth-data').textContent);
+    var FIX={}; for(const a of G2) FIX[a.ghsa]=a.firstPatched;
+    var parts=hits.map(function(id){ return id+' (first patched version: '+(FIX[id]||'none listed in the database')+')'; });
+    el.textContent='v'+v.join('.')+' is in the GitHub advisory database range of '+hits.length+' id'+(hits.length>1?'s':'')+': '+parts.join(', ')+'.'+(hits.some(function(id){return !FIX[id];})?' "None listed in the database" means that the database lists no fix. It does not mean that current versions are affected.':'')+note;
+  }
+  btn.addEventListener('click',show);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter') show(); });
+  inp.addEventListener('input',show);
+  if(window.addEventListener) window.addEventListener('pageshow',show);
+  show();
+})();
+</script>
+
+</body>
+</html>
